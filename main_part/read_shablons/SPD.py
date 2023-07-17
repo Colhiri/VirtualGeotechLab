@@ -24,6 +24,7 @@ def shablonExcel_SPD(row, dataframes: list, dct: dict, organise_dct: dict, value
     # Путь для сохранения протоколов
     pathSave = dct.get("pathSave")
 
+
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))
 
@@ -49,18 +50,18 @@ def shablonExcel_SPD(row, dataframes: list, dct: dict, organise_dct: dict, value
     e = organise_dct.get('e')
     IL = organise_dct.get('IL')
 
-    if LAB_NO is None or LAB_NO == np.nan or LAB_NO == np.NAN or LAB_NO == "None" or LAB_NO == "nAn":
+    if str(LAB_NO) in ['None', 'nan', 'nAn', 'NA', '<NA>']:
         prot_name = str(row) + '.xlsx'
     else:
         prot_name = LAB_NO + '.xlsx'
-    try:
-        shutil.copy('.\\srcs\\shablons\\SPD.xlsx'
+
+    shutil.copy('.\\srcs\\shablons\\SPD.xlsx'
                     ,f'{pathSave}\\{prot_name}')
-        os.rename(
-            f'.\\prot\\SPD.xlsx',
-            f'{pathSave}\\{prot_name}')
-    except:
-        pass
+
+    """os.rename(
+            f'{pathSave}\\SPD.xlsx',
+            f'{pathSave}\\{prot_name}')"""
+
 
     wb = openpyxl.load_workbook(
         f'{pathSave}\\{prot_name}')
@@ -133,7 +134,7 @@ def shablonExcel_SPD(row, dataframes: list, dct: dict, organise_dct: dict, value
 
     dataframe1.to_excel(writer, sheet_name='1', startcol=5, startrow=29, index=False,
                         index_label=False,
-                        header=False, float_format="%.3f")
+                        header=False, float_format="%.20f")
 
 
 

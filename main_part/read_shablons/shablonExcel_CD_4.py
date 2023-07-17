@@ -12,7 +12,7 @@ import openpyxl
 import pandas as pd
 from scipy import interpolate
 
-def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel):
+def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel: dict, mode: int) -> None:
     # Организационные моменты
     LAB_NO = organise_dct.get("LAB_NO")
     N_IG = organise_dct.get("N_IG")
@@ -86,23 +86,24 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
     ws['O53'] = dct.get('F')
     ws['O54'] = dct.get('C')
 
-    # Давления
-    # K_0
-    ws['B47'] = 'K0, д.е.'
-    ws['C47'] = (1 - math.sin(math.radians(dct.get('F'))))
+    if mode in [2, 3]:
+        # Давления
+        # K_0
+        ws['B47'] = 'K0, д.е.'
+        ws['C47'] = (1 - math.sin(math.radians(dct.get('F'))))
 
-    ws['B48'] = 'q_zg, МПа'
-    ws['C48'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
+        ws['B48'] = 'q_zg, МПа'
+        ws['C48'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
 
-    ws['F50'] = 'Точки модуля (полное напр.), МПа'
-    ws['F51'] = 'qf (полное напр.), МПа'
+        ws['F50'] = 'Точки модуля (полное напр.), МПа'
+        ws['F51'] = 'qf (полное напр.), МПа'
 
-    # Первая точка модуля E0
-    ws['J50'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
-    # Вторая точка модуля E0
-    ws['K50'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F')))) * 1.6
-    # Точка на Е50
-    ws['J51'] = values_Excel.get('devE50') + dct.get('pressStart1')
+        # Первая точка модуля E0
+        ws['J50'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
+        # Вторая точка модуля E0
+        ws['K50'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F')))) * 1.6
+        # Точка на Е50
+        ws['J51'] = values_Excel.get('devE50') + dct.get('pressStart1')
 
     ws['N47'] = dct.get('pressStart1')
     ws['N48'] = dct.get('pressStart2')
@@ -139,7 +140,7 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
     dataframe0 = dataframes[0]
     dataframe1 = dataframes[1]
     dataframe2 = dataframes[2]
-    dataframe3 = dataframes[3]
+
 
     dataframe0.to_excel(writer, sheet_name='1', startcol=5, startrow=64, index=False,
                         index_label=False,
@@ -153,8 +154,15 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
                         index_label=False,
                         header=False)
 
-    dataframe3.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
+    dataframe0.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
                         index_label=False,
                         header=False)
+
+    if mode in [2, 3]:
+        dataframe3 = dataframes[3]
+
+        dataframe3.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
+                            index_label=False,
+                            header=False)
 
     writer.close()

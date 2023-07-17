@@ -44,7 +44,7 @@ def combination(differencePress, dct_Combination: dict):
     pressE50 = dct_Combination.get("pressE50")
     pressEnd1 = dct_Combination.get("pressEnd1")
 
-    analyze = AnalyzeGraph("test")
+    analyze = AnalyzeGraph("test_1")
     analyze.get_first_data()
     analyze.calculate_perc()
     return analyze.points_reload([pressStart1, press16, pressE50, pressEnd1], [0, y_press16, y_pressE50])
@@ -165,7 +165,7 @@ def start_TPDS_E50(dct: dict, name: str, methodINTERPOLATION):
 
     try:
         if methodINTERPOLATION == "interp1d":
-            pchip = interpolate.interp1d(y, x, kind='cubic')
+            pchip = interpolate.interp1d(y, x, kind='linear')
 
         if methodINTERPOLATION == "CubicSpline":
             pchip = interpolate.CubicSpline(y, x)
@@ -185,11 +185,14 @@ def start_TPDS_E50(dct: dict, name: str, methodINTERPOLATION):
         if methodINTERPOLATION == "make_interp_spline":
             pchip = interpolate.make_interp_spline(y, x)
 
-        if methodINTERPOLATION == "interp1d":
-            pchip = interpolate.interp1d(y, x)
+        if methodINTERPOLATION == "nearest":
+            pchip = interpolate.interp1d(y, x, kind='nearest')
 
-        if methodINTERPOLATION == "interp1d":
-            pchip = interpolate.interp1d(y, x)
+        if methodINTERPOLATION == "quadratic":
+            pchip = interpolate.interp1d(y, x, kind='quadratic')
+
+        if methodINTERPOLATION == "cubic":
+            pchip = interpolate.interp1d(y, x, kind='cubic')
 
     except:
         return start_TPDS_E50(dct, name, methodINTERPOLATION)

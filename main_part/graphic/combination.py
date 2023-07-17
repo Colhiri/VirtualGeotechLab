@@ -14,7 +14,7 @@ class AnalyzeGraph:
         self.type_grunt = type_grunt
 
         if path_to_data is None:
-            self.path_to_data = "..\\ENGGEO_program\\BOT\\data.json"
+            self.path_to_data = "..\\GEOF\\BOT\\data.json"
         else:
             self.path_to_data = path_to_data
 

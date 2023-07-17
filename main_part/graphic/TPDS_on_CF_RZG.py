@@ -173,7 +173,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     pressEnd1 = dct.get("pressEnd")
 
-
     ## Проверка на максимальное возможное давление второй точки модуля E0 и перерасчет коэффициента домножения
     ## второй точки
     pressMAX_nowE50 = (pressEnd1 + pressStart1) / 2
@@ -182,7 +181,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
             press16 = random.randint(int(round(pressStart1, 3) * 1000 + 3), int(round(pressMAX_nowE50, 3) * 1000 - 3)) / 1000
         except:
             press16 = random.randint(int(round(pressStart1, 3) * 1000 + 1), int(round(pressMAX_nowE50, 3) * 1000 - 1)) / 1000
-
 
     ### Разница для расчёта коэффициента отклонения давления в функции комбинации
     differencePress = (press16 - pressStart1) / 5
@@ -196,8 +194,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     pressE50 = (pressEnd1 + pressStart1) / 2
     otn_E50 = (((pressEnd1 + pressStart1) / 2) - pressStart1 + E_50 * otn_pStart) / E_50
     y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
-
-
 
     E_rzg = E_0 * random.randint(45,60) / 10
     press_rzg = (pressE50 - pressStart1) / 2 + pressE50
@@ -223,7 +219,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     y_RZG_up = y_repeat_RZG - 0.001
     y_RZG_down = y_pressR_RZG - 0.001
 
-
     # первый участок петли (нижняя - первая)
     y_middle_point_first = ((y_pressR_RZG - y_RZG_down) / 2 + y_RZG_down)
     x_middle_point_first = ((press_rzg - pressRZG_down) / 2 + pressRZG_down) * 0.95
@@ -234,7 +229,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     first_x, first_y = splain(x=first_x, y=first_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
     first_y.reverse()
     first_x.reverse()
-
 
     # второй участок петли (нижняя - первая)
     y_middle_point_second = ((y_RZG_down - y_repeat_RZG) / 2 + y_repeat_RZG)
@@ -247,7 +241,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     second_y.reverse()
     second_x.reverse()
 
-
     # третий участок петли (верхняя - вторая)
     y_middle_point_third = ((y_RZG_up - y_repeat_RZG) / 2 + y_repeat_RZG)
     x_middle_point_third = ((pressRZG_up - press_repeat_RZG) / 2 + press_repeat_RZG) * 1.02
@@ -258,7 +251,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     third_x, third_y = splain(x=third_x, y=third_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
 
-
     # четвертый участок петли (верхняя - вторая)
     y_middle_point_foufth = ((y_pressR_RZG - y_RZG_up) / 2 + y_RZG_up)
     x_middle_point_foufth = ((press_rzg_END - pressRZG_up) / 2 + pressRZG_up) * 1.02
@@ -268,10 +260,7 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     foufth_x, foufth_y = splain(x=foufth_x, y=foufth_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
 
-
-
     typeGrunt = "sand"
-
 
     # Словарь для передачи в функцию комбинации
     dct_Combination = {
@@ -303,10 +292,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
             "pressEnd1": pressEnd1,
         }
 
-        # y = np.array(
-        #     [0.0, y_press16, y_pressE50, (y_pressE50 + (y_pressR_RZG + y_pressE50) / 2) / 2, ((y_pressR_RZG + y_pressE50) / 2) * 1.1, y_pressR_RZG])
-        # x = np.array(
-        #     [pressStart1, press16, pressE50, (pressE50 + (press_rzg + pressE50) / 2) / 2, ((press_rzg + pressE50) / 2) * 1.1, press_rzg])
 
         y = np.array(
             [0.0, y_press16, y_pressE50,
@@ -320,9 +305,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
         x_end = x_end.tolist()
         y_end = y_end.tolist()
-
-        # foufth_x.extend(x_end[3:])
-        # foufth_y.extend(y_end[3:])
 
         bad_indexes = []
         for f_x in range(0, x_end.index(max(x_end))):
@@ -338,7 +320,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
         y_end.insert(0, y_pressR_RZG)
 
         fifth_x, fifth_y = splain(x=x_end, y=y_end, count_point=100, methodINTERPOLATION="PchipInterpolator")
-        # fifth_x.reverse()
 
     if typeGrunt == "sandy_loam":
         choice = random.choice([2, 3, 4])
@@ -385,14 +366,8 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     #         continue
     #     xnew[count] = xnew[count] - valueRandom
 
-   #  fifth_x, fifth_y
     x = np.concatenate((xnew, first_x, second_x, third_x, foufth_x, fifth_x))
-    xnew_gr = np.concatenate((xnew, first_x, second_x, third_x, foufth_x, fifth_x))
-#
-#
     y = np.concatenate((yfit, first_y, second_y, third_y, foufth_y, fifth_y))
-    yfit_gr = np.concatenate((yfit, first_y, second_y, third_y, foufth_y, fifth_y))
-
 
     # Кривая для датафрейма и дапма файла (Девиаторное нагружение - Относительная вертикальная деформация)
     otnVertDef = y / 76
@@ -400,21 +375,16 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     curve1 = np.array([(x, y) for x, y in zip(deviator, otnVertDef)])
 
-    # print(f"E0 deviator -- {deviator[index_y_E_0]} -- otnVertDef {otnVertDef[index_y_E_0]}")
-    # print(f"E50 deviator -- {deviator[index_y_E_50]} -- otnVertDef {otnVertDef[index_y_E_50]}")
-
     NewDF = pd.DataFrame(curve1)
     NewDF.reset_index(drop=True, inplace=True)
 
-    # Дамп в csv
-    # NewDF.to_csv(fr"C:\Users\MSI GP66\PycharmProjects\dj_project\BEZIER\ENGGEO_program\prot\{name}.log",
-    #              sep='\t', index_label=False, index=False, header=False)
-
-    # Построение графика
-    plt.plot(x, y, '.')
-    plt.plot(xnew_gr, yfit_gr)
-    plt.grid()
-    plt.show()
+    # xnew_gr = np.concatenate((xnew, first_x, second_x, third_x, foufth_x, fifth_x))
+    # yfit_gr = np.concatenate((yfit, first_y, second_y, third_y, foufth_y, fifth_y))
+    # # Построение графика
+    # plt.plot(x, y, '.')
+    # plt.plot(xnew_gr, yfit_gr)
+    # plt.grid()
+    # plt.show()
 
     values_for_Excel = {"epsE0": otnVertDef[index_y_E_0],
                         "epsE50": otnVertDef[index_y_E_50],

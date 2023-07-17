@@ -176,9 +176,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
     y_press16 = 76 * otn_p16 - otn_p16 * stepE1
 
-
-
-
     # Разная для разных типов грунта
     # Нахождение положения модуля E50
     otnForE50 = otn_p16 + random.randint(5, 20) / 1000
@@ -187,8 +184,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     pressE50 = (pressEnd1 + pressStart1) / 2
     otn_E50 = (((pressEnd1 + pressStart1) / 2) - pressStart1 + E_50 * otn_pStart) / E_50
     y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
-
-
 
 
     pressE50 = (pressEnd1 + pressStart1) / 2
@@ -275,10 +270,7 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     foufth_x, foufth_y = splain(x=foufth_x, y=foufth_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
 
-
-
     typeGrunt = "sand"
-
 
     # Словарь для передачи в функцию комбинации
     dct_Combination = {
@@ -310,11 +302,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
             "pressEnd1": pressEnd1,
         }
 
-        # y = np.array(
-        #     [0.0, y_press16, y_pressE50, (y_pressE50 + (y_pressR_RZG + y_pressE50) / 2) / 2, ((y_pressR_RZG + y_pressE50) / 2) * 1.1, y_pressR_RZG])
-        # x = np.array(
-        #     [pressStart1, press16, pressE50, (pressE50 + (press_rzg + pressE50) / 2) / 2, ((press_rzg + pressE50) / 2) * 1.1, press_rzg])
-
         y = np.array(
             [0.0, y_press16, y_pressE50,
              ((y_pressR_RZG + y_pressE50) / 2) * 0.75, y_pressR_RZG])
@@ -327,9 +314,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
         x_end = x_end.tolist()
         y_end = y_end.tolist()
-
-        # foufth_x.extend(x_end[3:])
-        # foufth_y.extend(y_end[3:])
 
         bad_indexes = []
         for f_x in range(0, x_end.index(max(x_end))):
@@ -358,7 +342,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     if typeGrunt == "clay":
         choice = random.choice([1, 2])
-        # print(choice)
         x, y = combination(choice, differencePress, dct_Combination)
 
 
@@ -392,13 +375,9 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     #         continue
     #     xnew[count] = xnew[count] - valueRandom
 
-   #  fifth_x, fifth_y
     x = np.concatenate((xnew, first_x, second_x, third_x, foufth_x, fifth_x))
-    xnew_gr = np.concatenate((xnew, first_x, second_x, third_x, foufth_x, fifth_x))
-#
-#
+
     y = np.concatenate((yfit, first_y, second_y, third_y, foufth_y, fifth_y))
-    yfit_gr = np.concatenate((yfit, first_y, second_y, third_y, foufth_y, fifth_y))
 
 
     # Кривая для датафрейма и дапма файла (Девиаторное нагружение - Относительная вертикальная деформация)
@@ -410,15 +389,14 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     NewDF = pd.DataFrame(curve1)
     NewDF.reset_index(drop=True, inplace=True)
 
-    # Дамп в csv
-    # NewDF.to_csv(fr"C:\Users\MSI GP66\PycharmProjects\dj_project\BEZIER\ENGGEO_program\prot\{name}.log",
-    #              sep='\t', index_label=False, index=False, header=False)
 
-    # Построение графика
-    plt.plot(x, y, '.')
-    plt.plot(xnew_gr, yfit_gr)
-    plt.grid()
-    plt.show()
+    # xnew_gr = np.concatenate((xnew, first_x, second_x, third_x, foufth_x, fifth_x))
+    # yfit_gr = np.concatenate((yfit, first_y, second_y, third_y, foufth_y, fifth_y))
+    # # Построение графика
+    # plt.plot(x, y, '.')
+    # plt.plot(xnew_gr, yfit_gr)
+    # plt.grid()
+    # plt.show()
 
 
     # Нужно перестроить словарь так, чтобы он работал с общим шаблоном длля прочности.

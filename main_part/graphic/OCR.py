@@ -431,8 +431,6 @@ def OCR_start(dct: dict, name: str, organise_dct: dict, methodINTERPOLATION):
                       in zip(x1, [x * 1000 for x in y1], x2, [x * 1000 for x in y2], [Sigma_Beccer, Sigma_Beccer, Sigma_Beccer], [y_middle_cp * 1000,y_middle_cp * 1000,y_middle_cp * 1000,])]
     BECCER = pd.DataFrame(prepare_BECCER)
     BECCER.reset_index(drop=True, inplace=True)
-    # BECCER.to_csv(fr"C:\Users\MSI GP66\PycharmProjects\dj_project\ENGGEO_program\prot\{name}.log",
-    #              sep='\t', index_label=False, index=False, header=False)
 
     # Метод Казагранде
     point_X_GG_l, point_Y_GG_l = [point_X_GG, point_X_GG, point_X_GG],[point_Y_GG, point_Y_GG, point_Y_GG]
@@ -857,9 +855,6 @@ def OCR_start_Eoed(dct: dict, name: str, organise_dct: dict, methodINTERPOLATION
                       in zip(x1, [x * 1000 for x in y1], x2, [x * 1000 for x in y2], [Sigma_Beccer, Sigma_Beccer, Sigma_Beccer], [y_middle_cp * 1000,y_middle_cp * 1000,y_middle_cp * 1000,])]
     BECCER = pd.DataFrame(prepare_BECCER)
     BECCER.reset_index(drop=True, inplace=True)
-    # BECCER.to_csv(fr"C:\Users\MSI GP66\PycharmProjects\dj_project\ENGGEO_program\prot\{name}.log",
-    #              sep='\t', index_label=False, index=False, header=False)
-
 
     # Метод Казагранде
     point_X_GG_l, point_Y_GG_l = [point_X_GG, point_X_GG, point_X_GG],[point_Y_GG, point_Y_GG, point_Y_GG]

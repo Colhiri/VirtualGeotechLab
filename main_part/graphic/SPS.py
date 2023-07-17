@@ -252,9 +252,6 @@ def start_SPS_CD(dct: dict, name: str, methodINTERPOLATION):
     NewDF = pd.DataFrame(curve1)
     NewDF.reset_index(drop=True, inplace=True)
 
-    # NewDF.to_csv(fr"C:\Users\MSI GP66\PycharmProjects\dj_project\BEZIER\ENGGEO_program\prot\{name}.log",
-    #              sep='\t', index_label=False, index=False, header=False)
-
     # Построение графика
     # plt.plot(y, x, '.')
     # plt.plot(yfit, xnew)

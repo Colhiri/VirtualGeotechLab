@@ -142,23 +142,23 @@ def shablonExcel_OCR(row, dataframes: list, dct: dict, organise_dct: dict, value
     # метод Беккера
     (dataframe1.iloc[:, 3:]).to_excel(writer, sheet_name='1', startcol=1, startrow=44, index=False,
                         index_label=False,
-                        header=False, float_format="%.3f")
+                        header=False, float_format="%.20f")
     # Значения для линий
     BECCER = values_Excel.get('BECCER').astype('float64')
     BECCER.to_excel(writer, sheet_name='1', startcol=13, startrow=44, index=False,
                         index_label=False,
-                        header=False, float_format="%.3f")
+                        header=False, float_format="%.20f")
 
 
     # метод Казагранде
     (dataframe1.iloc[:, :3]).to_excel(writer, sheet_name='1', startcol=1, startrow=27, index=False,
                                       index_label=False,
-                                      header=False, float_format="%.3f")
+                                      header=False, float_format="%.20f")
     # Значения для линий
     CASAGRANDE = values_Excel.get('VALUES_LINES').astype('float64')
     CASAGRANDE.to_excel(writer, sheet_name='1', startcol=13, startrow=27, index=False,
                                       index_label=False,
-                                      header=False, float_format="%.3f")
+                                      header=False, float_format="%.20f")
 
 
 

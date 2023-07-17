@@ -31,7 +31,7 @@ def combination(differencePress, dct_Combination: dict):
 
 
 
-    analyze = AnalyzeGraph("test")
+    analyze = AnalyzeGraph("test_1")
     analyze.get_first_data()
     analyze.calculate_perc()
     return analyze.points_reload([pressStart1, press16, pressE50, pressEnd1], [0, y_press16, y_pressE50])
@@ -143,7 +143,7 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
 
     try:
         if methodINTERPOLATION == "interp1d":
-            pchip = interpolate.interp1d(y, x, kind='cubic')
+            pchip = interpolate.interp1d(y, x, kind='linear')
 
         if methodINTERPOLATION == "CubicSpline":
             pchip = interpolate.CubicSpline(y, x)
@@ -163,14 +163,14 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
         if methodINTERPOLATION == "make_interp_spline":
             pchip = interpolate.make_interp_spline(y, x)
 
-        if methodINTERPOLATION == "interp1d":
-            pchip = interpolate.interp1d(y, x)
+        if methodINTERPOLATION == "nearest":
+            pchip = interpolate.interp1d(y, x, kind='nearest')
 
-        if methodINTERPOLATION == "interp1d":
-            pchip = interpolate.interp1d(y, x)
+        if methodINTERPOLATION == "quadratic":
+            pchip = interpolate.interp1d(y, x, kind='quadratic')
 
-        if methodINTERPOLATION == "splrep":
-            # pchip = interpolate.splrep(y, x)
+        if methodINTERPOLATION == "cubic":
+            pchip = interpolate.interp1d(y, x, kind='cubic')
 
             # x = np.linspace(0, 10, 10)
             x = np.sin(y)
@@ -180,21 +180,6 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
             plt.plot(x2, y2)
             plt.show()
 
-
-        # if methodINTERPOLATION == "RegularGridInterpolator":
-        #     pchip = interpolate.RegularGridInterpolator(y, x)
-
-        # if methodINTERPOLATION == "NearestNDInterpolator":
-        #     pchip = interpolate.NearestNDInterpolator(x, y)
-
-        # if methodINTERPOLATION == "LinearNDInterpolator":
-        #     pchip = interpolate.LinearNDInterpolator(y, x)
-
-        # if methodINTERPOLATION == "CloughTocher2DInterpolator":
-        #     pchip = interpolate.CloughTocher2DInterpolator(y, x)
-
-        # if methodINTERPOLATION == "RBFInterpolator":
-        #     pchip = interpolate.RBFInterpolator(y, x)
     except:
         return start_TPDS_CF(dct, name, methodINTERPOLATION)
 
@@ -234,12 +219,6 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
 
     NewDF = pd.DataFrame(curve1)
     NewDF.reset_index(drop=True, inplace=True)
-
-    # Дамп в csv
-    # NewDF.to_csv(fr"C:\Users\MSI GP66\PycharmProjects\dj_project\BEZIER\ENGGEO_program\prot\{name}.log",
-    #              sep='\t', index_label=False, index=False, header=False)
-
-
 
     # Построение графика
     # plt.plot(x, y, '.')

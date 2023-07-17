@@ -3,9 +3,6 @@ from telebot import types
 import subprocess
 import sqlite3
 
-from DataDistibutor import DataDistributor as DD
-from Graph_server import Graph
-
 conn = sqlite3.connect('geofvck.db', check_same_thread=False)
 cursor = conn.cursor()
 

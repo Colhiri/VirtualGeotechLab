@@ -132,12 +132,8 @@ for row in range(0, count_rows):
 
     }
 
-    # Активация разгрузок
-    rzg = False
-
     # Графики по трехосникам КД
-    if not rzg and str(worksheet_journal['CD_sigma1'][row]) not in ["None", "nan"]:
-
+    if str(worksheet_journal['CD_sigma1'][row]) not in ["None", "nan"]:
         # Выбор давлений
         pressStart1 = worksheet_journal['CD_sigma1'][row]
         pressStart2 = worksheet_journal['CD_sigma2'][row]
@@ -148,7 +144,6 @@ for row in range(0, count_rows):
         E_50 = worksheet_journal['E50'][row]
         F = worksheet_journal['CD_fi'][row]
         C = worksheet_journal['CD_c'][row]
-
 
         pathSave = os.path.join(pathSave, 'Трехосные_КД_ПП')
         if not os.path.exists(pathSave):
@@ -171,22 +166,20 @@ for row in range(0, count_rows):
             math.pi * F / 180)) ** 2) + 1) ** (1 / 2)) * C)
         pressEnd3 = (pressStart3 * N + M)
 
-        # mode = 1 --- запись по прочностям с модулями и неправильными линейными графиками
+        # mode = 1 --- запись по 3 графика (деформация на первой прочности + 2 прочности с модулями)
         # mode = 2 --- запись 4 графиков (деформация + прочности с модулями)
         # mode = 3 --- запись 4 графиков (деформация с разгрузкой + прочности с модулями)
+        # mode = 4 --- запись 3 графиков (деформация с разгрузкой на первой прочности + 2 прочности с модулями)
 
-        mode = 2
+        mode = 1
 
         # Стандартная формула
         K_0 = 1 - math.sin(math.radians(F))
-        #
-        #
-        #
+
         if mode == 1:
             namesISP = ["graph1", "graph2", "graph3"]
             pressStarts = [pressStart1, pressStart2, pressStart3]
             pressEnds = [pressEnd1, pressEnd2, pressEnd3]
-
 
         if mode == 2:
             namesISP = ["graph0", "graph1", "graph2", "graph3"]
@@ -197,6 +190,11 @@ for row in range(0, count_rows):
             namesISP = ["graph0", "graph1", "graph2", "graph3"]
             pressStarts = [pressStart1 * K_0, pressStart1, pressStart2, pressStart3]
             pressEnds = [pressEnd1, pressEnd1, pressEnd2, pressEnd3]
+
+        if mode == 4:
+            namesISP = ["graph1", "graph2", "graph3"]
+            pressStarts = [pressStart1, pressStart2, pressStart3]
+            pressEnds = [pressEnd1, pressEnd2, pressEnd3]
 
 
         for name, pressStart, pressEnd in zip(namesISP, pressStarts, pressEnds):
@@ -218,22 +216,6 @@ for row in range(0, count_rows):
                    'name': name,
                    }
 
-            typeINTERPOLATION = ["interp1d",
-                                 "CubicSpline",
-                                 "PchipInterpolator", # очень неплохо
-                                 "Akima1DInterpolator", # неплохо
-                                 "BarycentricInterpolator",
-                                 "KroghInterpolator",
-                                 "make_interp_spline", # что-то в этом есть
-                                 "interp1d", # плоская залупа
-                                 # "RegularGridInterpolator",
-                                 # "NearestNDInterpolator",
-                                 # "LinearNDInterpolator",
-                                 # "CloughTocher2DInterpolator",
-                                 # "RBFInterpolator",
-                                 "splrep",
-
-                                 ]
             if mode == 1:
                 DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
             if mode == 2:
@@ -241,28 +223,34 @@ for row in range(0, count_rows):
                     DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
                 else:
                     DF_ISP, values_for_Excel = TPDS50.start_TPDS_E50(dct, name, "PchipInterpolator")
-
             if mode == 3:
                 DF_ISP, values_for_Excel = TPDSRZG50.start_TPDS_RZG(dct, name, "PchipInterpolator")
                 if name != "graph0":
                     DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
+            if mode == 4:
+                if name == "graph1":
+                    DF_ISP, values_for_Excel = TPDSRZG.start_TPDS_RZG(dct, name, "PchipInterpolator")
+                if name != "graph1":
+                    DF_ISP, _ = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
 
             if mode == 1:
                 if name == "graph1":
                     values_for_Excel_right = values_for_Excel
-            else:
+            if mode == 2:
                 if name == "graph0":
+                    values_for_Excel_right = values_for_Excel
+            if mode == 3:
+                if name == "graph0":
+                    values_for_Excel_right = values_for_Excel
+            if mode == 4:
+                if name == "graph1":
                     values_for_Excel_right = values_for_Excel
 
             save_DF.append(DF_ISP)
 
             print(f"{row}--{LAB_NO}--{name}--------DONE")
 
-        if mode == 1:
-            read_shablons.shablonExcel_TPS_CD(row, save_DF, dct, organise_dct, values_for_Excel_right)
-        else:
-            read_shablons.shablonExcel_TPS_CD_4(row, save_DF, dct, organise_dct, values_for_Excel_right)
-
+        read_shablons.shablonExcel_TPS_CD_4(row, save_DF, dct, organise_dct, values_for_Excel_right, mode)
 
     # Графики по срезам КД
     if str(worksheet_journal['fi'][row]) not in ["None", "nan"]:
@@ -291,8 +279,6 @@ for row in range(0, count_rows):
         pressEnd3 = (pressStart3 * math.tan(Rad) + C) - valueRANDOM_to_press2 / 2
 
         # math.tan(Rad)
-        # math.tan(Rad)
-        # math.tan(Rad)
         tan_RAD_F = ((3 * (pressStart1 * pressEnd1 + pressStart2 * pressEnd2 + pressStart3 * pressEnd3) -
                       (pressStart1 + pressStart2 + pressStart3) * (pressEnd1 + pressEnd2 + pressEnd3))
                      /
@@ -320,22 +306,6 @@ for row in range(0, count_rows):
                    'pathSave': pathSave,
                    }
 
-            typeINTERPOLATION = ["interp1d",
-                                 "CubicSpline",
-                                 "PchipInterpolator", # очень неплохо
-                                 "Akima1DInterpolator", # неплохо
-                                 "BarycentricInterpolator",
-                                 "KroghInterpolator",
-                                 "make_interp_spline", # что-то в этом есть
-                                 "interp1d", # плоская залупа
-                                 # "RegularGridInterpolator",
-                                 # "NearestNDInterpolator",
-                                 # "LinearNDInterpolator",
-                                 # "CloughTocher2DInterpolator",
-                                 # "RBFInterpolator",
-                                 "splrep",
-                                 ]
-
             NewDF, values_for_Excel_right = SPS.start_SPS_CD(dct, name, "PchipInterpolator")
 
             save_DF.append(NewDF)
@@ -359,97 +329,9 @@ for row in range(0, count_rows):
             'pathSave': pathSave,
                }
 
-        NewDF, values_for_Excel = SPD.SPD_start(dct, "main", organise_dct, None)
+        NewDF, values_for_Excel = SPD.SPD_start_new(dct, "main", organise_dct, None)
 
         read_shablons.shablonExcel_SPD(row, [NewDF], dct, organise_dct, values_for_Excel)
-
-
-
-
-    if rzg and str(worksheet_journal['CD_sigma1'][row]) not in ["None", "nan"]:
-        # Выбор давлений
-        pressStart1 = worksheet_journal['CD_sigma1'][row]
-        pressStart2 = worksheet_journal['CD_sigma2'][row]
-        pressStart3 = worksheet_journal['CD_sigma3'][row]
-
-        # Выбор значений механики
-        E_0 = worksheet_journal['CD_E0'][row]
-        E_50 = worksheet_journal['E50'][row]
-        F = worksheet_journal['CD_fi'][row]
-        C = worksheet_journal['CD_c'][row]
-
-        pathSave = os.path.join(pathSave, 'Трехосные_КД_ПП')
-        if not os.path.exists(pathSave):
-            os.mkdir(pathSave)
-
-        # Расчет для графиков по трем значениям
-        press16 = pressStart1 * 1.6
-        countPoint = 200
-        endE1 = 11.4
-
-        N = 2 * math.tan(math.pi * F / 180) * (
-                (((math.tan(math.pi * F / 180)) ** 2) + 1) ** (1 / 2)) + 2 * (
-                    (math.tan(math.pi * F / 180)) ** 2) + 1
-        M = 2 * (N ** (1 / 2)) * C
-        pressEnd1 = (pressStart1 * N + M)
-        pressEnd2 = pressStart2 * (
-                2 * math.tan(math.pi * F / 180) * ((((math.tan(math.pi * F / 180)) ** 2) + 1) ** (1 / 2)) + 2 * (
-                (math.tan(math.pi * F / 180)) ** 2) + 1) + (2 * ((2 * math.tan(math.pi * F / 180) * (
-                (((math.tan(math.pi * F / 180)) ** 2) + 1) ** (1 / 2)) + 2 * ((math.tan(
-            math.pi * F / 180)) ** 2) + 1) ** (
-                                                                         1 / 2)) * C)
-        pressEnd3 = (pressStart3 * N + M)
-
-        namesISP = ["graph1", "graph2", "graph3"]
-        pressStarts = [pressStart1, pressStart2, pressStart3]
-        pressEnds = [pressEnd1, pressEnd2, pressEnd3]
-
-        for name, pressStart, pressEnd in zip(namesISP, pressStarts, pressEnds):
-            dct = {'pressStart': pressStart,
-                   'pressStart1': pressStart1,
-                   'pressStart2': pressStart2,
-                   'pressStart3': pressStart3,
-                   'E_0': E_0,
-                   'E_50': E_50,
-                   'F': F,
-                   'C': C,
-                   'countPoint': countPoint,
-                   'endE1': endE1,
-                   'pressEnd1': pressEnd1,
-                   'pressEnd2': pressEnd2,
-                   'pressEnd3': pressEnd3,
-                   'pressEnd': pressEnd,
-                   'pathSave': pathSave,
-                   }
-
-            typeINTERPOLATION = ["interp1d",
-                                 "CubicSpline",
-                                 "PchipInterpolator",  # очень неплохо
-                                 "Akima1DInterpolator",  # неплохо
-                                 "BarycentricInterpolator",
-                                 "KroghInterpolator",
-                                 "make_interp_spline",  # что-то в этом есть
-                                 "interp1d",  # плоская залупа
-                                 # "RegularGridInterpolator",
-                                 # "NearestNDInterpolator",
-                                 # "LinearNDInterpolator",
-                                 # "CloughTocher2DInterpolator",
-                                 # "RBFInterpolator",
-                                 "splrep",
-                                 ]
-
-            DF_ISP, values_for_Excel = TPDSRZG.start_TPDS_RZG(dct, name, "PchipInterpolator")
-
-            if name == "graph1":
-                values_for_Excel_right = values_for_Excel
-
-            save_DF.append(DF_ISP)
-
-            print(f"{row}--{LAB_NO}--{name}--------DONE")
-
-        read_shablons.shablonExcel_TPS_CD(row, save_DF, dct, organise_dct, values_for_Excel_right)
-
-
 
     # Графики по компрессия КД
     if str(worksheet_journal['ocr'][row]) not in ["None", "nan"]:
@@ -471,9 +353,6 @@ for row in range(0, count_rows):
             'Eobs01_02_Mpa': Eobs01_02_Mpa,
         }
 
-        # Версия с модулем (модуль ловится, но график не очень)
-        # ewDF, values_for_Excel = OCR_ISP.OCR_start_Eoed(dct, "main", organise_dct, None)
-        # Версия без модуля
         NewDF, values_for_Excel = OCR_ISP.OCR_start(dct, "main", organise_dct, None)
 
         read_shablons.shablonExcel_OCR(row, [NewDF], dct, organise_dct, values_for_Excel)

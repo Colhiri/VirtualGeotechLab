@@ -130,6 +130,10 @@ class Graph:
         self.button_save_schema = Button(label="Save schema", button_type='success', height=40)
         self.button_save_schema.on_click(self.save_schema)
 
+        # Кнопка для сброса схемы
+        self.button_reset_schema = Button(label="Reset schema", button_type='success', height=40)
+        self.button_reset_schema.on_click(self.reset_schema)
+
         self.y_max_min_values = ColumnDataSource(dict(xs=self.Y_boundaries()[0],
                                                  ys=self.Y_boundaries()[1]))
 
@@ -137,11 +141,14 @@ class Graph:
 
         self.plot.add_glyph(self.y_max_min_values, self.y_max_min_glyph)
 
+    def reset_schema(self):
+        self.schema_select_handler(True, True, self.schema)
+
     def Y_boundaries(self):
 
         segs_x = []
         segs_y = []
-        for index in range(len(self.table_values_perc.data['y_max'])):
+        for index in range(len(self.mid_line_values.data['y'])):
             value_x = [self.mid_line_values.data['x'][index], self.mid_line_values.data['x'][index]]
             value_y = [self.mid_line_values.data['y'][index] * ((100 + self.table_values_perc.data['y_max'][index]) / 100),
                        self.mid_line_values.data['y'][index] * ((100 - self.table_values_perc.data['y_min'][index]) / 100)
@@ -169,8 +176,10 @@ class Graph:
     def delete_schema(self):
         distribut.delete_schema(self.schema_select.value)
         self.schema_select.options = [schem for schem in distribut.data.keys() if schem not in ["scheme_now"]]
-        self.schema_select_handler(1, 1, self.schema_select.options[0])
-        self.schema_select.value, self.schema = self.schema_select.options[0]
+        self.schema = self.schema_select.options[0]
+        self.schema_select.value = self.schema_select.options[0]
+        distribut.data['scheme_now'] = self.schema
+        self.schema_select_handler(True, True, self.schema_select.options[0])
 
     def save_schema(self):
         distribut.data_update(self.schema_select.value,
@@ -362,7 +371,7 @@ class Graph:
 
         # Подключение обработчиков событий
         curdoc().add_root(row(self.plot, column(self.name_new_shema, self.button_add_schema, self.button_delete_schema)))
-        curdoc().add_root(row(self.interpolation_select, self.schema_select, self.button_save_schema))
+        curdoc().add_root(row(self.interpolation_select, self.schema_select, self.button_save_schema, self.button_reset_schema))
 
         curdoc().add_root(column(row(self.data_table, self.data_table_perc)))
         curdoc().add_periodic_callback(self.update_plot, 100)  # Обновление графика каждые 100 мс
