@@ -6,6 +6,19 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
+from GEOF.main_part.graphic.combination import AnalyzeGraph
+
+
+"""
+###
+###
+###
+###
+Проблема заключается в том, что иногда press_rzg больше, чем press_end.
+Это значит нужно увеличивать press_end за счет E50 и давления на E50, либо за счет уменьшения разгрузки
+
+"""
+
 
 # Функция ближайщего соседа
 def nearest(lst, target):
@@ -19,9 +32,8 @@ def splain(x, y, count_point, methodINTERPOLATION):
 
     yfit = np.linspace(min(y), max(y), num=count_point)
 
-
     if methodINTERPOLATION == "interp1d":
-        pchip = interpolate.interp1d(y, x, kind='cubic')
+        pchip = interpolate.interp1d(y, x, kind='linear')
 
     if methodINTERPOLATION == "CubicSpline":
         pchip = interpolate.CubicSpline(y, x)
@@ -41,22 +53,14 @@ def splain(x, y, count_point, methodINTERPOLATION):
     if methodINTERPOLATION == "make_interp_spline":
         pchip = interpolate.make_interp_spline(y, x)
 
-    if methodINTERPOLATION == "interp1d":
-        pchip = interpolate.interp1d(y, x)
+    if methodINTERPOLATION == "nearest":
+        pchip = interpolate.interp1d(y, x, kind='nearest')
 
-    if methodINTERPOLATION == "interp1d":
-        pchip = interpolate.interp1d(y, x)
+    if methodINTERPOLATION == "quadratic":
+        pchip = interpolate.interp1d(y, x, kind='quadratic')
 
-    if methodINTERPOLATION == "splrep":
-        # pchip = interpolate.splrep(y, x)
-
-        # x = np.linspace(0, 10, 10)
-        x = np.sin(y)
-        spl = interpolate.splrep(y, x)
-        y2 = np.linspace(0, 10, 200)
-        x2 = interpolate.splev(x, y)
-        plt.plot(x2, y2)
-        plt.show()
+    if methodINTERPOLATION == "cubic":
+        pchip = interpolate.interp1d(y, x, kind='cubic')
 
     xnew = pchip(yfit)
 
@@ -70,7 +74,8 @@ def splain(x, y, count_point, methodINTERPOLATION):
 
     return xnew, yfit
 
-def combination(choice, differencePress, dct_Combination: dict):
+def combination(differencePress, dct_Combination: dict):
+    #######
 
     # можно передавать конечные значения, котоые не включают в себя значения с других графиков
     y_press16 = dct_Combination.get("y_press16")
@@ -82,7 +87,16 @@ def combination(choice, differencePress, dct_Combination: dict):
     pressE50 = dct_Combination.get("pressE50")
     pressEnd1 = dct_Combination.get("pressEnd1")
 
-    # Первая комбинация без хвостов
+    press_rzg_END = dct_Combination.get("press_rzg_END")
+    y_pressR_RZG = dct_Combination.get("y_pressR_RZG")
+
+    analyze = AnalyzeGraph("test_1")
+    analyze.get_first_data()
+    analyze.calculate_perc('rzg')
+    return analyze.points_reload([pressStart1, press16, pressE50, press_rzg_END, pressEnd1], [0, y_press16, y_pressE50, y_pressR_RZG], 'rzg')
+
+
+    """# Первая комбинация без хвостов
     y_1 = np.array([0.0, y_press16, y_pressE50, endE1])
     x_1 = np.array([pressStart1, press16, pressE50, pressEnd1])
 
@@ -150,7 +164,7 @@ def combination(choice, differencePress, dct_Combination: dict):
     return (x_1, y_1) if choice == 1 \
         else (x_2, y_2) if choice == 2 \
         else (x_3, y_3) if choice == 3 \
-        else (x_4, y_4)
+        else (x_4, y_4)"""
 
 def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     # Выбор давлений
@@ -293,13 +307,16 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     if typeGrunt == "sand":
         dct_Combination = {
             "y_press16": y_press16,
-            "y_pressE50": y_pressR_RZG,
+            "y_pressE50": y_pressE50,
             "endE1": endE1,
 
             "pressStart1": pressStart1,
             "press16": press16,
-            "pressE50": press_rzg_END,
+            "pressE50": pressE50,
             "pressEnd1": pressEnd1,
+
+            "press_rzg_END": press_rzg,
+            "y_pressR_RZG": y_pressR_RZG,
         }
 
         y = np.array(
@@ -309,24 +326,37 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
             [pressStart1, press16, pressE50,
              ((press_rzg + pressE50) / 2) * 1.02, press_rzg])
 
-        choice = random.choice([2, 3])
-        x_end, y_end = combination(choice, differencePress, dct_Combination)
+        x_end, y_end = combination(differencePress, dct_Combination)
 
-        x_end = x_end.tolist()
-        y_end = y_end.tolist()
+        try:
+            x_end = x_end.tolist()
+        except AttributeError:
+           pass
+        try:
+            y_end = y_end.tolist()
+        except AttributeError:
+           pass
 
         bad_indexes = []
         for f_x in range(0, x_end.index(max(x_end))):
-            if foufth_x[f_x] <= press_rzg_END:
+            if foufth_x[f_x] < press_rzg_END:
                 bad_indexes.append(f_x)
 
         bad_indexes.reverse()
         for ind in bad_indexes:
             x_end.pop(ind)
             y_end.pop(ind)
+        if press_rzg_END not in x_end:
+            x_end.insert(0, press_rzg_END)
+            y_end.insert(0, y_pressR_RZG)
 
-        x_end.insert(0, press_rzg_END)
-        y_end.insert(0, y_pressR_RZG)
+        if round(x_end[1], 3) == round(x_end[0], 3):
+            x_end.pop()
+            y_end.pop()
+
+        if round(x_end[2], 3) == round(x_end[1], 3):
+            x_end.pop(1)
+            y_end.pop(1)
 
         fifth_x, fifth_y = splain(x=x_end, y=y_end, count_point=100, methodINTERPOLATION="PchipInterpolator")
         # fifth_x.reverse()

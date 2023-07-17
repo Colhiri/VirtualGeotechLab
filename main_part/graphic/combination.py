@@ -39,13 +39,17 @@ class AnalyzeGraph:
         self.list_Y_min = self.data.get(self.type_grunt).get("list_Y_min")
         self.list_Y_max = self.data.get(self.type_grunt).get("list_Y_max")
 
-    def calculate_perc(self):
+    def calculate_perc(self, mode_graph):
         """
         ### Мы считаем в графпике процент от точки, а не от максимальной точки...
         Либо перерасчет, либо нужно привязываться к максимальной точке.
 
         :return:
         """
+        if mode_graph in ['rzg']:
+            list_indexes = [0, 1, 2, 3, 4]
+        else:
+            list_indexes = [0, 1, 2, self.point_values_X.index(max(self.point_values_X))]
 
         self.index_max = self.point_values_X.index(max(self.point_values_X))
         self.max_point = max(self.point_values_X)
@@ -63,14 +67,14 @@ class AnalyzeGraph:
 
         # Убрали проценты с тех ячеек, что меньше или равно максимальной точке
         for count in range(len(self.new_percents_min_x)):
-            if count in [0, 1, 2, self.point_values_X.index(max(self.point_values_X))]:
+            if count in list_indexes:
                 self.new_percents_min_x[count] = 100
                 self.new_percents_max_x[count] = 100
             if count in [self.point_values_X.index(max(self.point_values_X))]:
                 self.new_percents_min_x[self.point_values_X.index(max(self.point_values_X))] = 100
                 self.new_percents_max_x[self.point_values_X.index(max(self.point_values_X))] = 100
 
-    def points_reload(self, point_x, point_y):
+    def points_reload(self, point_x, point_y, mode_graph):
 
         max_x_real = max(point_x)
 
@@ -85,6 +89,11 @@ class AnalyzeGraph:
         ####
         Сюда нужно поставлять словарь со значениями . Как минимум максимального Y
         """
+        if mode_graph in ['rzg']:
+            list_indexes = [0, 1, 2, 3]
+        else:
+            list_indexes = [0, 1, 2]
+
 
         # -1 потому что это индекс E50, так как точка максимального давления непостоянна и контролируется от E50
         self.max_point_Y = max(point_y)
@@ -100,21 +109,19 @@ class AnalyzeGraph:
 
         # Убрали проценты с тех ячеек, что меньше или равно максимальной точке
         for count in range(len(self.new_percents_max_y)):
-            if count in [0, 1, 2]:
+            if count in list_indexes:
                 self.new_percents_min_y[count] = 100
                 self.new_percents_max_y[count] = 100
             if count in [self.point_values_X.index(max(self.point_values_X))]:
                 self.new_percents_min_y[self.point_values_X.index(max(self.point_values_X))] = 100
                 self.new_percents_max_y[self.point_values_X.index(max(self.point_values_X))] = 100
 
-
         percents_y = [(random.randint(int(perc_min * 100), int(perc_max * 100)) / 10000) for perc_min, perc_max in
                       zip(self.new_percents_min_y, self.new_percents_max_y)]
 
-
         new_point_x = []
         for count, perc in enumerate(percents_x, 0):
-            if count in [0, 1, 2]:
+            if count in list_indexes:
                 new_point_x.append(point_x[count])
                 continue
             if count in [self.point_values_X.index(max(self.point_values_X))]:
@@ -124,7 +131,7 @@ class AnalyzeGraph:
 
         new_point_y = []
         for count, perc in enumerate(percents_y, 0):
-            if count in [0, 1, 2]:
+            if count in list_indexes:
                 new_point_y.append(point_y[count])
                 continue
             if count in [self.point_values_X.index(max(self.point_values_X))]:
@@ -137,5 +144,23 @@ class AnalyzeGraph:
                     new_point_y.append(point_y[-1])
                 continue
             new_point_y.append((perc) * (11.4-max(point_y)))
+
+
+
+        """
+        Поменяй потом на что нибудь нормальное
+        Поменяй потом на что нибудь нормальное
+        Поменяй потом на что нибудь нормальное
+        Поменяй потом на что нибудь нормальное
+        Поменяй потом на что нибудь нормальное
+        if round(new_point_x[1],3) == round(new_point_x[0],3):
+            new_point_x.pop()
+            new_point_y.pop()
+
+        if round(new_point_x[2],3) == round(new_point_x[1],3):
+            new_point_x.pop(1)
+            new_point_y.pop(1)
+        """
+
 
         return new_point_x, new_point_y

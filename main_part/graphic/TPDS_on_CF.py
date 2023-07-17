@@ -29,12 +29,10 @@ def combination(differencePress, dct_Combination: dict):
     pressE50 = dct_Combination.get("pressE50")
     pressEnd1 = dct_Combination.get("pressEnd1")
 
-
-
     analyze = AnalyzeGraph("test_1")
     analyze.get_first_data()
-    analyze.calculate_perc()
-    return analyze.points_reload([pressStart1, press16, pressE50, pressEnd1], [0, y_press16, y_pressE50])
+    analyze.calculate_perc('no_rzg')
+    return analyze.points_reload([pressStart1, press16, pressE50, pressEnd1], [0, y_press16, y_pressE50], 'no_rzg')
 
 def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
 
@@ -133,11 +131,8 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
     if typeGrunt == "clay":
         x, y = combination(differencePress, dct_Combination)
 
-
     # Значения по E1 (Y)
     yfit = np.linspace(min(y), max(y), num=countPoint)
-
-
 
     #### Здесь меняются разные типы интерполяций
 
@@ -171,14 +166,6 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
 
         if methodINTERPOLATION == "cubic":
             pchip = interpolate.interp1d(y, x, kind='cubic')
-
-            # x = np.linspace(0, 10, 10)
-            x = np.sin(y)
-            spl = interpolate.splrep(y, x)
-            y2 = np.linspace(0, 10, 200)
-            x2 = interpolate.splev(x, y)
-            plt.plot(x2, y2)
-            plt.show()
 
     except:
         return start_TPDS_CF(dct, name, methodINTERPOLATION)

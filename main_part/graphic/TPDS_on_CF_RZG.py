@@ -21,9 +21,8 @@ def splain(x, y, count_point, methodINTERPOLATION):
 
     yfit = np.linspace(min(y), max(y), num=count_point)
 
-
     if methodINTERPOLATION == "interp1d":
-        pchip = interpolate.interp1d(y, x, kind='cubic')
+        pchip = interpolate.interp1d(y, x, kind='linear')
 
     if methodINTERPOLATION == "CubicSpline":
         pchip = interpolate.CubicSpline(y, x)
@@ -43,22 +42,14 @@ def splain(x, y, count_point, methodINTERPOLATION):
     if methodINTERPOLATION == "make_interp_spline":
         pchip = interpolate.make_interp_spline(y, x)
 
-    if methodINTERPOLATION == "interp1d":
-        pchip = interpolate.interp1d(y, x)
+    if methodINTERPOLATION == "nearest":
+        pchip = interpolate.interp1d(y, x, kind='nearest')
 
-    if methodINTERPOLATION == "interp1d":
-        pchip = interpolate.interp1d(y, x)
+    if methodINTERPOLATION == "quadratic":
+        pchip = interpolate.interp1d(y, x, kind='quadratic')
 
-    if methodINTERPOLATION == "splrep":
-        # pchip = interpolate.splrep(y, x)
-
-        # x = np.linspace(0, 10, 10)
-        x = np.sin(y)
-        spl = interpolate.splrep(y, x)
-        y2 = np.linspace(0, 10, 200)
-        x2 = interpolate.splev(x, y)
-        plt.plot(x2, y2)
-        plt.show()
+    if methodINTERPOLATION == "cubic":
+        pchip = interpolate.interp1d(y, x, kind='cubic')
 
     xnew = pchip(yfit)
 

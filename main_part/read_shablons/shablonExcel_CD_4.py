@@ -137,32 +137,50 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
         engine="openpyxl",
         if_sheet_exists='overlay')
 
-    dataframe0 = dataframes[0]
-    dataframe1 = dataframes[1]
-    dataframe2 = dataframes[2]
-
-
-    dataframe0.to_excel(writer, sheet_name='1', startcol=5, startrow=64, index=False,
-                        index_label=False,
-                        header=False)
-
-    dataframe1.to_excel(writer, sheet_name='1', startcol=9, startrow=64, index=False,
-                        index_label=False,
-                        header=False)
-
-    dataframe2.to_excel(writer, sheet_name='1', startcol=11, startrow=64, index=False,
-                        index_label=False,
-                        header=False)
-
-    dataframe0.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
-                        index_label=False,
-                        header=False)
 
     if mode in [2, 3]:
+        dataframe0 = dataframes[0]
+        dataframe1 = dataframes[1]
+        dataframe2 = dataframes[2]
         dataframe3 = dataframes[3]
+
+        dataframe0.to_excel(writer, sheet_name='1', startcol=5, startrow=64, index=False,
+                            index_label=False,
+                            header=False)
+
+        dataframe1.to_excel(writer, sheet_name='1', startcol=9, startrow=64, index=False,
+                            index_label=False,
+                            header=False)
+
+        dataframe2.to_excel(writer, sheet_name='1', startcol=11, startrow=64, index=False,
+                            index_label=False,
+                            header=False)
 
         dataframe3.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
                             index_label=False,
                             header=False)
+
+    else:
+        dataframe0 = dataframes[0]
+        dataframe1 = dataframes[1]
+        dataframe2 = dataframes[2]
+
+        dataframe0.to_excel(writer, sheet_name='1', startcol=5, startrow=64, index=False,
+                            index_label=False,
+                            header=False)
+
+        dataframe0.to_excel(writer, sheet_name='1', startcol=9, startrow=64, index=False,
+                            index_label=False,
+                            header=False)
+
+        dataframe1.to_excel(writer, sheet_name='1', startcol=11, startrow=64, index=False,
+                            index_label=False,
+                            header=False)
+
+        dataframe2.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
+                            index_label=False,
+                            header=False)
+
+
 
     writer.close()

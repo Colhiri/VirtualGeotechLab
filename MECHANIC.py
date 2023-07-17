@@ -171,7 +171,7 @@ for row in range(0, count_rows):
         # mode = 3 --- запись 4 графиков (деформация с разгрузкой + прочности с модулями)
         # mode = 4 --- запись 3 графиков (деформация с разгрузкой на первой прочности + 2 прочности с модулями)
 
-        mode = 1
+        mode = 3
 
         # Стандартная формула
         K_0 = 1 - math.sin(math.radians(F))
@@ -224,9 +224,10 @@ for row in range(0, count_rows):
                 else:
                     DF_ISP, values_for_Excel = TPDS50.start_TPDS_E50(dct, name, "PchipInterpolator")
             if mode == 3:
-                DF_ISP, values_for_Excel = TPDSRZG50.start_TPDS_RZG(dct, name, "PchipInterpolator")
                 if name != "graph0":
                     DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
+                else:
+                    DF_ISP, values_for_Excel = TPDSRZG50.start_TPDS_RZG(dct, name, "PchipInterpolator")
             if mode == 4:
                 if name == "graph1":
                     DF_ISP, values_for_Excel = TPDSRZG.start_TPDS_RZG(dct, name, "PchipInterpolator")
