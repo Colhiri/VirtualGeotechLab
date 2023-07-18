@@ -69,6 +69,7 @@ worksheet_journal = deleteRows.returnDATAFRAME()
 count_rows = len(worksheet_journal)
 for row in range(0, count_rows):
 
+
     # Список для сохранения датафреймов, которые возвращаются из TPDS
     save_DF = []
 
@@ -78,6 +79,7 @@ for row in range(0, count_rows):
     boreHole = worksheet_journal['BH'][row]
     depth = worksheet_journal['Depth'][row]
     nameSoil = worksheet_journal['name_soil'][row]
+    print(LAB_NO)
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = worksheet_journal['data_f'][row]

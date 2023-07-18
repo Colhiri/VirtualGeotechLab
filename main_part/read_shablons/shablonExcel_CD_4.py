@@ -86,7 +86,7 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
     ws['O53'] = dct.get('F')
     ws['O54'] = dct.get('C')
 
-    if mode in [2, 3]:
+    if mode in [1, 2, 3]:
         # Давления
         # K_0
         ws['B47'] = 'K0, д.е.'

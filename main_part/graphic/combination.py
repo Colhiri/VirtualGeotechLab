@@ -51,7 +51,6 @@ class AnalyzeGraph:
         else:
             list_indexes = [0, 1, 2, self.point_values_X.index(max(self.point_values_X))]
 
-        self.index_max = self.point_values_X.index(max(self.point_values_X))
         self.max_point = max(self.point_values_X)
 
         # Получили проценты расчетом
@@ -62,7 +61,6 @@ class AnalyzeGraph:
             val_new_max_x = ((val / self.max_point) * 100 + self.list_X_max[count])
             self.new_percents_min_x.append(val_new_min_x)
             self.new_percents_max_x.append(val_new_max_x)
-
 
 
         # Убрали проценты с тех ячеек, что меньше или равно максимальной точке
@@ -76,7 +74,7 @@ class AnalyzeGraph:
 
     def points_reload(self, point_x, point_y, mode_graph):
 
-        max_x_real = max(point_x)
+        max_x_real = max(point_x) - point_x[0]
 
         percents_x = [random.randint(int(perc_min * 100), int(perc_max * 100)) / 10000 for perc_min, perc_max in
                       zip(self.new_percents_min_x, self.new_percents_max_x)]
@@ -94,16 +92,14 @@ class AnalyzeGraph:
         else:
             list_indexes = [0, 1, 2]
 
-
-        # -1 потому что это индекс E50, так как точка максимального давления непостоянна и контролируется от E50
-        self.max_point_Y = max(point_y)
+        self.max_point_Y = max(self.point_values_Y) - self.point_values_Y[2]
 
         # Получили проценты расчетом
         self.new_percents_min_y = []
         self.new_percents_max_y = []
         for count, val in enumerate(self.point_values_Y, 0):
-            val_new_min_y = (((val) / (11.4 - self.max_point_Y * 1.5)) * 100 - self.list_Y_min[count])
-            val_new_max_y = (((val) / (11.4 - self.max_point_Y * 1.5)) * 100 + self.list_Y_max[count])
+            val_new_min_y = ((val / (self.max_point_Y)) * 100 - self.list_Y_min[count])
+            val_new_max_y = ((val / (self.max_point_Y)) * 100 + self.list_Y_max[count])
             self.new_percents_min_y.append(val_new_min_y)
             self.new_percents_max_y.append(val_new_max_y)
 
@@ -112,12 +108,11 @@ class AnalyzeGraph:
             if count in list_indexes:
                 self.new_percents_min_y[count] = 100
                 self.new_percents_max_y[count] = 100
-            if count in [self.point_values_X.index(max(self.point_values_X))]:
-                self.new_percents_min_y[self.point_values_X.index(max(self.point_values_X))] = 100
-                self.new_percents_max_y[self.point_values_X.index(max(self.point_values_X))] = 100
+
 
         percents_y = [(random.randint(int(perc_min * 100), int(perc_max * 100)) / 10000) for perc_min, perc_max in
                       zip(self.new_percents_min_y, self.new_percents_max_y)]
+
 
         new_point_x = []
         for count, perc in enumerate(percents_x, 0):
@@ -127,40 +122,21 @@ class AnalyzeGraph:
             if count in [self.point_values_X.index(max(self.point_values_X))]:
                 new_point_x.append(point_x[-1])
                 continue
-            new_point_x.append(perc * max_x_real)
+            new_point_x.append(perc * max_x_real + point_x[0])
 
         new_point_y = []
         for count, perc in enumerate(percents_y, 0):
             if count in list_indexes:
                 new_point_y.append(point_y[count])
                 continue
-            if count in [self.point_values_X.index(max(self.point_values_X))]:
-                if point_y[-1] < self.point_values_Y[self.point_values_X.index(max(self.point_values_X))]:
-                    if self.point_values_Y[self.point_values_X.index(max(self.point_values_X))] <= new_point_y[-1]:
-                        new_point_y.append(new_point_y[-1] * 1.01)
-                    else:
-                        new_point_y.append(self.point_values_Y[self.point_values_X.index(max(self.point_values_X))])
-                else:
-                    new_point_y.append(point_y[-1])
-                continue
-            new_point_y.append((perc) * (11.4-max(point_y)))
+            new_point_y.append(perc * self.max_point_Y + max(point_y))
 
 
-
-        """
-        Поменяй потом на что нибудь нормальное
-        Поменяй потом на что нибудь нормальное
-        Поменяй потом на что нибудь нормальное
-        Поменяй потом на что нибудь нормальное
-        Поменяй потом на что нибудь нормальное
-        if round(new_point_x[1],3) == round(new_point_x[0],3):
-            new_point_x.pop()
-            new_point_y.pop()
-
-        if round(new_point_x[2],3) == round(new_point_x[1],3):
-            new_point_x.pop(1)
-            new_point_y.pop(1)
-        """
-
+        # Дополнительная проверка, которая не требуется
+        # for count, val_y in enumerate(new_point_y, 0):
+        #     if count in list_indexes:
+        #         continue
+        #     if val_y < new_point_y[count - 1]:
+        #         new_point_y[count] = new_point_y[count - 1] * random.randint(110, 120) / 100
 
         return new_point_x, new_point_y

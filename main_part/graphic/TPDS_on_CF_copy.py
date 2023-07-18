@@ -1,24 +1,12 @@
 import math
 import random
-import sys
-
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import interpolate
-import scipy.stats as stats
 
 from GEOF.main_part.graphic.combination import AnalyzeGraph
-
-"""
-TPD, где последняя точка расчитывается исходя из модуля Е50 и нахождения его на вертикальном значении 
-относительной деформации 
-
-Не подходит для включения в прочность, так как точка разрушения не соответствует значению С и Ф
-
-Всегда ищет модуль на точке 1.6 от бытового давления (Теперь уже иногда от 1.3 или от 1.15
-"""
 
 
 # Функция ближайщего соседа
@@ -28,7 +16,6 @@ def nearest(lst, target):
     except:
         pressMAX = lst.index(max(lst))
     return min(lst[:pressMAX], key=lambda x: abs(x - target))
-
 
 def combination(differencePress, dct_Combination: dict):
 
@@ -42,80 +29,67 @@ def combination(differencePress, dct_Combination: dict):
     pressE50 = dct_Combination.get("pressE50")
     pressEnd1 = dct_Combination.get("pressEnd1")
 
-    analyze = AnalyzeGraph("clay")
+    analyze = AnalyzeGraph("sand")
     analyze.get_first_data()
     analyze.calculate_perc('no_rzg')
     return analyze.points_reload([pressStart1, press16, pressE50, pressEnd1], [0, y_press16, y_pressE50], 'no_rzg')
 
-
-def start_TPDS_E50(dct: dict, name: str, methodINTERPOLATION):
-
-    # Выбор значений механики
-    E_0 = dct.get("E_0")
-    E_50 = dct.get("E_50")
-    F = dct.get("F")
-    C = dct.get("C")
-    countPoint = dct.get("countPoint")
-
-    endE1 = dct.get("endE1")
-    stepE1 = endE1 / countPoint
-
+def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
 
     # Выбор давлений
     pressStart1 = dct.get("pressStart")
-    otn_pStart = 0
-
-    # Расчет E1 и относительных вертикальных деформаций
     press16 = pressStart1 * 1.6
-    otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
-    y_press16 = 76 * otn_p16 - otn_p16 * stepE1
 
-    # pressEnd1 = dct.get("pressEnd")
+
+    name = dct.get('name')
+    if name == 'graph1' or name == 'graph0':
+        E_0 = dct.get("E_0")
+        E_50 = dct.get("E_50")
+    if name == 'graph2':
+
+        random_press = dct.get("pressStart") / dct.get("pressStart1") * random.randint(90, 110) / 100
+        E_0 = dct.get("E_0") * random_press
+        E_50 = dct.get("E_50") * random_press
+    if name == 'graph3':
+        random_press = dct.get("pressStart") / dct.get("pressStart1") * random.randint(90, 110) / 100
+
+        E_0 = dct.get("E_0") * random_press
+        E_50 = dct.get("E_50") * random_press
+
+
+    F = dct.get("F")
+    C = dct.get("C")
+    countPoint = dct.get("countPoint")
+    endE1 = dct.get("endE1")
+
+    stepE1 = endE1 / countPoint
+
+    pressEnd1 = dct.get("pressEnd")
+
+
+    ## Проверка на максимальное возможное давление второй точки модуля E0 и перерасчет коэффициента домножения
+    ## второй точки
+    pressMAX_nowE50 = (pressEnd1 + pressStart1) / 2
+    if pressMAX_nowE50 <= press16:
+        try:
+            press16 = random.randint(int(round(pressStart1, 3) * 1000 + 3), int(round(pressMAX_nowE50, 3) * 1000 - 3)) / 1000
+        except:
+            press16 = random.randint(int(round(pressStart1, 3) * 1000 + 1), int(round(pressMAX_nowE50, 3) * 1000 - 1)) / 1000
+
 
     ### Разница для расчёта коэффициента отклонения давления в функции комбинации
     differencePress = (press16 - pressStart1) / 5
 
-    otn_E50 = otn_p16 * 3
-    pressEnd1 = pressStart1 + 2 * E_50 * otn_E50 - 2 * E_50 * otn_pStart
-    pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
+    # Расчет E1 и относительных вертикальных деформаций
+    otn_pStart = 0
+
+    otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
+    y_press16 = 76 * otn_p16 - otn_p16 * stepE1
+
+    pressE50 = (pressEnd1 + pressStart1) / 2
+    otn_E50 = (((pressEnd1 + pressStart1) / 2) - pressStart1 + E_50 * otn_pStart) / E_50
     y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
 
-
-
-    max_epsila_otn = 2.5 / (76 - 1 * stepE1)
-
-    res = stats.linregress([press16, pressE50], [otn_p16, otn_E50])
-    otn_END_NOW = pressEnd1 * res.slope + res.intercept
-
-
-    if otn_END_NOW > max_epsila_otn:
-        press16 = pressStart1 * 1.3
-        otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
-        y_press16 = 76 * otn_p16 - otn_p16 * stepE1
-
-        otn_E50 = otn_p16 * 3
-        pressEnd1 = pressStart1 + 2 * E_50 * otn_E50 - 2 * E_50 * otn_pStart
-        pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
-        y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
-
-        max_epsila_otn = 2.5 / (76 - 1 * stepE1)
-
-        res = stats.linregress([press16, pressE50], [otn_p16, otn_E50])
-        otn_END_NOW = pressEnd1 * res.slope + res.intercept
-
-        if otn_END_NOW > max_epsila_otn:
-
-            press16 = pressStart1 * 1.15
-            otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
-            y_press16 = 76 * otn_p16 - otn_p16 * stepE1
-
-            otn_E50 = otn_p16 * 3
-            pressEnd1 = pressStart1 + 2 * E_50 * otn_E50 - 2 * E_50 * otn_pStart
-            pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
-            y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
-
-
-    pressEnd1 = 2 * pressE50 - pressStart1
 
     """
     "gravel"
@@ -131,20 +105,22 @@ def start_TPDS_E50(dct: dict, name: str, methodINTERPOLATION):
     "y_pressE50": y_pressE50,
     "endE1": endE1,
 
-
     "pressStart1": pressStart1,
     "press16": press16,
     "pressE50": pressE50,
     "pressEnd1": pressEnd1,
     }
 
+
     # Списки контрольных точек
     if typeGrunt == "gravel":
-        x, y = combination(differencePress, dct_Combination)
+        y = np.array([0.0, y_press16, y_pressE50, 3.6, 5.7, endE1])
+        x = np.array([pressStart1, press16, pressE50, pressEnd1, pressEnd1 - 0.01, pressEnd1 - 0.011])
+
 
     if typeGrunt == "sand":
-        x, y = combination(differencePress, dct_Combination)
-
+        y = np.array([0.0, y_press16, y_pressE50, 3.6, 5.7, endE1])
+        x = np.array([pressStart1, press16, pressE50, pressEnd1, pressEnd1 - 0.01, pressEnd1 - 0.011])
 
     if typeGrunt == "sandy_loam":
         x, y = combination(differencePress, dct_Combination)
@@ -192,10 +168,9 @@ def start_TPDS_E50(dct: dict, name: str, methodINTERPOLATION):
             pchip = interpolate.interp1d(y, x, kind='cubic')
 
     except:
-        return start_TPDS_E50(dct, name, methodINTERPOLATION)
+        return start_TPDS_CF(dct, name, methodINTERPOLATION)
 
     xnew = pchip(yfit)
-
 
     # Вставка значений по найденному индексу приближенного значения для нахождения модулей для E0, E50, pressMax
     index_x_E_0 = xnew.tolist().index(nearest(xnew, press16))
@@ -218,7 +193,7 @@ def start_TPDS_E50(dct: dict, name: str, methodINTERPOLATION):
     for count, x_value in enumerate(xnew, 0):
         if count in (0, index_x_E_0, index_x_E_50, index_x_pressMax, index_y_E_0, index_y_E_50, index_y_pressMax):
             continue
-        valueRandom = random.randint(0, int((pressEnd1 - pressStart1) * 100)) / 1000
+        valueRandom = random.randint(0, int((pressEnd1 - pressStart1) * 100)) / 10000
         if xnew[count] - valueRandom <= 0:
             continue
         xnew[count] = xnew[count] - valueRandom
