@@ -42,7 +42,7 @@ def combination(differencePress, dct_Combination: dict):
     pressE50 = dct_Combination.get("pressE50")
     pressEnd1 = dct_Combination.get("pressEnd1")
 
-    analyze = AnalyzeGraph("clay")
+    analyze = AnalyzeGraph("1")
     analyze.get_first_data()
     analyze.calculate_perc('no_rzg')
     return analyze.points_reload([pressStart1, press16, pressE50, pressEnd1], [0, y_press16, y_pressE50], 'no_rzg')

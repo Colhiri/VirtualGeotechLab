@@ -30,7 +30,7 @@ def combination(differencePress, dct_Combination: dict):
     pressE50 = dct_Combination.get("pressE50")
     pressEnd1 = dct_Combination.get("pressEnd1")
 
-    analyze = AnalyzeGraph("clay")
+    analyze = AnalyzeGraph("1")
     analyze.get_first_data()
     analyze.calculate_perc('no_rzg')
     return analyze.points_reload([pressStart1, press16, pressE50, pressEnd1], [0, y_press16, y_pressE50], 'no_rzg')
@@ -47,11 +47,12 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
     if name == 'graph1' or name == 'graph0':
         E_0 = dct.get("E_0")
         E_50 = dct.get("E_50")
-    if name == 'graph2':
 
+    if name == 'graph2':
         random_press = (dct.get("pressStart") / dct.get("pressStart1")) * random.randint(90, 110) / 100
         E_0 = dct.get("E_0") * random_press
         E_50 = dct.get("E_50") * random_press
+
     if name == 'graph3':
         random_press = (dct.get("pressStart") / dct.get("pressStart1")) * random.randint(90, 110) / 100
 
@@ -63,20 +64,8 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
     C = dct.get("C")
     countPoint = dct.get("countPoint")
     endE1 = dct.get("endE1")
-
     stepE1 = endE1 / countPoint
-
     pressEnd1 = dct.get("pressEnd")
-
-
-    ## Проверка на максимальное возможное давление второй точки модуля E0 и перерасчет коэффициента домножения
-    ## второй точки
-    pressMAX_nowE50 = (pressEnd1 + pressStart1) / 2
-    if pressMAX_nowE50 <= press16:
-        try:
-            press16 = random.randint(int(round(pressStart1, 3) * 1000 + 3), int(round(pressMAX_nowE50, 3) * 1000 - 3)) / 1000
-        except:
-            press16 = random.randint(int(round(pressStart1, 3) * 1000 + 1), int(round(pressMAX_nowE50, 3) * 1000 - 1)) / 1000
 
 
     ### Разница для расчёта коэффициента отклонения давления в функции комбинации
@@ -87,27 +76,21 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
     otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
     y_press16 = 76 * otn_p16 - otn_p16 * stepE1
 
-    otn_E50 = otn_p16 * 3
+
     pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
+    otn_E50 = (pressE50 - pressStart1 + E_50 * otn_pStart) / E_50 # otn_p16 * 3
     y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
 
-    max_epsila_otn = 1.5 / (76 - 1 * stepE1)
+
+    max_epsila_otn = 2.5 / (76 - 1 * stepE1)
 
     res = stats.linregress([press16, pressE50], [otn_p16, otn_E50])
     otn_END_NOW = pressEnd1 * res.slope + res.intercept
-
-
 
     if (otn_END_NOW > max_epsila_otn or press16 > pressE50) and pressE50 < pressEnd1:
         press16 = pressStart1 * 1.3
         otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
         y_press16 = 76 * otn_p16 - otn_p16 * stepE1
-
-        otn_E50 = otn_p16 * 3
-        pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
-        y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
-
-        max_epsila_otn = 2.5 / (76 - 1 * stepE1)
 
         res = stats.linregress([press16, pressE50], [otn_p16, otn_E50])
         otn_END_NOW = pressEnd1 * res.slope + res.intercept
@@ -117,18 +100,10 @@ def start_TPDS_CF(dct: dict, name: str, methodINTERPOLATION):
             otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
             y_press16 = 76 * otn_p16 - otn_p16 * stepE1
 
-            otn_E50 = otn_p16 * 3
-            pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
-            y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
-
             if press16 > pressE50:
                 press16 = pressStart1 * 1.075
                 otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
                 y_press16 = 76 * otn_p16 - otn_p16 * stepE1
-
-                otn_E50 = otn_p16 * 3
-                pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
-                y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
 
     if ((press16 - pressStart1) / (pressE50 - pressStart1)) * 100 > 60:
         press16 = (pressE50 - pressStart1) * (random.randint(40, 60) / 100) + pressStart1

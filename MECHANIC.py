@@ -257,7 +257,6 @@ for row in range(0, count_rows):
 
     # Графики по срезам КД
     if str(worksheet_journal['fi'][row]) not in ["None", "nan"]:
-
         # Список для сохранения датафреймов, которые возвращаются из TPDS
         save_DF = []
 

@@ -46,10 +46,6 @@ class AnalyzeGraph:
 
         :return:
         """
-        if mode_graph in ['rzg']:
-            list_indexes = [0, 1, 2, 3, 4]
-        else:
-            list_indexes = [0, 1, 2, self.point_values_X.index(max(self.point_values_X))]
 
         self.max_point = max(self.point_values_X)
 
@@ -65,32 +61,15 @@ class AnalyzeGraph:
 
         # Убрали проценты с тех ячеек, что меньше или равно максимальной точке
         for count in range(len(self.new_percents_min_x)):
-            if count in list_indexes:
+            if count in [0, 1, 2]:
                 self.new_percents_min_x[count] = 100
                 self.new_percents_max_x[count] = 100
-            if count in [self.point_values_X.index(max(self.point_values_X))]:
-                self.new_percents_min_x[self.point_values_X.index(max(self.point_values_X))] = 100
-                self.new_percents_max_x[self.point_values_X.index(max(self.point_values_X))] = 100
-
     def points_reload(self, point_x, point_y, mode_graph):
 
         max_x_real = max(point_x) - point_x[0]
 
         percents_x = [random.randint(int(perc_min * 100), int(perc_max * 100)) / 10000 for perc_min, perc_max in
                       zip(self.new_percents_min_x, self.new_percents_max_x)]
-
-        """
-        ####
-        ####
-        ####
-        ####
-        ####
-        Сюда нужно поставлять словарь со значениями . Как минимум максимального Y
-        """
-        if mode_graph in ['rzg']:
-            list_indexes = [0, 1, 2, 3]
-        else:
-            list_indexes = [0, 1, 2]
 
         self.max_point_Y = max(self.point_values_Y) - self.point_values_Y[2]
 
@@ -105,18 +84,16 @@ class AnalyzeGraph:
 
         # Убрали проценты с тех ячеек, что меньше или равно максимальной точке
         for count in range(len(self.new_percents_max_y)):
-            if count in list_indexes:
+            if count in [0,1,2]:
                 self.new_percents_min_y[count] = 100
                 self.new_percents_max_y[count] = 100
-
 
         percents_y = [(random.randint(int(perc_min * 100), int(perc_max * 100)) / 10000) for perc_min, perc_max in
                       zip(self.new_percents_min_y, self.new_percents_max_y)]
 
-
         new_point_x = []
         for count, perc in enumerate(percents_x, 0):
-            if count in list_indexes:
+            if count in [0,1,2]:
                 new_point_x.append(point_x[count])
                 continue
             if count in [self.point_values_X.index(max(self.point_values_X))]:
@@ -126,17 +103,9 @@ class AnalyzeGraph:
 
         new_point_y = []
         for count, perc in enumerate(percents_y, 0):
-            if count in list_indexes:
+            if count in [0,1,2]:
                 new_point_y.append(point_y[count])
                 continue
             new_point_y.append(perc * self.max_point_Y + max(point_y))
-
-
-        # Дополнительная проверка, которая не требуется
-        # for count, val_y in enumerate(new_point_y, 0):
-        #     if count in list_indexes:
-        #         continue
-        #     if val_y < new_point_y[count - 1]:
-        #         new_point_y[count] = new_point_y[count - 1] * random.randint(110, 120) / 100
 
         return new_point_x, new_point_y

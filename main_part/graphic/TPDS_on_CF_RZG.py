@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import interpolate
+from scipy.stats import stats
 
+from GEOF.main_part.graphic.combination import AnalyzeGraph
 
 # Функция ближайщего соседа
 def nearest(lst, target):
@@ -14,8 +16,6 @@ def nearest(lst, target):
     except:
         pressMAX = lst.index(max(lst))
     return min(lst[:pressMAX], key=lambda x: abs(x - target))
-
-
 
 def splain(x, y, count_point, methodINTERPOLATION):
 
@@ -63,9 +63,7 @@ def splain(x, y, count_point, methodINTERPOLATION):
 
     return xnew, yfit
 
-
-
-def combination(choice, differencePress, dct_Combination: dict):
+def combination(differencePress, dct_Combination: dict):
 
     # можно передавать конечные значения, котоые не включают в себя значения с других графиков
     y_press16 = dct_Combination.get("y_press16")
@@ -77,80 +75,19 @@ def combination(choice, differencePress, dct_Combination: dict):
     pressE50 = dct_Combination.get("pressE50")
     pressEnd1 = dct_Combination.get("pressEnd1")
 
-    # Первая комбинация без хвостов
-    y_1 = np.array([0.0, y_press16, y_pressE50, endE1])
-    x_1 = np.array([pressStart1, press16, pressE50, pressEnd1])
+    press_rzg_END = dct_Combination.get("press_rzg_END")
+    y_pressR_RZG = dct_Combination.get("y_pressR_RZG")
 
-    y_2, x_2 = [], []
-    if choice == 2:
-        while not len(y_2) and not len(x_2):
-            try:
-                # Вторая комбинация
-                handle_y1 = random.randint(int(round(y_pressE50 + 1, 2) * 100),
-                                       int(round(endE1 - 2, 2) * 100)) / 100
-                handle_x1 = random.randint(int(round(pressE50 + differencePress, 3) * 1000),
-                                       int(round(pressEnd1 - differencePress, 3) * 1000)) / 1000
+    analyze = AnalyzeGraph("test_1")
+    analyze.get_first_data()
+    analyze.calculate_perc('rzg')
 
-                y_2 = np.array([0.0, y_press16, y_pressE50, handle_y1, endE1])
-                x_2 = np.array([pressStart1, press16, pressE50, pressEnd1, handle_x1])
-            except:
-                continue
-
-    y_3, x_3 = [], []
-    if choice == 3:
-        while not len(y_3) and not len(x_3):
-            try:
-                #  Третья комбинация
-                handle_y1 = random.randint(int(round(y_pressE50 + 2, 2) * 100),
-                                       int(round((endE1 - y_pressE50) / 2 + y_pressE50, 2) * 100)) / 100
-                handle_x1 = random.randint(int(round(pressE50 + differencePress, 3) * 1000),
-                                       int(round((pressEnd1 - pressE50) / 2 + pressE50, 3) * 1000)) / 1000
-
-                handle_y2 = random.randint(int(round(handle_y1 + 1, 2) * 100),
-                                       int(round(endE1 - 2, 1) * 100)) / 100
-                handle_x2 = random.randint(int(round(press16 + differencePress, 3) * 1000),
-                                       int(round(handle_x1 - differencePress, 3) * 1000)) / 1000
-
-                y_3 = np.array([0.0, y_press16, y_pressE50, handle_y1, handle_y2, endE1])
-                x_3 = np.array([pressStart1, press16, pressE50, pressEnd1, handle_x1, handle_x2])
-            except:
-                continue
-
-    y_4, x_4 = [], []
-    if choice == 4:
-        while not len(y_4) and not len(x_4):
-            try:
-                # Четвертая комбинация
-                handle_y1 = random.randint(int(round(y_pressE50 + 2, 2) * 100),
-                                       int(round((endE1 - y_pressE50) / 3 + y_pressE50, 2) * 100)) / 100
-                handle_x1 = random.randint(int(round(pressE50 + differencePress, 3) * 1000),
-                                       int(round((pressEnd1 - pressE50) / 3 + pressE50, 3) * 1000)) / 1000
-
-                handle_y2 = random.randint(int(round((endE1 - y_pressE50) / 3 + y_pressE50, 2) * 100),
-                                       int(round((endE1 - handle_y1) / 2 + handle_y1, 1) * 100)) / 100
-                handle_x2 = random.randint(int(round(press16 + differencePress, 3) * 1000),
-                                       int(round((pressEnd1 - pressE50) / 3 + pressE50, 3) * 1000)) / 1000
-
-                handle_y3 = random.randint(int(round((endE1 - handle_y1) / 2 + handle_y1, 1) * 100),
-                                       int(round(endE1 - 1, 2) * 100)) / 100
-                handle_x3 = random.randint(int(round((press16 + differencePress - pressStart1) / 2 + pressStart1, 3) * 1000),
-                                       int(round(press16 + differencePress, 3) * 1000)) / 1000
-
-                y_4 = np.array([0.0, y_press16, y_pressE50, handle_y1, handle_y2, handle_y3, endE1])
-                x_4 = np.array([pressStart1, press16, pressE50, pressEnd1, handle_x1, handle_x2, handle_x3])
-
-            except:
-                continue
-
-    return (x_1, y_1) if choice == 1 \
-        else (x_2, y_2) if choice == 2 \
-        else (x_3, y_3) if choice == 3 \
-        else (x_4, y_4)
+    return analyze.points_reload([pressStart1, press16, pressE50, press_rzg_END, pressEnd1], [0, y_press16, y_pressE50, y_pressR_RZG], 'rzg')
 
 def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     # Выбор давлений
     pressStart1 = dct.get("pressStart")
-    press16 = pressStart1 * 1.6
+    otn_pStart = 0
 
     # Выбор значений механики
     E_0 = dct.get("E_0")
@@ -159,32 +96,73 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     C = dct.get("C")
     countPoint = dct.get("countPoint")
     endE1 = dct.get("endE1")
-
     stepE1 = endE1 / countPoint
-
     pressEnd1 = dct.get("pressEnd")
 
-    ## Проверка на максимальное возможное давление второй точки модуля E0 и перерасчет коэффициента домножения
-    ## второй точки
-    pressMAX_nowE50 = (pressEnd1 + pressStart1) / 2
-    if pressMAX_nowE50 <= press16:
-        try:
-            press16 = random.randint(int(round(pressStart1, 3) * 1000 + 3), int(round(pressMAX_nowE50, 3) * 1000 - 3)) / 1000
-        except:
-            press16 = random.randint(int(round(pressStart1, 3) * 1000 + 1), int(round(pressMAX_nowE50, 3) * 1000 - 1)) / 1000
+
+    name = dct.get('name')
+    if name == 'graph1' or name == 'graph0':
+        E_0 = dct.get("E_0")
+        E_50 = dct.get("E_50")
+
+    if name == 'graph2':
+        random_press = (dct.get("pressStart") / dct.get("pressStart1")) * random.randint(90, 110) / 100
+        E_0 = dct.get("E_0") * random_press
+        E_50 = dct.get("E_50") * random_press
+
+    if name == 'graph3':
+        random_press = (dct.get("pressStart") / dct.get("pressStart1")) * random.randint(90, 110) / 100
+
+        E_0 = dct.get("E_0") * random_press
+        E_50 = dct.get("E_50") * random_press
+
+    # Расчет E1 и относительных вертикальных деформаций
+    press16 = pressStart1 * 1.6
+    otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
+    y_press16 = 76 * otn_p16 - otn_p16 * stepE1
 
     ### Разница для расчёта коэффициента отклонения давления в функции комбинации
     differencePress = (press16 - pressStart1) / 5
 
-    # Расчет E1 и относительных вертикальных деформаций
-    otn_pStart = 0
 
-    otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
-    y_press16 = 76 * otn_p16 - otn_p16 * stepE1
-
-    pressE50 = (pressEnd1 + pressStart1) / 2
-    otn_E50 = (((pressEnd1 + pressStart1) / 2) - pressStart1 + E_50 * otn_pStart) / E_50
+    pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
+    otn_E50 = (pressE50 - pressStart1 + E_50 * otn_pStart) / E_50  # otn_p16 * 3
     y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
+
+
+    ### Расчет правильных модулей
+    ### Расчет правильных модулей
+    ### Расчет правильных модулей
+
+    max_epsila_otn = 2.5 / (76 - 1 * stepE1)
+
+    res = stats.linregress([press16, pressE50], [otn_p16, otn_E50])
+    otn_END_NOW = pressEnd1 * res.slope + res.intercept
+
+    if (otn_END_NOW > max_epsila_otn or press16 > pressE50) and pressE50 < pressEnd1:
+        press16 = pressStart1 * 1.3
+        otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
+        y_press16 = 76 * otn_p16 - otn_p16 * stepE1
+
+        res = stats.linregress([press16, pressE50], [otn_p16, otn_E50])
+        otn_END_NOW = pressEnd1 * res.slope + res.intercept
+
+        if (otn_END_NOW > max_epsila_otn or press16 > pressE50) and pressE50 < pressEnd1:
+            press16 = pressStart1 * 1.15
+            otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
+            y_press16 = 76 * otn_p16 - otn_p16 * stepE1
+
+            if press16 > pressE50:
+                press16 = pressStart1 * 1.075
+                otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
+                y_press16 = 76 * otn_p16 - otn_p16 * stepE1
+
+    if ((press16 - pressStart1) / (pressE50 - pressStart1)) * 100 > 60:
+        press16 = (pressE50 - pressStart1) * (random.randint(40, 60) / 100) + pressStart1
+        otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
+        y_press16 = 76 * otn_p16 - otn_p16 * stepE1
+
+
 
     E_rzg = E_0 * random.randint(45,60) / 10
     press_rzg = (pressE50 - pressStart1) / 2 + pressE50
@@ -255,54 +233,45 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     # Словарь для передачи в функцию комбинации
     dct_Combination = {
-    "y_press16": y_press16,
-    "y_pressE50": y_pressE50,
-    "endE1": endE1,
+        "y_press16": y_press16,
+        "y_pressE50": y_pressE50,
+        "endE1": endE1,
 
-    "pressStart1": pressStart1,
-    "press16": press16,
-    "pressE50": pressE50,
-    "pressEnd1": pressEnd1,
+        "pressStart1": pressStart1,
+        "press16": press16,
+        "pressE50": pressE50,
+        "pressEnd1": pressEnd1,
+
+        "press_rzg_END": press_rzg,
+        "y_pressR_RZG": y_pressR_RZG,
     }
 
     # Списки контрольных точек
     if typeGrunt == "gravel":
         y = np.array([0.0, y_press16, y_pressE50, 3.6, 5.7, endE1])
-        x = np.array([pressStart1, press16, pressE50, pressEnd1, pressEnd1 - 0.01, pressEnd1 - 0.011])
+        x = np.array([pressStart1, press16, pressE50, pressEnd1, pressEnd1 - 0.01, pressEnd1])
 
 
     if typeGrunt == "sand":
-        dct_Combination = {
-            "y_press16": y_press16,
-            "y_pressE50": y_pressR_RZG,
-            "endE1": endE1,
-
-            "pressStart1": pressStart1,
-            "press16": press16,
-            "pressE50": press_rzg_END,
-            "pressEnd1": pressEnd1,
-        }
 
 
         y = np.array(
-            [0.0, y_press16, y_pressE50,
-             ((y_pressR_RZG + y_pressE50) / 2) * 0.75, y_pressR_RZG])
+            [0.0, y_press16, y_pressE50, y_pressR_RZG])
         x = np.array(
-            [pressStart1, press16, pressE50,
-             ((press_rzg + pressE50) / 2) * 1.02, press_rzg])
+            [pressStart1, press16, pressE50, press_rzg])
 
-        choice = random.choice([2, 3])
-        x_end, y_end = combination(choice, differencePress, dct_Combination)
+        x_end, y_end = combination(differencePress, dct_Combination)
 
-        x_end = x_end.tolist()
-        y_end = y_end.tolist()
+        try:
+            x_end = x_end.tolist()
+        except AttributeError:
+            pass
+        try:
+            y_end = y_end.tolist()
+        except AttributeError:
+            pass
 
-        bad_indexes = []
-        for f_x in range(0, x_end.index(max(x_end))):
-            if foufth_x[f_x] <= press_rzg_END:
-                bad_indexes.append(f_x)
-
-        bad_indexes.reverse()
+        bad_indexes = [3, 2, 1, 0]
         for ind in bad_indexes:
             x_end.pop(ind)
             y_end.pop(ind)
@@ -313,19 +282,13 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
         fifth_x, fifth_y = splain(x=x_end, y=y_end, count_point=100, methodINTERPOLATION="PchipInterpolator")
 
     if typeGrunt == "sandy_loam":
-        choice = random.choice([2, 3, 4])
-        x_end, y_end = combination(choice, differencePress, dct_Combination)
+        x_end, y_end = combination(differencePress, dct_Combination)
 
     if typeGrunt == "loam":
-        choice = random.choice([1, 2, 3])
-        # print(choice)
-        x, y = combination(choice, differencePress, dct_Combination)
+        x, y = combination(differencePress, dct_Combination)
 
     if typeGrunt == "clay":
-        choice = random.choice([1, 2])
-        # print(choice)
-        x, y = combination(choice, differencePress, dct_Combination)
-
+        x, y = combination(differencePress, dct_Combination)
 
 
     xnew, yfit = splain(x, y, 100, 'PchipInterpolator')
@@ -346,7 +309,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     xnew[index_y_E_0] = press16
     xnew[index_y_E_50] = pressE50
     fifth_x[index_x_pressMax] = pressEnd1
-
 
     # # Рандом для значений, исключая те, которые являются необходимыми для расчетов необходимых парамтров
     # for count, x_value in enumerate(xnew, 0):

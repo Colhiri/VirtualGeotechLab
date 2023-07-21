@@ -12,7 +12,7 @@ TOKEN = '5817177597:AAFldPHKS5vSco58icQU56ALbgiQAqyrxT4'
 # Создание экземпляра бота
 bot = telebot.TeleBot(TOKEN)
 
-BOKEH_SERVER_PORT = 5007
+BOKEH_SERVER_PORT = 5009
 
 # Путь к исполняемому файлу вашей программы для графиков
 PROGRAM_PATH = r'Graph_server.py'

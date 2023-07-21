@@ -1,12 +1,15 @@
+import bokeh.models
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
-from bokeh.models import (MultiLine, CustomJS, IntEditor, TextInput, Button, ColumnDataSource, PointDrawTool, Select, DateFormatter, Line, TableColumn, DataTable, NumberFormatter)
+from bokeh.models import (Legend, MultiLine, CustomJS, IntEditor, TextInput, Button, ColumnDataSource, PointDrawTool, Select, DateFormatter, Line, TableColumn, DataTable, NumberFormatter)
 from bokeh.plotting import figure
 from scipy import interpolate
 import numpy as np
-from bokeh.events import ButtonClick
+from bokeh.events import ButtonClick, SelectionGeometry
 
 from DataDistibutor import DataDistributor as DD
+
+
 
 class Graph:
     def __init__(self, dct: dict):
@@ -34,6 +37,9 @@ class Graph:
         ### Инициализация графика и графических утилит
         self.plot = figure(width=800, height=800, y_range=(self.limit_axe_Y, 0))
 
+
+
+
         self.interpolation_methods = ["linear", "CubicSpline", "PchipInterpolator", "Akima1DInterpolator",
                                       "BarycentricInterpolator", "KroghInterpolator", "make_interp_spline",
                                       "nearest", "quadratic", "cubic"]
@@ -46,12 +52,17 @@ class Graph:
                                            value=distribut.data.get("scheme_now"),
                                            options=self.schemas)
 
+        self.global_schema = [schem for schem in distribut.data.keys() if schem not in ["scheme_now"]]
+        self.schema_select = Select(title='Choice your test',
+                                    value=distribut.data.get("scheme_now"),
+                                    options=self.global_schema)
+
         ### Создание значений для линий
         # Основная линия
         self.mid_line_values = ColumnDataSource(data=dict(x=self.point_values_X, y=self.point_values_Y),)
         # Интерполяция точек по основной линии
         self.mid_line_interpolate_values = ColumnDataSource(data=dict(self.interpolation_line(self.mid_line_values.data['x'],
-                                                                                              self.mid_line_values.data['y'])))
+                                                                                              self.mid_line_values.data['y'])), )
 
         # Вспомогательная минимальная линия по оси Х
         self.min_line_values = ColumnDataSource(
@@ -71,7 +82,7 @@ class Graph:
                                               self.max_line_values.data['y'])))
 
         # Создание глифа для линии между точками
-        self.min_line_glyph = Line(x='x', y='y', line_color='blue', line_width=1)
+        self.min_line_glyph = Line(x='x', y='y', line_color='blue', line_width=1, )
         self.plot.add_glyph(self.min_line_interpolate_values, self.min_line_glyph)
 
         self.max_line_glyph = Line(x='x', y='y', line_color='red', line_width=1)
@@ -90,7 +101,7 @@ class Graph:
 
 
 
-        self.table_values_perc = ColumnDataSource(dict(
+        self.table_values_perc = ColumnDataSource(dict(x=self.point_values_X, y=self.point_values_Y,
                                                   x_min=self.list_X_min, x_max=self.list_X_max,
                                                   y_min=self.list_Y_min, y_max=self.list_Y_max))
         self.columns_table_perc = [
@@ -141,10 +152,30 @@ class Graph:
 
         self.plot.add_glyph(self.y_max_min_values, self.y_max_min_glyph)
 
+
+        """
+        Нужно подумать как это лучше реализовать
+        """
+
+        self.plot_1 = figure(width=800, height=800, y_range=(self.limit_axe_Y, 0))
+        # Отображение точек на графике
+        self.glyph_1 = self.plot_1.circle('x', 'y', size=10, color='blue', alpha=0.5, source=self.mid_line_values)
+
+        self.draw_tool_1 = PointDrawTool(renderers=[self.glyph_1], empty_value='black')
+        self.plot_1.add_tools(self.draw_tool_1)
+
     def reset_schema(self):
+        """
+        Сбрасывает схему до последнего сохраненного чекпоинта на локалке в json
+        :return:
+        """
         self.schema_select_handler(True, True, self.schema)
 
     def Y_boundaries(self):
+        """
+        Пересчитывает границы полилинии в процентах отхождения по оси Y
+        :return: Значения для всех точек графика по двум точкам
+        """
 
         segs_x = []
         segs_y = []
@@ -159,21 +190,19 @@ class Graph:
 
         return (segs_x, segs_y)
 
-    def update_Y_bound(self):
-        self.y_max_min_values.data = dict(xs=self.Y_boundaries()[0], ys=self.Y_boundaries()[1])
-
-
-    def add_point_table_perc(self):
-        self.list_X_min.append(0)
-        self.list_X_max.append(0)
-        self.list_Y_min.append(0)
-        self.list_Y_max.append(0)
-
     def add_new_schema(self):
+        """
+        Добавляет новую схему
+        :return:
+        """
         distribut.add_new_schema(self.name_new_shema.value)
         self.schema_select.options = [schem for schem in distribut.data.keys() if schem not in ["scheme_now"]]
 
     def delete_schema(self):
+        """
+        Удаляет открытую в данный момент схему
+        :return:
+        """
         distribut.delete_schema(self.schema_select.value)
         self.schema_select.options = [schem for schem in distribut.data.keys() if schem not in ["scheme_now"]]
         self.schema = self.schema_select.options[0]
@@ -182,6 +211,10 @@ class Graph:
         self.schema_select_handler(True, True, self.schema_select.options[0])
 
     def save_schema(self):
+        """
+        Сохраняет схему в json
+        :return:
+        """
         distribut.data_update(self.schema_select.value,
                               {
                                   "limit_axe_Y": max(self.point_values_Y),
@@ -196,6 +229,11 @@ class Graph:
 
     # Обработчик события нажатия кнопки добавления точки
     def add_point_handler(self, event):
+        """
+        Добавляет точку на график
+        :param event:
+        :return:
+        """
         x = event.x
         y = event.y
 
@@ -204,17 +242,78 @@ class Graph:
 
         self.update_plot()
 
+    def delete_handler(self):
+        """
+        Удаляет точку исходя из сравнения индеков между точками в обновленной средней линии и точками оси X, которые еще не обновлены
+        :return:
+        """
+        _index = None
+        if len(self.mid_line_values.data['x']) == len(self.point_values_X):
+            return
+        # Получаем координаты удаленной точки
+        for x_new, x_old in zip(self.mid_line_values.data['x'], self.point_values_X):
+            print(f" x_new {x_new} x_old {x_old}")
+            if x_new != x_old:
+                _index = self.mid_line_values.data['x'].index(x_new) + 1
+
+        if len(self.mid_line_values.data['x']) != len(self.point_values_X):
+            _index = -1
+
+        if not _index:
+            return
+
+        self.list_X_min.pop(_index)
+        self.list_X_max.pop(_index)
+        self.list_Y_min.pop(_index)
+        self.list_Y_max.pop(_index)
+
+        self.point_values_X = self.mid_line_values.data['x']
+        self.point_values_Y = self.mid_line_values.data['y']
+
+        new_data = {
+            'x': self.point_values_X,
+            'y': self.point_values_Y,
+            'x_min': self.list_X_min,
+            'x_max': self.list_X_max,
+            'y_min': self.list_Y_min,
+            'y_max': self.list_Y_max,
+        }
+        self.table_values_perc.data = new_data
+
+        _index = None
+
+        self.update_plot()
+
     # Обработчик события перемещения точки
     def move_point_handler(self, event):
+        """
+        Двигаем выбранную точку на графике
+        :param event:
+        :return:
+        """
         # Сделай обработку точек, которые нельзя изменять
         self.mid_line_values.data = dict(x=event.x, y=event.y)
         self.update_plot()
 
     def interpolation_select_handler(self, attr, old, new):
+        """
+        Выбор методы интерполяции в выпадающем списке
+        :param attr:
+        :param old:
+        :param new:
+        :return:
+        """
         self.method_interpolate = new
         self.update_plot()
 
     def schema_select_handler(self, attr, old, new):
+        """
+        Выбор схемы, ее загрузка, и отображение
+        :param attr:
+        :param old:
+        :param new:
+        :return:
+        """
         self.schema = new
         distribut.data.update({"scheme_now": self.schema})
 
@@ -241,7 +340,8 @@ class Graph:
 
         self.table_values.data = dict(x=self.mid_line_values.data['x'], y=self.mid_line_values.data['y'],)
 
-        self.table_values_perc.data = dict(x_min=self.list_X_min, x_max=self.list_X_max,
+        self.table_values_perc.data = dict(x=self.point_values_X, y=self.point_values_Y,
+                                            x_min=self.list_X_min, x_max=self.list_X_max,
                                             y_min=self.list_Y_min, y_max=self.list_Y_max)
 
         self.calculate()
@@ -253,10 +353,19 @@ class Graph:
         self.update_plot()
 
     def calculate(self):
+        """
+        Высчитывание отхлждения линий по минимальным и мкксимальным процентам от точек средней линии
+        :return:
+        """
         self.min_line_values.data['x'] = [AX * ((100 - perc) / 100) for AX, perc in zip(self.mid_line_values.data['x'], self.table_values_perc.data['x_min'])]
         self.max_line_values.data['x'] = [AX * ((100 + perc) / 100) for AX, perc in zip(self.mid_line_values.data['x'], self.table_values_perc.data['x_max'])]
 
     def handle_table_edit(self, event):
+        """
+        Возможность редактирования точек в таблице процентов
+        :param event:
+        :return:
+        """
         edited_item = event.column.field
         edited_row = event.row
         new_value = event.new
@@ -265,6 +374,12 @@ class Graph:
         self.table_values.change.emit()
 
     def update_plot(self):
+        """
+        Обновляет все отображение каждый заданный фрейм и при вызове из функций
+        :return:
+        """
+
+        self.delete_handler()
 
         self.mid_line_interpolate_values.data = self.interpolation_line(self.mid_line_values.data['x'],
                                                                         self.mid_line_values.data['y'])
@@ -282,13 +397,14 @@ class Graph:
             self.list_Y_max.append(0)
             # Обновление данных в таблице
             new_data = {
+                'x': self.mid_line_values.data['x'],
+                'y': self.mid_line_values.data['y'],
                 'x_min': self.list_X_min,
                 'x_max': self.list_X_max,
                 'y_min': self.list_Y_min,
                 'y_max': self.list_Y_max,
             }
             self.table_values_perc.data = new_data
-
 
         # Обновление данных в таблице
         new_data = {
@@ -305,7 +421,7 @@ class Graph:
         self.max_line_interpolate_values.data = dict(self.interpolation_line(self.max_line_values.data['x'],
                                                                              self.mid_line_values.data['y']))
 
-        self.update_Y_bound()
+        self.y_max_min_values.data = dict(xs=self.Y_boundaries()[0], ys=self.Y_boundaries()[1])
 
         self.point_values_X = self.mid_line_values.data['x']
         self.point_values_Y = self.mid_line_values.data['y']
@@ -364,13 +480,18 @@ class Graph:
         return {'x': xnew, 'y': yfit}
 
     def run(self):
+        """
+        Запуск программы
+        :return:
+        """
         # Подключение обработчика события изменения выбранного метода интерполяции
         self.interpolation_select.on_change('value', self.interpolation_select_handler)
         self.schema_select.on_change('value', self.schema_select_handler)
         self.table_values_perc.js_on_change('patching', CustomJS(code="console.log(cb_obj);"))
 
+
         # Подключение обработчиков событий
-        curdoc().add_root(row(self.plot, column(self.name_new_shema, self.button_add_schema, self.button_delete_schema)))
+        curdoc().add_root(row(self.plot, column(self.name_new_shema, self.button_add_schema, self.button_delete_schema), self.plot_1))
         curdoc().add_root(row(self.interpolation_select, self.schema_select, self.button_save_schema, self.button_reset_schema))
 
         curdoc().add_root(column(row(self.data_table, self.data_table_perc)))
@@ -378,6 +499,9 @@ class Graph:
 
         self.plot.on_event('tap', self.add_point_handler)  # Обработчик нажатия на график
         self.plot.on_event('pan', self.move_point_handler)  # Обработчик перемещения точки
+
+        self.plot_1.on_event('tap', self.add_point_handler)  # Обработчик нажатия на график
+        self.plot_1.on_event('pan', self.move_point_handler)  # Обработчик перемещения точки
 
 distribut = DD()
 graphs = Graph(distribut.data)
