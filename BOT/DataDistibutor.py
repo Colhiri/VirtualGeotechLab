@@ -22,7 +22,7 @@ class DataDistributor:
                     "scheme_now": "test",
                     "test":
                         {
-                            "point_values_X": [0.1, 0.1 * 1.6, (0.25 - 0.1 * 1.6) / 2 + 0.1 * 1.6, 0.25],
+                            "point_values_X": [0. , 0.1 * 1.6, (0.25 - 0.1 * 1.6) / 2 + 0.1 * 1.6, 0.25],
                             "point_values_Y": [0.0, 0.4, 0.8, 1.6],
                             "method_interpolate": "PchipInterpolator",
                             # Лимиты п осям
@@ -38,6 +38,9 @@ class DataDistributor:
                             "list_Y_min": [0 for x in range(4)],
                             "list_Y_max": [0 for x in range(4)],
                             # Лимит уже есть по оси Y
+                            "volume_list_x": [0, 0.05, 0.1, 0.15],
+                            "volume_list_y": [0, 0, 0, 0],
+
                         },
                 }
                 self.data_save()
@@ -49,9 +52,9 @@ class DataDistributor:
         """
         Обновление данных
 
-        №№№ Вохможно этот метод стоит использовать чаще
-        №№№ Вохможно этот метод стоит использовать чаще
-        №№№ Вохможно этот метод стоит использовать чаще
+        №№№ Возможно этот метод стоит использовать чаще
+        №№№ Возможно этот метод стоит использовать чаще
+        №№№ Возможно этот метод стоит использовать чаще
         :param name_scheme:
         :param dct:
         :return:
@@ -108,6 +111,8 @@ class DataDistributor:
             "list_Y_min": [0 for x in range(4)],
             "list_Y_max": [0 for x in range(4)],
             # Лимит уже есть по оси Y
+            "volume_list_x": [0, 0.05, 0.1, 0.15],
+            "volume_list_y": [0, 0, 0, 0],
         })
 
     def delete_schema(self, schema):
