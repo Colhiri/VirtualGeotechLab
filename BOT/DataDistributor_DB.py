@@ -263,8 +263,11 @@ class DataDitributor:
         self.conn.commit()
         print('Данные пользователя записаны в базу данных')
 
-    def write_temporary_user(self):
-        pass
+
+    def write_temporary_user(self, user_id: int, user_name: str, user_surname: str, username: str):
+        self.cursor.execute('INSERT INTO temp_user (user_id, user_name, user_surname, username) VALUES (?, ?, ?, ?)',
+                       (user_id, user_name, user_surname, username))
+        self.conn.commit()
 
     """
     Связь с временным словарем

@@ -5,9 +5,9 @@ from bokeh.plotting import figure
 from scipy import interpolate
 import numpy as np
 
-from DataDistributor_DB import DataDitributor as DD
+from DataDistibutor import DataDistributor as DD
 
-class Graph_traxial:
+class Graph:
     def __init__(self, dct: dict):
 
         ### Распаковка элементов
@@ -468,5 +468,6 @@ class Graph_traxial:
         self.plot.on_event('tap', self.add_point_handler)  # Обработчик нажатия на график
         self.plot.on_event('pan', self.move_point_handler)  # Обработчик перемещения точки
 
-graphs = Graph_traxial(distribut.data)
+distribut = DD()
+graphs = Graph(distribut.data)
 graphs.run()
