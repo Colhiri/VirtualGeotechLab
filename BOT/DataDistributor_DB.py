@@ -30,6 +30,9 @@ class DataDitributor:
         self.cursor.execute('SELECT id_company FROM peoples WHERE ip = ?', (self.ip_people,))
         self.id_org = self.cursor.fetchone()[0]
 
+    """
+    Связь с базой данных
+    """
     def check_schemas_people(self):
         check = self.cursor.execute('SELECT id FROM schemas WHERE id_people = ?', (self.id_people,)).fetchone()
         if not check:
@@ -122,48 +125,34 @@ class DataDitributor:
             "id_people": self.id_people,
             "id_org": self.id_org,
             "ip_people": self.ip_people,
-            "traxial": None,
-            "volume_traxial": None,
-            "unaxial": None,
+            "traxial_scheme_now": self.cursor.execute('SELECT traxial FROM peoples WHERE id = ?', (self.id_people,)),
+            "volume_traxial_scheme_now": self.cursor.execute('SELECT volume_traxial FROM peoples WHERE id = ?', (self.id_people,)),
+            "unaxial_scheme_now": self.cursor.execute('SELECT unaxial FROM peoples WHERE id = ?', (self.id_people,)),
+            "traxial": {},
+            "volume_traxial": {},
+            "unaxial": {},
                     }
 
-        # Получить используемые схемы
-        schemas_uses = {key: value for key, value in zip(('traxial', 'volume_traxial', 'unaxial'), self.cursor.execute(f'SELECT traxial, volume_traxial, unaxial FROM peoples WHERE id = ?',
-                                            (self.id_people,)).fetchall()[0])}
-
         for id, name, type, interp, lim_X, lim_Y in zip(IDs_schemas, names_schemas, types_schemas, methods_interpolation, limits_axe_X, limits_axe_Y):
-            for name_table in ['point_values_X', 'point_values_Y', 'list_X_min', 'list_X_max', 'list_Y_min', 'list_Y_max']:
-                point_values_X = 1
-                point_values_Y = 1
-                list_X_min = 1
-                list_X_max = 1
-                list_Y_min = 1
-                list_Y_max = 1
-                new_data_type = {
-                        "scheme_now": schemas_uses.get(type),
-                        "test":
-                            {
-                                "point_values_X": [0.0, 0.1, 0.2, 0.3],
-                                "point_values_Y": [0.0, 0.4, 0.8, 1.6],
-                                "method_interpolate": "PchipInterpolator",
-                                # Лимиты п осям
-                                "limit_axe_X": lim_X,
-                                "limit_axe_Y": lim_Y,
-                                # App
-                                "list_X_min": [0 for x in range(4)],
-                                "list_X_max": [0 for x in range(4)],
-                                "list_Y_min": [0 for x in range(4)],
-                                "list_Y_max": [0 for x in range(4)],
-                            },
-                    },
-
-        print()
+            new_data_type = {
+                "point_values_X": [value for value in self.cursor.execute('SELECT * FROM point_values_X WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
+                "point_values_Y": [value for value in self.cursor.execute('SELECT * FROM point_values_Y WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
+                "method_interpolate": "PchipInterpolator",
+                # Лимиты п осям
+                "limit_axe_X": lim_X,
+                "limit_axe_Y": lim_Y,
+                # App
+                "list_X_min": [value for value in self.cursor.execute('SELECT * FROM list_X_min WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
+                "list_X_max": [value for value in self.cursor.execute('SELECT * FROM list_X_max WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
+                "list_Y_min": [value for value in self.cursor.execute('SELECT * FROM list_Y_min WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
+                "list_Y_max": [value for value in self.cursor.execute('SELECT * FROM list_Y_max WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
+                    }
+            self.data.get(type).update({name: new_data_type})
 
     def write_use_schemas_people(self, name_traxial, name_volume_traxial, name_unaxial):
         self.cursor.execute(f'UPDATE peoples SET traxial = ?, volume_traxial = ?, unaxial = ? WHERE id = ?',
                             (name_traxial, name_volume_traxial, name_unaxial, self.id_people, ))
         self.conn.commit()
-
 
     def write_data_in_database(self):
         # Обновить текущие схемы в базе из временного словаря
@@ -175,7 +164,10 @@ class DataDitributor:
             """Пройтись по схемам в словаре"""
 
             name_schemas = list(self.data.get(type_schema).keys())
-            name_schemas.remove("scheme_now")
+            try:
+                name_schemas.remove("scheme_now")
+            except:
+                pass
 
             for name in name_schemas:
                 """Пройтись по именам схем в словаре"""
@@ -203,11 +195,14 @@ class DataDitributor:
                         self.cursor.execute(f'UPDATE {name_lst} SET {key} = ? WHERE schema_id = ?', (value, OBJ_schemas,))
                         self.conn.commit()
 
+        print('Данные сохранены')
+
     def add_new_points_in_database(self, name_table, schema_id, type_schema):
         self.cursor.execute(
             f'INSERT OR REPLACE INTO {name_table} (schema_id, id_people, type) VALUES (?, ?, ?)',
             (schema_id, self.id_people, type_schema))
         self.conn.commit()
+        print('Новые точки схем добавлены в базу данных')
 
     def add_new_schema_in_database(self, name_schema, type_schema):
         """
@@ -232,8 +227,19 @@ class DataDitributor:
              self.data.get(type_schema).get(name_schema).get('limit_axe_Y')))
         self.conn.commit()
 
+        print('Новая схема добавлена в базу данных')
+
         return self.cursor.execute('SELECT id FROM schemas WHERE id_people = ? AND type = ? AND name_schema = ?',
                                     (self.id_people, type_schema, name_schema, )).fetchone()[0]
+
+    def delete_schema_in_database(self, name_schema, type_schema):
+        # Получить ID схемы
+        id_schema = self.cursor.execute('SELECT id FROM schemas WHERE name = ? AND type = ?', (name_schema, type_schema, )).fetchone()
+        # Удалить в схемах
+        self.cursor.execute('DELETE FROM schemas WHERE id = ?', (id_schema, ))
+        # Удалить в точках
+        [self.cursor.execute(f'DELETE FROM {table} WHERE id = ?', (id_schema, )) for table in ['point_values_X', 'point_values_Y', 'list_X_min', 'list_X_max', 'list_Y_min', 'list_Y_max']]
+        self.conn.commit()
 
     # Получить данные о пользователях
     def get_company_data(self):
@@ -249,48 +255,24 @@ class DataDitributor:
         self.conn.commit()
 
         self.name_company = name_company
+        print('Данные о компании записаны в базу данных')
 
     def write_people_company(self):
         self.cursor.execute(f'INSERT INTO peoples (id, id_company, ip, name_company) VALUES (?, (SELECT id FROM clients WHERE company = "{self.name_company}", ?, ?)',
                             (OBJID(), None, self.ip_people, self.name_company,))
         self.conn.commit()
-
-
-
-    def write_first_data_points(self):
-        check = self.cursor.execute('SELECT id FROM schemas WHERE id_people = ?', (self.id_people,)).fetchone()
-        if not check:
-            self.add_new_schema('schema_1', 'traxial')
-
+        print('Данные пользователя записаны в базу данных')
 
     def write_temporary_user(self):
         pass
 
-
-    # Получить данные по id и типу схемы
-    def get_data_points(self, id_user, type_schema):
-        """
-        Возможные типы в точках:
-        traxial
-        unaxial
-        volume_traxial
-        """
-        if type_schema in ['', None]:
-            print('Ошибка данных по схеме')
-        if id_user in ['', None]:
-            print('Ошибка данных по пользователю')
-
-        if type_schema == 'traxial':
-            pass
-        if type_schema == 'unaxial':
-            pass
-        if type_schema == 'volume_traxial':
-            pass
+    """
+    Связь с временным словарем
+    """
 
     def data_update(self, name_schema, dct: dict):
         """
         Обновление данных
-
         :param name_scheme:
         :param dct:
         :return:
@@ -300,94 +282,7 @@ class DataDitributor:
     def data_give(self):
         return self.data
 
-    def data_save(self, name_schema, type_schema):
-        """
-        Сохранение даты в файл
-        :return:
-        """
-        check = self.cursor.execute('SELECT id FROM schemas WHERE id_people = ? and name_schema = ?', (self.id_people, name_schema,)).fetchone()
-        if not check:
-            if type_schema in ['traxial', 'volume_traxial']:
-                self.cursor.execute(
-                    f'INSERT INTO schemas (id, name_schema, id_people, type, interpolation, limit_axe_X, limit_axe_Y) '
-                    f'VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    (OBJID(), name_schema, self.id_people, 'traxial',
-                     self.data.get(type_schema).get(name_schema).get('method_interpolate'),
-                     self.data.get(type_schema).get(name_schema).get('limit_axe_X'),
-                     self.data.get(type_schema).get(name_schema).get('limit_axe_Y')))
-                self.conn.commit()
-
-                self.cursor.execute(
-                    f'INSERT INTO schemas (id, name_schema, id_people, type, interpolation, limit_axe_X, limit_axe_Y) '
-                    f'VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    (OBJID(), name_schema, self.id_people, 'volume_traxial',
-                     self.data.get(type_schema).get(name_schema).get('method_interpolate'),
-                     self.data.get(type_schema).get(name_schema).get('limit_axe_X'),
-                     self.data.get(type_schema).get(name_schema).get('limit_axe_Y')))
-                self.conn.commit()
-
-            if type_schema in ['unaxial']:
-                self.cursor.execute(
-                    f'INSERT INTO schemas (id, name_schema, id_people, type, interpolation, limit_axe_X, limit_axe_Y) '
-                    f'VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    (OBJID(), name_schema, self.id_people, 'unaxial',
-                     self.data.get(type_schema).get(name_schema).get('method_interpolate'),
-                     self.data.get(type_schema).get(name_schema).get('limit_axe_X'),
-                     self.data.get(type_schema).get(name_schema).get('limit_axe_Y')))
-                self.conn.commit()
-
-        else:
-            if type_schema in ['traxial', 'volume_traxial']:
-                self.cursor.execute('UPDATE schemas SET '
-                                    'method_interpolate = ?, '
-                                    'limit_axe_X = ?, '
-                                    'limit_axe_Y = ?, '
-                                    'WHERE id_people = ? AND type = ?',
-                                    (self.data.get('traxial').get(name_schema).get('method_interpolate'),
-                                     self.data.get('traxial').get(name_schema).get('limit_axe_X'),
-                                     self.data.get('traxial').get(name_schema).get('limit_axe_Y'),
-                                     self.id_people,
-                                     'traxial',
-                                     ))
-                self.conn.commit()
-
-                self.cursor.execute('UPDATE schemas SET '
-                                    'method_interpolate = ?, '
-                                    'limit_axe_X = ?, '
-                                    'limit_axe_Y = ?, '
-                                    'WHERE id_people = ? AND type = ?',
-                                    (self.data.get('volume_traxial').get(name_schema).get('method_interpolate'),
-                                     self.data.get('volume_traxial').get(name_schema).get('limit_axe_X'),
-                                     self.data.get('volume_traxial').get(name_schema).get('limit_axe_Y'),
-                                     self.id_people,
-                                     'volume_traxial',
-                                     ))
-                self.conn.commit()
-
-            if type_schema in ['unaxial']:
-                self.cursor.execute('UPDATE schemas SET '
-                                    'method_interpolate = ?, '
-                                    'limit_axe_X = ?, '
-                                    'limit_axe_Y = ?, '
-                                    'WHERE id_people = ? AND type = ?',
-                                    (self.data.get('unaxial').get(name_schema).get('method_interpolate'),
-                                     self.data.get('unaxial').get(name_schema).get('limit_axe_X'),
-                                     self.data.get('unaxial').get(name_schema).get('limit_axe_Y'),
-                                     self.id_people,
-                                     'unaxial',
-                                     ))
-                self.conn.commit()
-
-        print('Данные сохранены')
-
-    def data_load(self):
-        """
-        Загрузка даты из сохраненного файла
-        :return:
-        """
-        print('Данные загружены')
-
-    def add_new_schema(self, name: str, type_schema: str):
+    def add_new_schema_in_dct(self, name: str, type_schema: str):
         """
         Добавление новой схемы со стартовыми параметрами
         :param name:
@@ -440,12 +335,19 @@ class DataDitributor:
                     "list_Y_max": [0 for x in range(4)],
                 })
 
-    def delete_schema(self, schema, type_schema):
+        self.write_data_in_database()
+        print('Схема добавлена в базу данных')
+
+    def delete_schema_in_dct(self, name_schema, type_schema):
+        # Удалить из временного словаря
         if type_schema in ['traxial', 'volume_traxial']:
-            self.data.get('traxial').pop(schema)
-            self.data.get('volume_traxial').pop(schema)
+            self.data.get('traxial').pop(name_schema)
+            self.data.get('volume_traxial').pop(name_schema)
         if type_schema in ['unaxial']:
-            self.data.get('unaxial').pop(schema)
+            self.data.get('unaxial').pop(name_schema)
+        # Удалить из базы данных
+        self.delete_schema_in_database(name_schema, type_schema)
+        print('Схема удалена')
 
 test = DataDitributor('192.168.86')
 test.check_schemas_people()
