@@ -10,7 +10,7 @@ def OBJID():
 
 
 class DataDitributor:
-    def __init__(self, ip_people, path_to_data=None):
+    def __init__(self, id_people, path_to_data=None):
         if path_to_data is None:
             self.path_to_data = ".\\geofvck.db"
         else:
@@ -19,16 +19,15 @@ class DataDitributor:
         self.conn = sqlite3.connect(self.path_to_data)
         self.cursor = self.conn.cursor()
 
-        self.ip_people = ip_people
+        self.id_people = id_people
 
-        self.cursor.execute('SELECT name_company FROM peoples WHERE ip = ?', (self.ip_people,))
+        self.cursor.execute('SELECT name_company FROM peoples WHERE id = ?', (self.id_people,))
         self.name_company = self.cursor.fetchone()[0]
 
-        self.cursor.execute('SELECT id FROM peoples WHERE ip = ?', (self.ip_people,))
-        self.id_people = self.cursor.fetchone()[0]
-
-        self.cursor.execute('SELECT id_company FROM peoples WHERE ip = ?', (self.ip_people,))
+        self.cursor.execute('SELECT id_company FROM peoples WHERE id = ?', (self.id_people,))
         self.id_org = self.cursor.fetchone()[0]
+
+        self.data = None
 
     """
     Связь с базой данных
@@ -39,10 +38,11 @@ class DataDitributor:
             self.data = {
                 "id_people": self.id_people,
                 "id_org": self.id_org,
-                "ip_people": self.ip_people,
+                "traxial_scheme_now": 'test',
+                "volume_traxial_scheme_now": 'test',
+                "unaxial_scheme_now": 'test',
                 "traxial":
                     {
-                        "scheme_now": "test",
                         "test":
                             {
                                 "point_values_X": [0.1, 0.1 * 1.6, (0.25 - 0.1 * 1.6) / 2 + 0.1 * 1.6, 0.25],
@@ -59,7 +59,6 @@ class DataDitributor:
 
                 "volume_traxial":
                     {
-                        "scheme_now": "test",
                         "test":
                             {
                                 "point_values_X": [0.0, 0.1, 0.2, 0.3],
@@ -78,7 +77,6 @@ class DataDitributor:
 
                 "unaxial":
                     {
-                        "scheme_now": "test",
                         "test":
                             {
                                 "point_values_X": [0.0, 0.1, 0.2, 0.3],
@@ -95,6 +93,7 @@ class DataDitributor:
                             },
                     },
             }
+
         else:
             """
             Загрузить схемы из database
@@ -124,10 +123,9 @@ class DataDitributor:
         self.data = {
             "id_people": self.id_people,
             "id_org": self.id_org,
-            "ip_people": self.ip_people,
-            "traxial_scheme_now": self.cursor.execute('SELECT traxial FROM peoples WHERE id = ?', (self.id_people,)),
-            "volume_traxial_scheme_now": self.cursor.execute('SELECT volume_traxial FROM peoples WHERE id = ?', (self.id_people,)),
-            "unaxial_scheme_now": self.cursor.execute('SELECT unaxial FROM peoples WHERE id = ?', (self.id_people,)),
+            "traxial_scheme_now": self.cursor.execute('SELECT traxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
+            "volume_traxial_scheme_now": self.cursor.execute('SELECT volume_traxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
+            "unaxial_scheme_now": self.cursor.execute('SELECT unaxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
             "traxial": {},
             "volume_traxial": {},
             "unaxial": {},
@@ -137,7 +135,7 @@ class DataDitributor:
             new_data_type = {
                 "point_values_X": [value for value in self.cursor.execute('SELECT * FROM point_values_X WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
                 "point_values_Y": [value for value in self.cursor.execute('SELECT * FROM point_values_Y WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
-                "method_interpolate": "PchipInterpolator",
+                "method_interpolate": self.cursor.execute('SELECT interpolation FROM schemas WHERE id = ?', (id,)).fetchone()[0],
                 # Лимиты п осям
                 "limit_axe_X": lim_X,
                 "limit_axe_Y": lim_Y,
@@ -150,19 +148,19 @@ class DataDitributor:
             self.data.get(type).update({name: new_data_type})
 
     def write_use_schemas_people(self, name_traxial, name_volume_traxial, name_unaxial):
+        if isinstance(name_traxial, tuple):
+            name_traxial = name_traxial[0]
+        if isinstance(name_traxial, tuple):
+            name_volume_traxial = name_volume_traxial[0]
+        if isinstance(name_traxial, tuple):
+            name_unaxial = name_unaxial[0]
         self.cursor.execute(f'UPDATE peoples SET traxial = ?, volume_traxial = ?, unaxial = ? WHERE id = ?',
                             (name_traxial, name_volume_traxial, name_unaxial, self.id_people, ))
         self.conn.commit()
 
     def write_data_in_database(self):
-        # Обновить текущие схемы в базе из временного словаря
-        self.write_use_schemas_people(self.data.get('traxial').get("scheme_now"),
-                                      self.data.get('volume_traxial').get("scheme_now"),
-                                      self.data.get('unaxial').get("scheme_now"))
-
         for type_schema in ('traxial', 'volume_traxial', 'unaxial'):
             """Пройтись по схемам в словаре"""
-
             name_schemas = list(self.data.get(type_schema).keys())
             try:
                 name_schemas.remove("scheme_now")
@@ -195,6 +193,11 @@ class DataDitributor:
                         self.cursor.execute(f'UPDATE {name_lst} SET {key} = ? WHERE schema_id = ?', (value, OBJ_schemas,))
                         self.conn.commit()
 
+        # Обновить текущие схемы в базе из временного словаря
+        self.write_use_schemas_people(self.data.get('traxial_scheme_now'),
+                                      self.data.get('volume_traxial_scheme_now'),
+                                      self.data.get('unaxial_scheme_now'))
+
         print('Данные сохранены')
 
     def add_new_points_in_database(self, name_table, schema_id, type_schema):
@@ -202,7 +205,6 @@ class DataDitributor:
             f'INSERT OR REPLACE INTO {name_table} (schema_id, id_people, type) VALUES (?, ?, ?)',
             (schema_id, self.id_people, type_schema))
         self.conn.commit()
-        print('Новые точки схем добавлены в базу данных')
 
     def add_new_schema_in_database(self, name_schema, type_schema):
         """
@@ -227,18 +229,16 @@ class DataDitributor:
              self.data.get(type_schema).get(name_schema).get('limit_axe_Y')))
         self.conn.commit()
 
-        print('Новая схема добавлена в базу данных')
-
         return self.cursor.execute('SELECT id FROM schemas WHERE id_people = ? AND type = ? AND name_schema = ?',
                                     (self.id_people, type_schema, name_schema, )).fetchone()[0]
 
     def delete_schema_in_database(self, name_schema, type_schema):
         # Получить ID схемы
-        id_schema = self.cursor.execute('SELECT id FROM schemas WHERE name = ? AND type = ?', (name_schema, type_schema, )).fetchone()
+        id_schema = self.cursor.execute('SELECT id FROM schemas WHERE name_schema = ? AND type = ?', (name_schema, type_schema, )).fetchone()[0]
         # Удалить в схемах
         self.cursor.execute('DELETE FROM schemas WHERE id = ?', (id_schema, ))
         # Удалить в точках
-        [self.cursor.execute(f'DELETE FROM {table} WHERE id = ?', (id_schema, )) for table in ['point_values_X', 'point_values_Y', 'list_X_min', 'list_X_max', 'list_Y_min', 'list_Y_max']]
+        [self.cursor.execute(f'DELETE FROM {table} WHERE schema_id = ?', (id_schema, )) for table in ['point_values_X', 'point_values_Y', 'list_X_min', 'list_X_max', 'list_Y_min', 'list_Y_max']]
         self.conn.commit()
 
     # Получить данные о пользователях
@@ -257,9 +257,10 @@ class DataDitributor:
         self.name_company = name_company
         print('Данные о компании записаны в базу данных')
 
-    def write_people_company(self):
-        self.cursor.execute(f'INSERT INTO peoples (id, id_company, ip, name_company) VALUES (?, (SELECT id FROM clients WHERE company = "{self.name_company}", ?, ?)',
-                            (OBJID(), None, self.ip_people, self.name_company,))
+
+    def write_people_company(self, id_user):
+        self.cursor.execute(f'INSERT INTO peoples (id, id_company, name_company) VALUES (?, (SELECT id FROM clients WHERE company = "{self.name_company}", ?, ?)',
+                            (id_user, None, self.name_company,))
         self.conn.commit()
         print('Данные пользователя записаны в базу данных')
 
@@ -351,7 +352,3 @@ class DataDitributor:
         # Удалить из базы данных
         self.delete_schema_in_database(name_schema, type_schema)
         print('Схема удалена')
-
-test = DataDitributor('192.168.86')
-test.check_schemas_people()
-test.write_data_in_database()

@@ -19,7 +19,7 @@ joining_date)
 VALUES 
 ('{OBJID()}',
 'GEOF',
-'192.168.86',
+'192.168.',
 '{datetime.date.today()}')
 ;
 '''
@@ -27,23 +27,26 @@ VALUES
 create_company = f'''INSERT INTO peoples 
 (id,
 id_company,
-ip
+name_company
 )
 VALUES 
-('{OBJID()}',
+('356379915',
 (SELECT id FROM company WHERE name_company = 'GEOF'),
-'192.168.86'
+'192.168.',
+'GEOF'
 );
 '''
 
+
+
 delete_data = [cursor.execute(f'DELETE FROM {table}') for table in ['schemas', 'point_values_X', 'point_values_Y', 'list_X_min', 'list_X_max', 'list_Y_min', 'list_Y_max']]
 conn.commit()
-
-"""for command in [
+"""
+for command in [
     create_admin,
     create_company,
                 ]:
     cursor.execute(command)
-    conn.commit()"""
-
+    conn.commit()
+"""
 cursor.close()
