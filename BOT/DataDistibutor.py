@@ -22,7 +22,7 @@ class DataDistributor:
                     "scheme_now": "test",
                     "test":
                         {
-                            "point_values_X": [0. , 0.1 * 1.6, (0.25 - 0.1 * 1.6) / 2 + 0.1 * 1.6, 0.25],
+                            "point_values_X": [0., 0.1 * 1.6, (0.25 - 0.1 * 1.6) / 2 + 0.1 * 1.6, 0.25],
                             "point_values_Y": [0.0, 0.4, 0.8, 1.6],
                             "method_interpolate": "PchipInterpolator",
                             # Лимиты п осям

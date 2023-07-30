@@ -20,9 +20,6 @@ class Graph:
         self.limit_axe_Y = dct.get(self.schema).get("limit_axe_Y")
         ### Интерполяция
         self.method_interpolate = dct.get(self.schema).get("method_interpolate")
-        ### Точки для дополнительных кривых
-        self.last_save_values_X = dct.get(self.schema).get("last_save_values_X")
-        self.last_save_values_Y = dct.get(self.schema).get("last_save_values_Y")
 
         ### Проценты с APP
         self.list_X_min = dct.get(self.schema).get("list_X_min")
@@ -301,9 +298,6 @@ class Graph:
         self.limit_axe_Y = dct.get(self.schema).get("limit_axe_Y")
         ### Интерполяция
         self.method_interpolate = dct.get(self.schema).get("method_interpolate")
-        ### Точки для дополнительных кривых
-        self.last_save_values_X = dct.get(self.schema).get("last_save_values_X")
-        self.last_save_values_Y = dct.get(self.schema).get("last_save_values_Y")
 
         ### Проценты с APP
         self.list_X_min = dct.get(self.schema).get("list_X_min")
