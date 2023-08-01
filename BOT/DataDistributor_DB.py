@@ -54,6 +54,10 @@ class DataDitributor:
                                 "list_X_max": [0 for x in range(4)],
                                 "list_Y_min": [0 for x in range(4)],
                                 "list_Y_max": [0 for x in range(4)],
+                                "count_points_min": 200,
+                                "count_points_max": 200,
+                                "random_percent_min": 1,
+                                "random_percent_max": 1,
                             },
                     },
 
@@ -72,6 +76,10 @@ class DataDitributor:
                                 "list_X_max": [0 for x in range(4)],
                                 "list_Y_min": [0 for x in range(4)],
                                 "list_Y_max": [0 for x in range(4)],
+                                "count_points_min": 200,
+                                "count_points_max": 200,
+                                "random_percent_min": 1,
+                                "random_percent_max": 1,
                             },
                     },
 
@@ -90,6 +98,10 @@ class DataDitributor:
                                 "list_X_max": [0 for x in range(4)],
                                 "list_Y_min": [0 for x in range(4)],
                                 "list_Y_max": [0 for x in range(4)],
+                                "count_points_min": 200,
+                                "count_points_max": 200,
+                                "random_percent_min": 1,
+                                "random_percent_max": 1,
                             },
                     },
             }
@@ -133,17 +145,21 @@ class DataDitributor:
 
         for id, name, type, interp, lim_X, lim_Y in zip(IDs_schemas, names_schemas, types_schemas, methods_interpolation, limits_axe_X, limits_axe_Y):
             new_data_type = {
-                "point_values_X": [value for value in self.cursor.execute('SELECT * FROM point_values_X WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
-                "point_values_Y": [value for value in self.cursor.execute('SELECT * FROM point_values_Y WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
+                "point_values_X": [value for value in self.cursor.execute('SELECT * FROM point_values_X WHERE schema_id = ?', (id, )).fetchone()[5:] if value is not None],
+                "point_values_Y": [value for value in self.cursor.execute('SELECT * FROM point_values_Y WHERE schema_id = ?', (id, )).fetchone()[5:] if value is not None],
                 "method_interpolate": self.cursor.execute('SELECT interpolation FROM schemas WHERE id = ?', (id,)).fetchone()[0],
                 # Лимиты п осям
                 "limit_axe_X": lim_X,
                 "limit_axe_Y": lim_Y,
                 # App
-                "list_X_min": [value for value in self.cursor.execute('SELECT * FROM list_X_min WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
-                "list_X_max": [value for value in self.cursor.execute('SELECT * FROM list_X_max WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
-                "list_Y_min": [value for value in self.cursor.execute('SELECT * FROM list_Y_min WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
-                "list_Y_max": [value for value in self.cursor.execute('SELECT * FROM list_Y_max WHERE schema_id = ?', (id, )).fetchone()[3:] if value is not None],
+                "list_X_min": [value for value in self.cursor.execute('SELECT * FROM list_X_min WHERE schema_id = ?', (id, )).fetchone()[5:] if value is not None],
+                "list_X_max": [value for value in self.cursor.execute('SELECT * FROM list_X_max WHERE schema_id = ?', (id, )).fetchone()[5:] if value is not None],
+                "list_Y_min": [value for value in self.cursor.execute('SELECT * FROM list_Y_min WHERE schema_id = ?', (id, )).fetchone()[5:] if value is not None],
+                "list_Y_max": [value for value in self.cursor.execute('SELECT * FROM list_Y_max WHERE schema_id = ?', (id, )).fetchone()[5:] if value is not None],
+                "count_points_min": self.cursor.execute(f'SELECT count_points_min FROM schemas WHERE id = ?', (id, )).fetchone()[0],
+                "count_points_max": self.cursor.execute(f'SELECT count_points_max FROM schemas WHERE id = ?', (id, )).fetchone()[0],
+                "random_percent_min": self.cursor.execute(f'SELECT random_percent_min FROM schemas WHERE id = ?', (id, )).fetchone()[0],
+                "random_percent_max": self.cursor.execute(f'SELECT random_percent_max FROM schemas WHERE id = ?', (id, )).fetchone()[0],
                     }
             self.data.get(type).update({name: new_data_type})
 
@@ -186,7 +202,6 @@ class DataDitributor:
                 for name_lst, lst in data_points.items():
                     """Пройтись по именам и значениям таблиц с точками схем в словаре"""
                     """Добавить схему, если ее нет."""
-
                     self.add_new_points_in_database(name_lst, OBJ_schemas, type_schema)
 
                     for key, value in lst.items():
@@ -201,9 +216,12 @@ class DataDitributor:
         print('Данные сохранены')
 
     def add_new_points_in_database(self, name_table, schema_id, type_schema):
+        name_schema = self.cursor.execute(f'SELECT name_schema FROM schemas WHERE id = ?', (schema_id, )).fetchone()[0]
+        interpolation = self.cursor.execute(f'SELECT interpolation FROM schemas WHERE id = ?', (schema_id, )).fetchone()[0]
         self.cursor.execute(
-            f'INSERT OR REPLACE INTO {name_table} (schema_id, id_people, type) VALUES (?, ?, ?)',
-            (schema_id, self.id_people, type_schema))
+            f'INSERT OR REPLACE INTO {name_table} (schema_id, name_schema, interpolation, id_people, type) '
+            f'VALUES (?, ?, ?, ?, ?)',
+            (schema_id, name_schema, interpolation, self.id_people, type_schema))
         self.conn.commit()
 
     def add_new_schema_in_database(self, name_schema, type_schema):
@@ -213,7 +231,6 @@ class DataDitributor:
         :param type_schema:
         :return:
         """
-
         check = self.cursor.execute('SELECT id FROM schemas WHERE id_people = ? AND type = ? AND name_schema = ?',
                                     (self.id_people, type_schema, name_schema, )).fetchone()
         # Проверка на наличие id точек, если оно есть, то возвращается именно id, а не turple
@@ -221,25 +238,34 @@ class DataDitributor:
             check = check[0]
 
         self.cursor.execute(
-            f'INSERT OR REPLACE INTO schemas (id, name_schema, id_people, type, interpolation, limit_axe_X, limit_axe_Y) '
-            f'VALUES (?, ?, ?, ?, ?, ?, ?)',
+            f'INSERT OR REPLACE INTO schemas (id, name_schema, id_people, type, interpolation, limit_axe_X, limit_axe_Y,'
+            f'count_points_min, count_points_max, random_percent_min, random_percent_max) '
+            f'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             (OBJID() if not check else check, name_schema, self.id_people, type_schema,
              self.data.get(type_schema).get(name_schema).get('method_interpolate'),
              self.data.get(type_schema).get(name_schema).get('limit_axe_X'),
-             self.data.get(type_schema).get(name_schema).get('limit_axe_Y')))
+             self.data.get(type_schema).get(name_schema).get('limit_axe_Y'),
+             self.data.get(type_schema).get(name_schema).get('count_points_min'),
+             self.data.get(type_schema).get(name_schema).get('count_points_max'),
+             self.data.get(type_schema).get(name_schema).get('random_percent_min'),
+             self.data.get(type_schema).get(name_schema).get('random_percent_max')))
         self.conn.commit()
 
         return self.cursor.execute('SELECT id FROM schemas WHERE id_people = ? AND type = ? AND name_schema = ?',
                                     (self.id_people, type_schema, name_schema, )).fetchone()[0]
 
     def delete_schema_in_database(self, name_schema, type_schema):
+        print(name_schema)
+        print(type_schema)
+
         # Получить ID схемы
         id_schema = self.cursor.execute('SELECT id FROM schemas WHERE name_schema = ? AND type = ?', (name_schema, type_schema, )).fetchone()[0]
         # Удалить в схемах
         self.cursor.execute('DELETE FROM schemas WHERE id = ?', (id_schema, ))
         # Удалить в точках
-        [self.cursor.execute(f'DELETE FROM {table} WHERE schema_id = ?', (id_schema, )) for table in ['point_values_X', 'point_values_Y', 'list_X_min', 'list_X_max', 'list_Y_min', 'list_Y_max']]
-        self.conn.commit()
+        for table in ['point_values_X', 'point_values_Y', 'list_X_min', 'list_X_max', 'list_Y_min', 'list_Y_max']:
+            self.cursor.execute(f'DELETE FROM {table} WHERE schema_id = ?', (id_schema, ))
+            self.conn.commit()
 
     # Получить данные о пользователях
     def get_company_data(self):
@@ -308,6 +334,10 @@ class DataDitributor:
                     "list_X_max": [0 for x in range(4)],
                     "list_Y_min": [0 for x in range(4)],
                     "list_Y_max": [0 for x in range(4)],
+                    "count_points_min": 200,
+                    "count_points_max": 200,
+                    "random_percent_min": 1,
+                    "random_percent_max": 1,
                 })
             self.data.get('volume_traxial').setdefault(
                 name,
@@ -321,6 +351,10 @@ class DataDitributor:
                     "list_X_max": [0 for x in range(4)],
                     "list_Y_min": [0 for x in range(4)],
                     "list_Y_max": [0 for x in range(4)],
+                    "count_points_min": 200,
+                    "count_points_max": 200,
+                    "random_percent_min": 1,
+                    "random_percent_max": 1,
                 })
         if type_schema in ['unaxial']:
             self.data.get('unaxial').setdefault(
@@ -337,6 +371,10 @@ class DataDitributor:
                     "list_X_max": [0 for x in range(4)],
                     "list_Y_min": [0 for x in range(4)],
                     "list_Y_max": [0 for x in range(4)],
+                    "count_points_min": 200,
+                    "count_points_max": 200,
+                    "random_percent_min": 1,
+                    "random_percent_max": 1,
                 })
 
         self.write_data_in_database()
@@ -347,8 +385,11 @@ class DataDitributor:
         if type_schema in ['traxial', 'volume_traxial']:
             self.data.get('traxial').pop(name_schema)
             self.data.get('volume_traxial').pop(name_schema)
+            self.delete_schema_in_database(name_schema, 'traxial')
+            self.delete_schema_in_database(name_schema, 'volume_traxial')
         if type_schema in ['unaxial']:
             self.data.get('unaxial').pop(name_schema)
+            self.delete_schema_in_database(name_schema, 'unaxial')
+
         # Удалить из базы данных
-        self.delete_schema_in_database(name_schema, type_schema)
         print('Схема удалена')

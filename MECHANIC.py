@@ -1,17 +1,6 @@
 import math
 import random
 import os
-import shutil
-from time import strftime
-import time
-import datetime
-import json
-
-import matplotlib.pyplot as plt
-import numpy as np
-import openpyxl
-import pandas as pd
-from scipy import interpolate
 
 import GEOF.main_part.graphic.TPDS_on_CF as TPDSCF
 import GEOF.main_part.graphic.TPDS_on_E50 as TPDS50
@@ -30,47 +19,10 @@ import GEOF.main_part.read_shablons as read_shablons
 
 import sys
 
-def start(file_path):
-    ### Удалить строки без механики
-    deleteRows = main_tools.ExcelModules(# path=".\\Data.xlsx",
-                                         path=file_path,
-                                         sheetName='Sheet1',
-                                         howRowsSkip=5,
-                                         howColumnSkip=0
-                                         )
-    """
-    deleteRows.DeleteDefinitionRows(['P1', 'P_r', 'ocr',
-                                     'fi', 'c',
-                                     'fi_nn','c_nn',
-                                     'Eoed01_02_MPa','Eobs01_02_Mpa',
-                                     'CD_sigma1','CD_sigma2','CD_sigma3',
-                                     'CD_E0','E50','CD_fi', 'CD_c',
-                                     'CU_sigma1', 'CU_sigma2', 'CU_sigma3', 'CU_E50', 'CU_fi', 'CU_c',
-                                     'UU_sigma1', 'UU_sigma2', 'UU_sigma3', 'UU_c',
-                                     ], [None, np.NAN, "None", np.NaN, "nan"])
-    """
-    deleteRows.DeleteDefinitionRows(['CD_fi', 'CD_c',], [None, np.NAN, "None", np.NaN, "nan"])
-
-
-    deleteRows.replaceChar(',', '.', ['Depth','We', 'ps', 'p', 'pd', 'n', 'e', 'Sr', 'WL', 'WP', 'IP', 'IL', 'Ir',
-                                      'P1', 'P_r', 'ocr',
-                                     'fi', 'c',
-                                     'fi_nn','c_nn',
-                                     'Eoed01_02_MPa','Eobs01_02_Mpa',
-                                     'CD_sigma1','CD_sigma2','CD_sigma3',
-                                     'CD_u1','CD_u2','CD_u3',
-                                      'CD_v',
-                                     'CD_E0','E50','CD_fi', 'CD_c',
-                                     'CU_sigma1', 'CU_sigma2', 'CU_sigma3', 'CU_E50', 'CU_fi', 'CU_c',
-                                     'UU_sigma1', 'UU_sigma2', 'UU_sigma3', 'UU_c',
-                                     ], typeRewrite='float64')
-
-    worksheet_journal = deleteRows.returnDATAFRAME()
-
+def start(worksheet_journal, id_user, dct_combination):
 
     count_rows = len(worksheet_journal)
     for row in range(0, count_rows):
-
 
         # Список для сохранения датафреймов, которые возвращаются из TPDS
         save_DF = []
@@ -96,10 +48,10 @@ def start(file_path):
         number_protocol = worksheet_journal['Np'][row]
 
         # Заказчик
-        nameClient = "Переход трубопровода через р. Енисей"  # ['Ind_lab'][row]
+        nameClient = "Переход трубопровода через р. Енисей"
 
         # Объект
-        nameObject = 'ООО Регионстрой'  # ['Ind_lab'][row]
+        nameObject = 'ООО Регионстрой'
 
         # Физические параметры для протокола
         We = worksheet_journal['We'][row]
@@ -111,7 +63,10 @@ def start(file_path):
         Sr = worksheet_journal['Sr'][row]
 
         # Создание папки для складирования испытаний в объекте
-        pathSave = os.path.join(f".\\prot\\{nameObject}")
+        pathSave = os.path.join(f"..\\prot\\{id_user}")
+        if not os.path.exists(pathSave):
+            os.mkdir(pathSave)
+        pathSave = os.path.join(f"..\\prot\\{id_user}\\{nameObject}")
         if not os.path.exists(pathSave):
             os.mkdir(pathSave)
 
@@ -133,8 +88,24 @@ def start(file_path):
             'e': e,
             'IP': IP,
             'IL': IL,
-
         }
+
+        type_grunt_schemas = {
+            "traxial": {
+                "gravel": 'gravel',
+                "sand": 'sand',
+                "sandy_loam": 'sandy_loam',
+                "loam": 'loam',
+                "clay": 'clay',
+                        },
+            "unaxial": {
+                "gravel": '1',
+                "sand": '1',
+                "sandy_loam": '1',
+                "loam": '1',
+                "clay": '1',
+                        },
+                                }
 
         # Графики по трехосникам КД
         if str(worksheet_journal['CD_sigma1'][row]) not in ["None", "nan"]:
@@ -175,7 +146,7 @@ def start(file_path):
             # mode = 3 --- запись 4 графиков (деформация с разгрузкой + прочности с модулями)
             # mode = 4 --- запись 3 графиков (деформация с разгрузкой на первой прочности + 2 прочности с модулями)
 
-            mode = 3
+            mode = 1
 
             # Стандартная формула
             K_0 = 1 - math.sin(math.radians(F))
@@ -202,7 +173,7 @@ def start(file_path):
 
 
             for name, pressStart, pressEnd in zip(namesISP, pressStarts, pressEnds):
-                dct = {'pressStart': pressStart,
+                dct_for_mech = {'pressStart': pressStart,
                        'pressStart1': pressStart1,
                        'pressStart2': pressStart2,
                        'pressStart3': pressStart3,
@@ -221,22 +192,50 @@ def start(file_path):
                        }
 
                 if mode == 1:
-                    DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
+                    DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(name=name,
+                                                                    data_mech=dct_for_mech,
+                                                                    organise_dct=organise_dct,
+                                                                    dct_combination=dct_combination,
+                                                                    type_grunt_schemas=type_grunt_schemas)
                 if mode == 2:
                     if name != "graph0":
-                        DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
+                        DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(name=name,
+                                                                    data_mech=dct_for_mech,
+                                                                    organise_dct=organise_dct,
+                                                                    dct_combination=dct_combination,
+                                                                    type_grunt_schemas=type_grunt_schemas)
                     else:
-                        DF_ISP, values_for_Excel = TPDS50.start_TPDS_E50(dct, name, "PchipInterpolator")
+                        DF_ISP, values_for_Excel = TPDS50.start_TPDS_E50(name=name,
+                                                                    data_mech=dct_for_mech,
+                                                                    organise_dct=organise_dct,
+                                                                    dct_combination=dct_combination,
+                                                                    type_grunt_schemas=type_grunt_schemas)
                 if mode == 3:
                     if name != "graph0":
-                        DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
+                        DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(name=name,
+                                                                    data_mech=dct_for_mech,
+                                                                    organise_dct=organise_dct,
+                                                                    dct_combination=dct_combination,
+                                                                    type_grunt_schemas=type_grunt_schemas)
                     else:
-                        DF_ISP, values_for_Excel = TPDSRZG50.start_TPDS_RZG(dct, name, "PchipInterpolator")
+                        DF_ISP, values_for_Excel = TPDSRZG50.start_TPDS_RZG(name=name,
+                                                                    data_mech=dct_for_mech,
+                                                                    organise_dct=organise_dct,
+                                                                    dct_combination=dct_combination,
+                                                                    type_grunt_schemas=type_grunt_schemas)
                 if mode == 4:
                     if name == "graph1":
-                        DF_ISP, values_for_Excel = TPDSRZG.start_TPDS_RZG(dct, name, "PchipInterpolator")
+                        DF_ISP, values_for_Excel = TPDSRZG.start_TPDS_RZG(name=name,
+                                                                    data_mech=dct_for_mech,
+                                                                    organise_dct=organise_dct,
+                                                                    dct_combination=dct_combination,
+                                                                    type_grunt_schemas=type_grunt_schemas)
                     if name != "graph1":
-                        DF_ISP, _ = TPDSCF.start_TPDS_CF(dct, name, "PchipInterpolator")
+                        DF_ISP, _ = TPDSCF.start_TPDS_CF(name=name,
+                                                                    data_mech=dct_for_mech,
+                                                                    organise_dct=organise_dct,
+                                                                    dct_combination=dct_combination,
+                                                                    type_grunt_schemas=type_grunt_schemas)
 
                 if mode == 1:
                     if name == "graph1":
@@ -255,7 +254,7 @@ def start(file_path):
 
                 print(f"{row}--{LAB_NO}--{name}--------DONE")
 
-            read_shablons.shablonExcel_TPS_CD_4(row, save_DF, dct, organise_dct, values_for_Excel_right, mode)
+            read_shablons.shablonExcel_TPS_CD_4(row, save_DF, dct_for_mech, organise_dct, values_for_Excel_right, mode)
 
         # Графики по срезам КД
         if str(worksheet_journal['fi'][row]) not in ["None", "nan"]:

@@ -6,11 +6,9 @@ from time import strftime
 import time
 import datetime
 
-import matplotlib.pyplot as plt
 import numpy as np
 import openpyxl
 import pandas as pd
-from scipy import interpolate
 
 def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel: dict, mode: int) -> None:
     # Организационные моменты
@@ -54,10 +52,10 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
     else:
         prot_name = LAB_NO + '.xlsx'
     try:
-        shutil.copy('.\\srcs\\shablons\\TPDS_CD.xlsx'
+        shutil.copy('..\\srcs\\shablons\\TPDS_CD.xlsx'
                     ,f'{pathSave}\\{prot_name}')
         os.rename(
-            f'.\\prot\\TPDS_CD.xlsx',
+            f'..\\prot\\TPDS_CD.xlsx',
             f'{pathSave}\\{prot_name}')
     except:
         pass
@@ -137,7 +135,6 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
         engine="openpyxl",
         if_sheet_exists='overlay')
 
-
     if mode in [2, 3]:
         dataframe0 = dataframes[0]
         dataframe1 = dataframes[1]
@@ -180,7 +177,4 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
         dataframe2.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
                             index_label=False,
                             header=False)
-
-
-
     writer.close()

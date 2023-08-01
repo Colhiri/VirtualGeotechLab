@@ -2,6 +2,8 @@ import sqlite3
 import datetime
 import random
 
+import database_short
+
 conn = sqlite3.connect('geofvck.db')
 
 cursor = conn.cursor()
@@ -32,13 +34,11 @@ name_company
 VALUES 
 ('356379915',
 (SELECT id FROM company WHERE name_company = 'GEOF'),
-'192.168.',
 'GEOF'
 );
 '''
 
-
-
+"""
 delete_data = [cursor.execute(f'DELETE FROM {table}') for table in ['schemas', 'point_values_X', 'point_values_Y', 'list_X_min', 'list_X_max', 'list_Y_min', 'list_Y_max']]
 conn.commit()
 """
@@ -48,5 +48,5 @@ for command in [
                 ]:
     cursor.execute(command)
     conn.commit()
-"""
+
 cursor.close()

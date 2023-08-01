@@ -54,10 +54,10 @@ def shablonExcel_SPS_CD(row, dataframes: list, dct: dict, organise_dct: dict, va
     else:
         prot_name = LAB_NO + '.xlsx'
     try:
-        shutil.copy('.\\srcs\\shablons\\SPS_CD.xlsx'
+        shutil.copy('..\\srcs\\shablons\\SPS_CD.xlsx'
                     ,f'{pathSave}\\{prot_name}')
         os.rename(
-            f'.\\prot\\SPS_CD.xlsx',
+            f'..\\prot\\SPS_CD.xlsx',
             f'{pathSave}\\{prot_name}')
     except:
         pass

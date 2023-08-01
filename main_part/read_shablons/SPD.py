@@ -55,7 +55,7 @@ def shablonExcel_SPD(row, dataframes: list, dct: dict, organise_dct: dict, value
     else:
         prot_name = LAB_NO + '.xlsx'
 
-    shutil.copy('.\\srcs\\shablons\\SPD.xlsx'
+    shutil.copy('..\\srcs\\shablons\\SPD.xlsx'
                     ,f'{pathSave}\\{prot_name}')
 
     """os.rename(

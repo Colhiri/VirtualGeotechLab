@@ -1,10 +1,13 @@
+import random
+import sys
+
+import numpy as np
+from scipy import interpolate
+
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
-from bokeh.models import (CustomJS, IntEditor, TextInput, Button, ColumnDataSource, PointDrawTool, Select, TableColumn, DataTable, NumberFormatter)
+from bokeh.models import (CheckboxButtonGroup, CustomJS, IntEditor, TextInput, Button, ColumnDataSource, PointDrawTool, Select, TableColumn, DataTable, NumberFormatter)
 from bokeh.plotting import figure
-from scipy import interpolate
-import numpy as np
-import sys
 
 from DataDistributor_DB import DataDitributor as DD
 
@@ -25,11 +28,16 @@ class Graph_traxial:
         self.list_X_max = dct.get('traxial').get(self.schema).get("list_X_max")
         self.list_Y_min = dct.get('traxial').get(self.schema).get("list_Y_min")
         self.list_Y_max = dct.get('traxial').get(self.schema).get("list_Y_max")
+        ### Проценты с APP
+        self.count_points_min = str(dct.get('traxial').get(self.schema).get("count_points_min"))
+        self.count_points_max = str(dct.get('traxial').get(self.schema).get("count_points_max"))
+        self.random_percent_min = str(dct.get('traxial').get(self.schema).get("random_percent_min"))
+        self.random_percent_max = str(dct.get('traxial').get(self.schema).get("random_percent_max"))
+
         ### Инициализация графика и графических утилит
         self.plot = figure(width=800, height=800, y_range=(self.limit_axe_Y, 0))
         self.plot.y_range.start = 20
         self.plot.y_range.end = 0
-
         ### Создание значений для линий
         # Основная линия
         self.mid_line_values = ColumnDataSource(data=dict(x=self.point_values_X, y=self.point_values_Y),)
@@ -99,15 +107,31 @@ class Graph_traxial:
         self.plot.legend.orientation = "vertical"
         self.plot.legend.location = "top_right"
 
+        # Текстовое поле для того, чтобы написать количество точек и рандом
+        self.count_points_min_text = TextInput(title="Set count point min", value=self.count_points_min)
+        self.count_points_max_text = TextInput(title="Set count point min", value=self.count_points_max)
+        self.random_percent_min_text = TextInput(title="Set random min", value=self.random_percent_min)
+        self.random_percent_max_text = TextInput(title="Set random max", value=self.random_percent_max)
+
+        # Кнопка для применения параметров количества точек и рандома
+        self.button_update_point_random = Button(label="Update", button_type='success', height=40)
+        self.button_update_point_random.on_click(self.update_percents)
+
+
+        self.random_activate = CheckboxButtonGroup(labels=['Random ON/OFF'], active=[0, 1], button_type='warning')
+        self.random_activate.js_on_event("button_click", CustomJS(args=dict(btn=self.random_activate), code="""
+            console.log('checkbox_button_group: active=' + btn.active, this.toString())
+        """))
+
         # Текстовое поле для того, чтобы написать имя новой схемы
         self.name_new_shema = TextInput(title="Name new schema", value="")
 
         # Кнопка для добавления схемы
-        self.button_add_schema = Button(label="Add schema", button_type='success')
+        self.button_add_schema = Button(label="Add schema", button_type='success', height=40)
         self.button_add_schema.on_click(self.add_new_schema)
 
         # Кнопка для удаления схемы
-        self.button_delete_schema = Button(label="Delete schema", button_type='success')
+        self.button_delete_schema = Button(label="Delete schema", button_type='success', height=40)
         self.button_delete_schema.on_click(self.delete_schema)
 
         # Кнопка для сохранения схемы
@@ -134,6 +158,46 @@ class Graph_traxial:
                                     value=distribut.data.get("traxial_scheme_now"),
                                     options=self.schemas)
 
+    def update_percents(self):
+        """
+        Обновление значений исходя из значений в текстовых полях
+        :return:
+        """
+        self.count_points_min = int(self.count_points_min_text.value),
+        self.count_points_max = int(self.count_points_max_text.value),
+        self.random_percent_min = float(self.random_percent_min_text.value),
+        self.random_percent_max = float(self.random_percent_max_text.value)
+
+        if isinstance(self.count_points_min, tuple):
+            self.count_points_min = self.count_points_min[0]
+        if isinstance(self.count_points_max, tuple):
+            self.count_points_max = self.count_points_max[0]
+        if isinstance(self.random_percent_min, tuple):
+            self.random_percent_min = self.random_percent_min[0]
+        if isinstance(self.random_percent_max, tuple):
+            self.random_percent_max = self.random_percent_max[0]
+
+    def random_percent(self):
+        """
+        Функция рандомного процента
+        :return:
+        """
+        perc_min = int((100 - float(self.random_percent_min)) * 100)
+        perc_max = int((100 + float(self.random_percent_max)) * 100)
+        return random.randint(perc_min, perc_max) / 10000
+
+    def update_random_and_count_point(self, value):
+        """
+        Функция обновления определенной линии графика
+        :param value:
+        :return:
+        """
+        points_x, points_y = value['x'], value['y']
+        if self.random_activate.active == [1]:
+            points_x = [self.random_percent() * x_value for x_value in points_x]
+            return {'x': points_x, 'y': points_y}
+        return {'x': points_x, 'y': points_y}
+
     def reset_schema(self):
         """
         Сбрасывает схему до последнего сохраненного чекпоинта на локалке в json
@@ -146,7 +210,6 @@ class Graph_traxial:
         Пересчитывает границы полилинии в процентах отхождения по оси Y
         :return: Значения для всех точек графика по двум точкам
         """
-
         segs_x = []
         segs_y = []
         for index in range(len(self.mid_line_values.data['y'])):
@@ -179,7 +242,8 @@ class Graph_traxial:
                                       schem not in ["traxial_scheme_now"]]
         self.schema = self.schema_select.options[0]
         self.schema_select.value = self.schema_select.options[0]
-        distribut.data['scheme_now'] = self.schema
+        distribut.data.get('traxial')['traxial_scheme_now'] = self.schema
+        distribut.data.get('volume_traxial')['volume_traxial_scheme_now'] = self.schema
         self.schema_select_handler(True, True, self.schema_select.options[0])
 
     def save_schema(self):
@@ -196,7 +260,11 @@ class Graph_traxial:
                                   "list_X_max": self.list_X_max,
                                   "list_Y_min": self.list_Y_min,
                                   "list_Y_max": self.list_Y_max,
-                              }
+                                  "count_points_min": int(self.count_points_min_text.value),
+                                  "count_points_max": int(self.count_points_max_text.value),
+                                  "random_percent_min": float(self.random_percent_min_text.value),
+                                  "random_percent_max": float(self.random_percent_max_text.value),
+                                                    }
         distribut.write_data_in_database()
 
     # Обработчик события нажатия кнопки добавления точки
@@ -224,7 +292,6 @@ class Graph_traxial:
             return
         # Получаем координаты удаленной точки
         for x_new, x_old in zip(self.mid_line_values.data['x'], self.point_values_X):
-            print(f" x_new {x_new} x_old {x_old}")
             if x_new != x_old:
                 _index = self.mid_line_values.data['x'].index(x_new) + 1
 
@@ -310,6 +377,11 @@ class Graph_traxial:
         self.list_X_max = dct.get('traxial').get(self.schema).get("list_X_max")
         self.list_Y_min = dct.get('traxial').get(self.schema).get("list_Y_min")
         self.list_Y_max = dct.get('traxial').get(self.schema).get("list_Y_max")
+        ### Проценты с APP
+        self.count_points_min = str(dct.get('traxial').get(self.schema).get("count_points_min"))
+        self.count_points_max = str(dct.get('traxial').get(self.schema).get("count_points_max"))
+        self.random_percent_min = str(dct.get('traxial').get(self.schema).get("random_percent_min"))
+        self.random_percent_max = str(dct.get('traxial').get(self.schema).get("random_percent_max"))
 
         self.mid_line_values.data = dict(x=self.point_values_X, y=self.point_values_Y)
 
@@ -358,8 +430,9 @@ class Graph_traxial:
 
         self.delete_handler()
 
-        self.mid_line_interpolate_values.data = self.interpolation_line(self.mid_line_values.data['x'],
-                                                                        self.mid_line_values.data['y'])
+
+        self.mid_line_interpolate_values.data = self.update_random_and_count_point(self.interpolation_line(self.mid_line_values.data['x'],
+                                                                        self.mid_line_values.data['y']))
 
         self.table_values.data['x'] = self.mid_line_values.data['x']
         self.table_values.data['y'] = self.mid_line_values.data['y']
@@ -451,6 +524,7 @@ class Graph_traxial:
         except ValueError:
             print("Невозможно интерполировать значения")
             return
+
         xnew = pchip(yfit)
 
         return {'x': xnew, 'y': yfit}
@@ -467,7 +541,17 @@ class Graph_traxial:
 
         # Подключение обработчиков событий
         curdoc().add_root(row(self.plot, column(self.name_new_shema, self.button_add_schema, self.button_delete_schema)))
-        curdoc().add_root(row(self.interpolation_select, self.schema_select, self.button_save_schema, self.button_reset_schema))
+        curdoc().add_root(row(self.interpolation_select,
+                              self.schema_select,
+                              self.button_save_schema,
+                              self.button_reset_schema,
+                              self.count_points_min_text,
+                              self.count_points_max_text,
+                              self.random_percent_min_text,
+                              self.random_percent_max_text,
+                              self.button_update_point_random,
+                              self.random_activate,
+                              ))
 
         curdoc().add_root(column(row(self.data_table, self.data_table_perc)))
         curdoc().add_periodic_callback(self.update_plot, 100)  # Обновление графика каждые 100 мс
@@ -475,7 +559,7 @@ class Graph_traxial:
         self.plot.on_event('tap', self.add_point_handler)  # Обработчик нажатия на график
         self.plot.on_event('pan', self.move_point_handler)  # Обработчик перемещения точки
 
-distribut = DD(id_people=sys.argv[1])
+distribut = DD(id_people=sys.argv[1]) # sys.argv[1])'356379915'
 distribut.check_schemas_people()
 distribut.write_data_in_database()
 graphs = Graph_traxial(distribut.data)

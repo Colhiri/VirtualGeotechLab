@@ -97,7 +97,6 @@ class FastReplace(ExcelModules):
     def __init__(self, worksheet):
         self.worksheet = worksheet
 
-
 class ExcelModuleWithoutPD:
     def __init__(self, pathMain, sheetName):
         self.pathMain = pathMain
@@ -120,7 +119,6 @@ class ExcelModuleWithoutPD:
             app = xw.App(visible=False)
             wb = app.books.open(self.pathMain + path)
 
-            # book = xw.App(visible=False).books.open(self.pathMain + path, read_only=True)
             data_excel = xw.sheets[self.sheetName]
 
             returnValues = {}
@@ -128,11 +126,6 @@ class ExcelModuleWithoutPD:
                 returnValues.setdefault(value, data_excel.range(name).value)
 
             wb.close()
-            # wb.quit()
-
-            # writer = pd.ExcelWriter(self.pathMain + path, mode='a', engine="openpyxl",
-            #                         if_sheet_exists='overlay')
-            # writer.close()
 
             self.saveValues.setdefault(self.indexSave, returnValues)
             self.indexSave += 1

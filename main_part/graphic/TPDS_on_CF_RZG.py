@@ -63,58 +63,37 @@ def splain(x, y, count_point, methodINTERPOLATION):
 
     return xnew, yfit
 
-def combination(differencePress, dct_Combination: dict):
-
-    # можно передавать конечные значения, котоые не включают в себя значения с других графиков
-    y_press16 = dct_Combination.get("y_press16")
-    y_pressE50 = dct_Combination.get("y_pressE50")
-    endE1 = dct_Combination.get("endE1")
-
-    pressStart1 = dct_Combination.get("pressStart1")
-    press16 = dct_Combination.get("press16")
-    pressE50 = dct_Combination.get("pressE50")
-    pressEnd1 = dct_Combination.get("pressEnd1")
-
-    press_rzg_END = dct_Combination.get("press_rzg_END")
-    y_pressR_RZG = dct_Combination.get("y_pressR_RZG")
-
-    analyze = AnalyzeGraph("test_1")
-    analyze.get_first_data()
-    analyze.calculate_perc('rzg')
-
-    return analyze.points_reload([pressStart1, press16, pressE50, press_rzg_END, pressEnd1], [0, y_press16, y_pressE50, y_pressR_RZG], 'rzg')
-
-def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
+def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
     # Выбор давлений
-    pressStart1 = dct.get("pressStart")
+    pressStart1 = data_mech.get("pressStart")
     otn_pStart = 0
 
     # Выбор значений механики
-    E_0 = dct.get("E_0")
-    E_50 = dct.get("E_50")
-    F = dct.get("F")
-    C = dct.get("C")
-    countPoint = dct.get("countPoint")
-    endE1 = dct.get("endE1")
+    E_0 = data_mech.get("E_0")
+    E_50 = data_mech.get("E_50")
+    F = data_mech.get("F")
+    C = data_mech.get("C")
+    countPoint = data_mech.get("countPoint")
+    endE1 = data_mech.get("endE1")
     stepE1 = endE1 / countPoint
-    pressEnd1 = dct.get("pressEnd")
+    pressEnd1 = data_mech.get("pressEnd")
 
 
-    name = dct.get('name')
+    name = data_mech.get('name')
     if name == 'graph1' or name == 'graph0':
-        E_0 = dct.get("E_0")
-        E_50 = dct.get("E_50")
+        E_0 = data_mech.get("E_0")
+        E_50 = data_mech.get("E_50")
 
     if name == 'graph2':
-        random_press = (dct.get("pressStart") / dct.get("pressStart1")) * random.randint(90, 110) / 100
-        E_0 = dct.get("E_0") * random_press
-        E_50 = dct.get("E_50") * random_press
+        random_press = (data_mech.get("pressStart") / data_mech.get("pressStart1")) * random.randint(90, 110) / 100
+        E_0 = data_mech.get("E_0") * random_press
+        E_50 = data_mech.get("E_50") * random_press
 
     if name == 'graph3':
-        random_press = (dct.get("pressStart") / dct.get("pressStart1")) * random.randint(90, 110) / 100
+        random_press = (data_mech.get("pressStart") / data_mech.get("pressStart1")) * random.randint(90, 110) / 100
 
-        E_0 = dct.get("E_0") * random_press
-        E_50 = dct.get("E_50") * random_press
+        E_0 = data_mech.get("E_0") * random_press
+        E_50 = data_mech.get("E_50") * random_press
 
     # Расчет E1 и относительных вертикальных деформаций
     press16 = pressStart1 * 1.6
@@ -124,11 +103,9 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
     ### Разница для расчёта коэффициента отклонения давления в функции комбинации
     differencePress = (press16 - pressStart1) / 5
 
-
     pressE50 = (pressEnd1 - pressStart1) / 2 + pressStart1
     otn_E50 = (pressE50 - pressStart1 + E_50 * otn_pStart) / E_50  # otn_p16 * 3
     y_pressE50 = 76 * otn_E50 - otn_E50 * stepE1
-
 
     ### Расчет правильных модулей
     ### Расчет правильных модулей
@@ -229,10 +206,8 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     foufth_x, foufth_y = splain(x=foufth_x, y=foufth_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
 
-    typeGrunt = "sand"
-
     # Словарь для передачи в функцию комбинации
-    dct_Combination = {
+    control_point = {
         "y_press16": y_press16,
         "y_pressE50": y_pressE50,
         "endE1": endE1,
@@ -246,52 +221,39 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
         "y_pressR_RZG": y_pressR_RZG,
     }
 
-    # Списки контрольных точек
-    if typeGrunt == "gravel":
-        y = np.array([0.0, y_press16, y_pressE50, 3.6, 5.7, endE1])
-        x = np.array([pressStart1, press16, pressE50, pressEnd1, pressEnd1 - 0.01, pressEnd1])
+    analyze = AnalyzeGraph(organise_values=organise_dct,
+                           control_points=control_point,
+                           data=dct_combination,
+                           type_grunt_dct=type_grunt_schemas)
+    analyze.calculate_perc()
+    x_end, y_end = analyze.points_reload()
 
+    try:
+        x_end = x_end.tolist()
+    except AttributeError:
+        pass
+    try:
+        y_end = y_end.tolist()
+    except AttributeError:
+        pass
 
-    if typeGrunt == "sand":
+    bad_indexes = [3, 2, 1, 0]
+    for ind in bad_indexes:
+        x_end.pop(ind)
+        y_end.pop(ind)
 
+    x_end.insert(0, press_rzg_END)
+    y_end.insert(0, y_pressR_RZG)
 
-        y = np.array(
-            [0.0, y_press16, y_pressE50, y_pressR_RZG])
-        x = np.array(
-            [pressStart1, press16, pressE50, press_rzg])
+    fifth_x, fifth_y = splain(x=x_end, y=y_end, count_point=100, methodINTERPOLATION="PchipInterpolator")
 
-        x_end, y_end = combination(differencePress, dct_Combination)
-
-        try:
-            x_end = x_end.tolist()
-        except AttributeError:
-            pass
-        try:
-            y_end = y_end.tolist()
-        except AttributeError:
-            pass
-
-        bad_indexes = [3, 2, 1, 0]
-        for ind in bad_indexes:
-            x_end.pop(ind)
-            y_end.pop(ind)
-
-        x_end.insert(0, press_rzg_END)
-        y_end.insert(0, y_pressR_RZG)
-
-        fifth_x, fifth_y = splain(x=x_end, y=y_end, count_point=100, methodINTERPOLATION="PchipInterpolator")
-
-    if typeGrunt == "sandy_loam":
-        x_end, y_end = combination(differencePress, dct_Combination)
-
-    if typeGrunt == "loam":
-        x, y = combination(differencePress, dct_Combination)
-
-    if typeGrunt == "clay":
-        x, y = combination(differencePress, dct_Combination)
-
-
+    y = np.array(
+        [0.0, y_press16, y_pressE50, y_pressR_RZG])
+    x = np.array(
+        [pressStart1, press16, pressE50, press_rzg])
     xnew, yfit = splain(x, y, 100, 'PchipInterpolator')
+
+
 
     # Вставка значений по найденному индексу приближенного значения для нахождения модулей для E0, E50, pressMax
     index_x_E_0 = xnew.index(nearest(xnew, press16))
@@ -330,14 +292,6 @@ def start_TPDS_RZG(dct: dict, name: str, methodINTERPOLATION):
 
     NewDF = pd.DataFrame(curve1)
     NewDF.reset_index(drop=True, inplace=True)
-
-    # xnew_gr = np.concatenate((xnew, first_x, second_x, third_x, foufth_x, fifth_x))
-    # yfit_gr = np.concatenate((yfit, first_y, second_y, third_y, foufth_y, fifth_y))
-    # # Построение графика
-    # plt.plot(x, y, '.')
-    # plt.plot(xnew_gr, yfit_gr)
-    # plt.grid()
-    # plt.show()
 
     values_for_Excel = {"epsE0": otnVertDef[index_y_E_0],
                         "epsE50": otnVertDef[index_y_E_50],
