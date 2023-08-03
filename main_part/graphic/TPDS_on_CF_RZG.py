@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 from scipy.stats import stats
+from scipy.special import comb
 
 from GEOF.main_part.graphic.combination import AnalyzeGraph
 
@@ -16,6 +17,40 @@ def nearest(lst, target):
     except:
         pressMAX = lst.index(max(lst))
     return min(lst[:pressMAX], key=lambda x: abs(x - target))
+
+def bernstein_poly(i, n, t):
+    """
+     The Bernstein polynomial of n, i as a function of t
+    """
+
+    return comb(n, i) * ( t**(n-i) ) * (1 - t)**i
+
+def bezier_curve(points, nTimes=1000):
+    """
+       Given a set of control points, return the
+       bezier curve defined by the control points.
+
+       points should be a list of lists, or list of tuples
+       such as [ [1,1],
+                 [2,3],
+                 [4,5], ..[Xn, Yn] ]
+        nTimes is the number of time steps, defaults to 1000
+
+        See http://processingjs.nihongoresources.com/bezierinfo/
+    """
+
+    nPoints = len(points)
+    xPoints = np.array([p[0] for p in points])
+    yPoints = np.array([p[1] for p in points])
+
+    t = np.linspace(0.0, 1.0, nTimes)
+
+    polynomial_array = np.array([ bernstein_poly(i, nPoints-1, t) for i in range(0, nPoints)   ])
+
+    xvals = np.dot(xPoints, polynomial_array)
+    yvals = np.dot(yPoints, polynomial_array)
+
+    return xvals, yvals
 
 def splain(x, y, count_point, methodINTERPOLATION):
 
@@ -144,7 +179,7 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
     E_rzg = E_0 * random.randint(45,60) / 10
     press_rzg = (pressE50 - pressStart1) / 2 + pressE50
 
-    press_rzg_END = press_rzg - random.randint(1, 2) / 1000
+    press_rzg_END = press_rzg - 0.0005
 
     otn_E_RZG = otn_E50 + random.randint(4, 5) / 100
     y_pressR_RZG = 76 * otn_E_RZG - otn_E_RZG * stepE1
@@ -162,49 +197,22 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
     # Середины петель
     pressRZG_up = (press_rzg - press_repeat_RZG) / 2 + press_repeat_RZG + 0.004
     pressRZG_down = (press_rzg - press_repeat_RZG) / 2 + press_repeat_RZG - 0.004
-    y_RZG_up = y_repeat_RZG - 0.001
-    y_RZG_down = y_pressR_RZG - 0.001
+    y_RZG_up = y_repeat_RZG + 0.2
+    y_RZG_down = y_pressR_RZG - 0.2
 
-    # первый участок петли (нижняя - первая)
-    y_middle_point_first = ((y_pressR_RZG - y_RZG_down) / 2 + y_RZG_down)
-    x_middle_point_first = ((press_rzg - pressRZG_down) / 2 + pressRZG_down) * 0.95
+    # Кривая Безье
+    # Кривая Безье
+    # Кривая Безье
+    xpoints = np.array([press_repeat_RZG, pressRZG_up, press_rzg_END])
+    ypoints = np.array([y_repeat_RZG, y_RZG_up, y_pressR_RZG])
+    points = np.array([(x, y) for x, y in zip(xpoints, ypoints)])
+    low_curve_x, low_curve_y = bezier_curve(points, nTimes=100)
 
-    first_y = [y_RZG_down, y_middle_point_first, y_pressR_RZG] # от середины разгрузки первой петли до начала
-    first_x = [pressRZG_down, x_middle_point_first, press_rzg] # от середины разгрузки первой петли до начала
+    xpoints = np.array([press_rzg, pressRZG_down, press_repeat_RZG])
+    ypoints = np.array([y_pressR_RZG, y_RZG_down, y_repeat_RZG])
 
-    first_x, first_y = splain(x=first_x, y=first_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
-    first_y.reverse()
-    first_x.reverse()
-
-    # второй участок петли (нижняя - первая)
-    y_middle_point_second = ((y_RZG_down - y_repeat_RZG) / 2 + y_repeat_RZG)
-    x_middle_point_second = ((pressRZG_down - press_repeat_RZG) / 2 + press_repeat_RZG) * 0.95
-
-    second_y = [y_repeat_RZG, y_middle_point_second, y_RZG_down]  # от конца первой ветви до середины первлй пелтли
-    second_x = [press_repeat_RZG, x_middle_point_second, pressRZG_down]  # от конца первой ветви до середины первлй пелтли
-
-    second_x, second_y = splain(x=second_x, y=second_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
-    second_y.reverse()
-    second_x.reverse()
-
-    # третий участок петли (верхняя - вторая)
-    y_middle_point_third = ((y_RZG_up - y_repeat_RZG) / 2 + y_repeat_RZG)
-    x_middle_point_third = ((pressRZG_up - press_repeat_RZG) / 2 + press_repeat_RZG) * 1.02
-
-    third_y = [y_repeat_RZG, y_middle_point_third, y_RZG_up]  # от конца первой ветви до середины второй петли
-    third_x = [press_repeat_RZG, x_middle_point_third, pressRZG_up]  # от конца первой ветви до середины второй петли
-    third_y.reverse()
-
-    third_x, third_y = splain(x=third_x, y=third_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
-
-    # четвертый участок петли (верхняя - вторая)
-    y_middle_point_foufth = ((y_pressR_RZG - y_RZG_up) / 2 + y_RZG_up)
-    x_middle_point_foufth = ((press_rzg_END - pressRZG_up) / 2 + pressRZG_up) * 1.02
-
-    foufth_y = [y_RZG_up, y_middle_point_foufth, y_pressR_RZG]  # от середины второй петли до конца
-    foufth_x = [pressRZG_up, x_middle_point_foufth, press_rzg_END]  # от середины второй петли до конца
-
-    foufth_x, foufth_y = splain(x=foufth_x, y=foufth_y, count_point=50, methodINTERPOLATION="PchipInterpolator")
+    points = np.array([(x, y) for x, y in zip(xpoints, ypoints)])
+    high_curve_x, high_curve_y = bezier_curve(points, nTimes=100)
 
     # Словарь для передачи в функцию комбинации
     control_point = {
@@ -254,7 +262,6 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
     xnew, yfit = splain(x, y, 100, 'PchipInterpolator')
 
 
-
     # Вставка значений по найденному индексу приближенного значения для нахождения модулей для E0, E50, pressMax
     index_x_E_0 = xnew.index(nearest(xnew, press16))
     index_x_E_50 = xnew.index(nearest(xnew, pressE50))
@@ -281,8 +288,9 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
     #         continue
     #     xnew[count] = xnew[count] - valueRandom
 
-    x = np.concatenate((xnew, first_x, second_x, third_x, foufth_x, fifth_x))
-    y = np.concatenate((yfit, first_y, second_y, third_y, foufth_y, fifth_y))
+
+    x = np.concatenate((xnew, low_curve_x, high_curve_x, fifth_x))
+    y = np.concatenate((yfit, low_curve_y, high_curve_y, fifth_y))
 
     # Кривая для датафрейма и дапма файла (Девиаторное нагружение - Относительная вертикальная деформация)
     otnVertDef = y / 76
