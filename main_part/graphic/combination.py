@@ -178,7 +178,7 @@ class AnalyzeGraph:
         Применяет метод интерполяции к выбранным точкам
         :return:
         """
-        yfit = np.linspace(min(self.new_point_y), max(self.new_point_y), num=200)
+        yfit = np.linspace(min(self.new_point_y), max(self.new_point_y), num=random.randint(int(self.count_points_min), int(self.count_points_max)))
 
         if self.method_interpolate == "interp1d":
             pchip = interpolate.interp1d(self.new_point_y, self.new_point_x, kind='linear')
@@ -221,7 +221,5 @@ class AnalyzeGraph:
             pass
 
         xnew = [self.random_percent() * x_value for x_value in xnew]
-
-
 
         return xnew, yfit

@@ -21,8 +21,12 @@ class DataDitributor:
 
         self.id_people = id_people
 
-        self.cursor.execute('SELECT name_company FROM peoples WHERE id = ?', (self.id_people,))
-        self.name_company = self.cursor.fetchone()[0]
+        try:
+            self.cursor.execute('SELECT name_company FROM peoples WHERE id = ?', (self.id_people,))
+            self.name_company = self.cursor.fetchone()[0]
+        except TypeError:
+            self.name_company = None
+
 
         self.cursor.execute('SELECT id_company FROM peoples WHERE id = ?', (self.id_people,))
         self.id_org = self.cursor.fetchone()[0]
@@ -41,6 +45,7 @@ class DataDitributor:
                 "traxial_scheme_now": 'test',
                 "volume_traxial_scheme_now": 'test',
                 "unaxial_scheme_now": 'test',
+                "consolidation_scheme_now": 'test',
                 "traxial":
                     {
                         "test":
@@ -104,6 +109,28 @@ class DataDitributor:
                                 "random_percent_max": 1,
                             },
                     },
+
+                "consolidation":
+                    {
+                        "test":
+                            {
+                                "point_values_X": [0, 0.01, 0.02, 0.04, 0.05],
+                                "point_values_Y": [-0.4, -0.3, -0.2, -0.1, 0],
+                                "method_interpolate": "PchipInterpolator",
+                                # Лимиты п осям
+                                "limit_axe_X": None,
+                                "limit_axe_Y": 2,
+                                # App
+                                "list_X_min": [0 for x in range(5)],
+                                "list_X_max": [0 for x in range(5)],
+                                "list_Y_min": [0 for x in range(5)],
+                                "list_Y_max": [0 for x in range(5)],
+                                "count_points_min": 200,
+                                "count_points_max": 200,
+                                "random_percent_min": 0,
+                                "random_percent_max": 0.5,
+                            },
+                    },
             }
 
         else:
@@ -138,9 +165,11 @@ class DataDitributor:
             "traxial_scheme_now": self.cursor.execute('SELECT traxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
             "volume_traxial_scheme_now": self.cursor.execute('SELECT volume_traxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
             "unaxial_scheme_now": self.cursor.execute('SELECT unaxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
+            "consolidation_scheme_now": self.cursor.execute('SELECT unaxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
             "traxial": {},
             "volume_traxial": {},
             "unaxial": {},
+            "consolidation": {},
                     }
 
         for id, name, type, interp, lim_X, lim_Y in zip(IDs_schemas, names_schemas, types_schemas, methods_interpolation, limits_axe_X, limits_axe_Y):
@@ -163,19 +192,21 @@ class DataDitributor:
                     }
             self.data.get(type).update({name: new_data_type})
 
-    def write_use_schemas_people(self, name_traxial, name_volume_traxial, name_unaxial):
+    def write_use_schemas_people(self, name_traxial, name_volume_traxial, name_unaxial, name_consolidation):
         if isinstance(name_traxial, tuple):
             name_traxial = name_traxial[0]
         if isinstance(name_traxial, tuple):
             name_volume_traxial = name_volume_traxial[0]
         if isinstance(name_traxial, tuple):
             name_unaxial = name_unaxial[0]
-        self.cursor.execute(f'UPDATE peoples SET traxial = ?, volume_traxial = ?, unaxial = ? WHERE id = ?',
-                            (name_traxial, name_volume_traxial, name_unaxial, self.id_people, ))
+        if isinstance(name_consolidation, tuple):
+            name_consolidation = name_consolidation[0]
+        self.cursor.execute(f'UPDATE peoples SET traxial = ?, volume_traxial = ?, unaxial = ?, consolidation = ? WHERE id = ?',
+                            (name_traxial, name_volume_traxial, name_unaxial, name_consolidation, self.id_people, ))
         self.conn.commit()
 
     def write_data_in_database(self):
-        for type_schema in ('traxial', 'volume_traxial', 'unaxial'):
+        for type_schema in ('traxial', 'volume_traxial', 'unaxial', 'consolidation'):
             """Пройтись по схемам в словаре"""
             name_schemas = list(self.data.get(type_schema).keys())
             try:
@@ -211,7 +242,8 @@ class DataDitributor:
         # Обновить текущие схемы в базе из временного словаря
         self.write_use_schemas_people(self.data.get('traxial_scheme_now'),
                                       self.data.get('volume_traxial_scheme_now'),
-                                      self.data.get('unaxial_scheme_now'))
+                                      self.data.get('unaxial_scheme_now'),
+                                      self.data.get('consolidation_scheme_now'))
 
         print('Данные сохранены')
 
@@ -233,7 +265,7 @@ class DataDitributor:
         """
         check = self.cursor.execute('SELECT id FROM schemas WHERE id_people = ? AND type = ? AND name_schema = ?',
                                     (self.id_people, type_schema, name_schema, )).fetchone()
-        # Проверка на наличие id точек, если оно есть, то возвращается именно id, а не turple
+        # Проверка на наличие id точек, если оно есть, то возвращается именно id, а не tuple
         if check:
             check = check[0]
 
@@ -376,6 +408,26 @@ class DataDitributor:
                     "random_percent_min": 1,
                     "random_percent_max": 1,
                 })
+        if type_schema in ['consolidation']:
+            self.data.get('consolidation').setdefault(
+                name,
+                {
+                    "point_values_X": [0, 0.01, 0.02, 0.04, 0.05],
+                    "point_values_Y": [-0.4, -0.3, -0.2, -0.1, 0],
+                    "method_interpolate": "PchipInterpolator",
+                    # Лимиты п осям
+                    "limit_axe_X": None,
+                    "limit_axe_Y": 2,
+                    # App
+                    "list_X_min": [0 for x in range(5)],
+                    "list_X_max": [0 for x in range(5)],
+                    "list_Y_min": [0 for x in range(5)],
+                    "list_Y_max": [0 for x in range(5)],
+                    "count_points_min": 200,
+                    "count_points_max": 200,
+                    "random_percent_min": 0,
+                    "random_percent_max": 0.5,
+                })
 
         self.write_data_in_database()
         print('Схема добавлена в базу данных')
@@ -387,9 +439,9 @@ class DataDitributor:
             self.data.get('volume_traxial').pop(name_schema)
             self.delete_schema_in_database(name_schema, 'traxial')
             self.delete_schema_in_database(name_schema, 'volume_traxial')
-        if type_schema in ['unaxial']:
-            self.data.get('unaxial').pop(name_schema)
-            self.delete_schema_in_database(name_schema, 'unaxial')
+        if type_schema in ['unaxial', 'consolidation']:
+            self.data.get(type_schema).pop(name_schema)
+            self.delete_schema_in_database(name_schema, type_schema)
 
         # Удалить из базы данных
         print('Схема удалена')

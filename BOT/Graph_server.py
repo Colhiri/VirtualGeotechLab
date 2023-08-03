@@ -13,29 +13,31 @@ from DataDistributor_DB import DataDitributor as DD
 
 class Graph_traxial:
     def __init__(self, dct: dict):
+        self.global_schema = 'traxial'
+
         ### Распаковка элементов
-        self.schema = dct.get("traxial_scheme_now")
+        self.schema = dct.get(f"{self.global_schema}_scheme_now")
         ### Точки для основной кривой
-        self.point_values_X = dct.get('traxial').get(self.schema).get("point_values_X")
-        self.point_values_Y = dct.get('traxial').get(self.schema).get("point_values_Y")
+        self.point_values_X = dct.get(self.global_schema).get(self.schema).get("point_values_X")
+        self.point_values_Y = dct.get(self.global_schema).get(self.schema).get("point_values_Y")
         ### Лимиты
         self.limit_axe_X = max(self.point_values_X) + 0.05
-        self.limit_axe_Y = dct.get('traxial').get(self.schema).get("limit_axe_Y")
+        self.limit_axe_Y = dct.get(self.global_schema).get(self.schema).get("limit_axe_Y")
         ### Интерполяция
-        self.method_interpolate = dct.get('traxial').get(self.schema).get("method_interpolate")
+        self.method_interpolate = dct.get(self.global_schema).get(self.schema).get("method_interpolate")
         ### Проценты с APP
-        self.list_X_min = dct.get('traxial').get(self.schema).get("list_X_min")
-        self.list_X_max = dct.get('traxial').get(self.schema).get("list_X_max")
-        self.list_Y_min = dct.get('traxial').get(self.schema).get("list_Y_min")
-        self.list_Y_max = dct.get('traxial').get(self.schema).get("list_Y_max")
+        self.list_X_min = dct.get(self.global_schema).get(self.schema).get("list_X_min")
+        self.list_X_max = dct.get(self.global_schema).get(self.schema).get("list_X_max")
+        self.list_Y_min = dct.get(self.global_schema).get(self.schema).get("list_Y_min")
+        self.list_Y_max = dct.get(self.global_schema).get(self.schema).get("list_Y_max")
         ### Проценты с APP
-        self.count_points_min = str(dct.get('traxial').get(self.schema).get("count_points_min"))
-        self.count_points_max = str(dct.get('traxial').get(self.schema).get("count_points_max"))
-        self.random_percent_min = str(dct.get('traxial').get(self.schema).get("random_percent_min"))
-        self.random_percent_max = str(dct.get('traxial').get(self.schema).get("random_percent_max"))
+        self.count_points_min = str(dct.get(self.global_schema).get(self.schema).get("count_points_min"))
+        self.count_points_max = str(dct.get(self.global_schema).get(self.schema).get("count_points_max"))
+        self.random_percent_min = str(dct.get(self.global_schema).get(self.schema).get("random_percent_min"))
+        self.random_percent_max = str(dct.get(self.global_schema).get(self.schema).get("random_percent_max"))
 
         ### Инициализация графика и графических утилит
-        self.plot = figure(width=800, height=800, y_range=(self.limit_axe_Y, 0))
+        self.plot = figure(width=1000, height=1000, y_range=(self.limit_axe_Y, 0))
         self.plot.y_range.start = 20
         self.plot.y_range.end = 0
         ### Создание значений для линий
@@ -147,15 +149,15 @@ class Graph_traxial:
                                       "BarycentricInterpolator", "KroghInterpolator", "make_interp_spline",
                                       "nearest", "quadratic", "cubic"]
         self.interpolation_select = Select(title='Interpolation Method',
-                                           value=distribut.data.get('traxial').get(self.schema).get("method_interpolate"),
+                                           value=distribut.data.get(self.global_schema).get(self.schema).get("method_interpolate"),
                                            options=self.interpolation_methods)
 
         # Список схем
-        self.schemas = [schem for schem in distribut.data.get('traxial').keys() if
-                        schem not in ["traxial_scheme_now"]]
+        self.schemas = [schem for schem in distribut.data.get(self.global_schema).keys() if
+                        schem not in [f"{self.global_schema}_scheme_now"]]
 
         self.schema_select = Select(title='Choice schema',
-                                    value=distribut.data.get("traxial_scheme_now"),
+                                    value=distribut.data.get(f"{self.global_schema}_scheme_now"),
                                     options=self.schemas)
 
     def update_percents(self):
@@ -176,6 +178,11 @@ class Graph_traxial:
             self.random_percent_min = self.random_percent_min[0]
         if isinstance(self.random_percent_max, tuple):
             self.random_percent_max = self.random_percent_max[0]
+
+        self.count_points_min_text.value = str(self.count_points_min)
+        self.count_points_max_text.value = str(self.count_points_max)
+        self.random_percent_min_text.value = str(self.random_percent_min)
+        self.random_percent_max_text.value = str(self.random_percent_max)
 
     def random_percent(self):
         """
@@ -228,29 +235,30 @@ class Graph_traxial:
         Добавляет новую схему
         :return:
         """
-        distribut.add_new_schema_in_dct(self.name_new_shema.value, 'traxial')
-        self.schema_select.options = [schem for schem in distribut.data.get('traxial').keys() if
-                                      schem not in ["traxial_scheme_now"]]
+        distribut.add_new_schema_in_dct(self.name_new_shema.value, self.global_schema)
+        self.schema_select.options = [schem for schem in distribut.data.get(self.global_schema).keys() if
+                                      schem not in [f"{self.global_schema}_scheme_now"]]
 
     def delete_schema(self):
         """
         Удаляет открытую в данный момент схему
         :return:
         """
-        distribut.delete_schema_in_dct(self.schema_select.value, 'traxial')
-        self.schema_select.options = [schem for schem in distribut.data.get('traxial').keys() if
-                                      schem not in ["traxial_scheme_now"]]
+        distribut.delete_schema_in_dct(self.schema_select.value, self.global_schema)
+        self.schema_select.options = [schem for schem in distribut.data.get(self.global_schema).keys() if
+                                      schem not in [f"{self.global_schema}_scheme_now"]]
         self.schema = self.schema_select.options[0]
         self.schema_select.value = self.schema_select.options[0]
-        distribut.data.get('traxial')['traxial_scheme_now'] = self.schema
+        distribut.data.get(self.global_schema)[f'{self.global_schema}_scheme_now'] = self.schema
         distribut.data.get('volume_traxial')['volume_traxial_scheme_now'] = self.schema
         self.schema_select_handler(True, True, self.schema_select.options[0])
 
     def save_schema(self):
         """
+        Переопределить для другого класса
         :return:
         """
-        distribut.data.get('traxial')[self.schema] = {
+        distribut.data.get(self.global_schema)[self.schema] = {
                                   "method_interpolate": self.method_interpolate,
                                   "limit_axe_X": self.limit_axe_X,
                                   "limit_axe_Y": max(self.point_values_Y),
@@ -265,6 +273,15 @@ class Graph_traxial:
                                   "random_percent_min": float(self.random_percent_min_text.value),
                                   "random_percent_max": float(self.random_percent_max_text.value),
                                                     }
+        if self.global_schema in ['traxial']:
+            distribut.data.get('volume_traxial').get(self.schema).update({
+                                      "count_points_min": int(self.count_points_min_text.value),
+                                      "count_points_max": int(self.count_points_max_text.value),
+                                      "random_percent_min": float(self.random_percent_min_text.value),
+                                      "random_percent_max": float(self.random_percent_max_text.value),
+                                      "limit_axe_X": self.limit_axe_X,
+                                      "limit_axe_Y": max(self.point_values_Y),
+                                                                          })
         distribut.write_data_in_database()
 
     # Обработчик события нажатия кнопки добавления точки
@@ -358,30 +375,36 @@ class Graph_traxial:
 
         self.schema = new
 
-        distribut.data.update({"traxial_scheme_now": self.schema})
-        distribut.data.update({"volume_traxial_scheme_now": self.schema})
+        distribut.data.update({f"{self.global_schema}_scheme_now": self.schema})
+        if self.global_schema in ['traxial']:
+            distribut.data.update({"volume_traxial_scheme_now": self.schema})
 
         dct = distribut.data_give()
 
         ### Распаковка элементов
         ### Точки для основной кривой
-        self.point_values_X = dct.get('traxial').get(self.schema).get("point_values_X")
-        self.point_values_Y = dct.get('traxial').get(self.schema).get("point_values_Y")
+        self.point_values_X = dct.get(self.global_schema).get(self.schema).get("point_values_X")
+        self.point_values_Y = dct.get(self.global_schema).get(self.schema).get("point_values_Y")
         ### Лимиты
         self.limit_axe_X = max(self.point_values_X) + 0.05
-        self.limit_axe_Y = dct.get('traxial').get(self.schema).get("limit_axe_Y")
-        ### Интерполяция distribut.data.get('traxial').get(self.schema).get("method_interpolate")
-        self.method_interpolate = dct.get('traxial').get(self.schema).get("method_interpolate")
+        self.limit_axe_Y = dct.get(self.global_schema).get(self.schema).get("limit_axe_Y")
+        ### Интерполяция
+        self.method_interpolate = dct.get(self.global_schema).get(self.schema).get("method_interpolate")
         ### Проценты с APP
-        self.list_X_min = dct.get('traxial').get(self.schema).get("list_X_min")
-        self.list_X_max = dct.get('traxial').get(self.schema).get("list_X_max")
-        self.list_Y_min = dct.get('traxial').get(self.schema).get("list_Y_min")
-        self.list_Y_max = dct.get('traxial').get(self.schema).get("list_Y_max")
+        self.list_X_min = dct.get(self.global_schema).get(self.schema).get("list_X_min")
+        self.list_X_max = dct.get(self.global_schema).get(self.schema).get("list_X_max")
+        self.list_Y_min = dct.get(self.global_schema).get(self.schema).get("list_Y_min")
+        self.list_Y_max = dct.get(self.global_schema).get(self.schema).get("list_Y_max")
         ### Проценты с APP
-        self.count_points_min = str(dct.get('traxial').get(self.schema).get("count_points_min"))
-        self.count_points_max = str(dct.get('traxial').get(self.schema).get("count_points_max"))
-        self.random_percent_min = str(dct.get('traxial').get(self.schema).get("random_percent_min"))
-        self.random_percent_max = str(dct.get('traxial').get(self.schema).get("random_percent_max"))
+        self.count_points_min = str(dct.get(self.global_schema).get(self.schema).get("count_points_min"))
+        self.count_points_max = str(dct.get(self.global_schema).get(self.schema).get("count_points_max"))
+        self.random_percent_min = str(dct.get(self.global_schema).get(self.schema).get("random_percent_min"))
+        self.random_percent_max = str(dct.get(self.global_schema).get(self.schema).get("random_percent_max"))
+
+        self.count_points_min_text.value = self.count_points_min
+        self.count_points_max_text.value = self.count_points_max
+        self.random_percent_min_text.value = self.random_percent_min
+        self.random_percent_max_text.value = self.random_percent_max
 
         self.mid_line_values.data = dict(x=self.point_values_X, y=self.point_values_Y)
 
@@ -427,9 +450,7 @@ class Graph_traxial:
         Обновляет все отображение каждый заданный фрейм и при вызове из функций
         :return:
         """
-
         self.delete_handler()
-
 
         self.mid_line_interpolate_values.data = self.update_random_and_count_point(self.interpolation_line(self.mid_line_values.data['x'],
                                                                         self.mid_line_values.data['y']))
@@ -559,8 +580,9 @@ class Graph_traxial:
         self.plot.on_event('tap', self.add_point_handler)  # Обработчик нажатия на график
         self.plot.on_event('pan', self.move_point_handler)  # Обработчик перемещения точки
 
-distribut = DD(id_people=sys.argv[1]) # sys.argv[1])'356379915'
+distribut = DD(id_people=sys.argv[1]) # sys.argv[1])
 distribut.check_schemas_people()
 distribut.write_data_in_database()
-graphs = Graph_traxial(distribut.data)
-graphs.run()
+if sys.argv[2] == 'traxial':
+    graphs = Graph_traxial(distribut.data)
+    graphs.run()

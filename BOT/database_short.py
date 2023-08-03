@@ -20,6 +20,7 @@ name_company TEXT,
 traxial TEXT,
 volume_traxial TEXT,
 unaxial TEXT,
+consolidation TEXT,
 connect_per_day INTEGER,
 FOREIGN KEY (id_company) REFERENCES company(id) ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED
 );

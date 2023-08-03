@@ -5,10 +5,20 @@ import shutil
 from time import strftime
 import time
 import datetime
+from functools import wraps
 
 import numpy as np
 import openpyxl
 import pandas as pd
+
+def _decorator(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        stop = time.time()
+        print(f'Время работы: {start - stop}')
+        return result
+    return wrapper
 
 def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel: dict, mode: int) -> None:
     # Организационные моменты

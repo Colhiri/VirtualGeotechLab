@@ -1,5 +1,7 @@
 import math
 import random
+import time
+from functools import wraps
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,8 +20,16 @@ def nearest(lst, target):
         pressMAX = lst.index(max(lst))
     return min(lst[:pressMAX], key=lambda x: abs(x - target))
 
-def start_TPDS_CF(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
+def _decorator(func):
+    def wrapper(*args):
+        start = time.time()
+        NewDF, values_for_Excel = func(*args)
+        stop = time.time()
+        print(f'Время работы: {start - stop}')
+        return NewDF, values_for_Excel
+    return wrapper
 
+def start_TPDS_CF(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
     # Выбор давлений
     pressStart1 = data_mech.get("pressStart")
     press16 = pressStart1 * 1.6
@@ -152,3 +162,4 @@ def start_TPDS_CF(name: str, data_mech: dict, organise_dct, dct_combination: dic
                         "devMAX": deviator[index_x_pressMax]}
 
     return NewDF, values_for_Excel
+

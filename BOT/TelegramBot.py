@@ -15,11 +15,11 @@ from DataDistributor_DB import DataDitributor as DD
 TOKEN = '5817177597:AAFldPHKS5vSco58icQU56ALbgiQAqyrxT4'
 bot = telebot.TeleBot(TOKEN)
 
-
 @bot.message_handler(commands=['help'])
 def commands_bot(message):
     bot.send_message(message.chat.id, "Список доступных команд:")
-    bot.send_message(message.chat.id, "Для настройки графиков: /run_program.")
+    bot.send_message(message.chat.id, "Для настройки трехосных графиков (вертикальные и объемные деформации): /run_traxial")
+    bot.send_message(message.chat.id, "Для настройки графиков консолидации: /run_consolidation")
     bot.send_message(message.chat.id, "Для инициализация пользователя в системе: /initialize")
     bot.send_message(message.chat.id, "Для отправки файла шаблона механики: /get_mech_shablon")
     bot.send_message(message.chat.id, "Для запуска записи по шаблону: /give_mech и после отправьте шаблон")
@@ -149,13 +149,8 @@ def get_mech_shablon(message):
 @bot.message_handler(commands=['start'])
 def start(message):
     initialize_user(message)
-    # Отправка приветственного сообщения и инструкций
-    bot.send_message(message.chat.id, "--Welcome--")
-    bot.send_message(message.chat.id, "Список доступных команд:")
-    bot.send_message(message.chat.id, "Для настройки графиков: /run_program.")
-    bot.send_message(message.chat.id, "Для инициализация пользователя в системе: /initialize")
-    bot.send_message(message.chat.id, "Для отправки файла шаблона механики: /get_mech_shablon")
-    bot.send_message(message.chat.id, "Для запуска записи по шаблону: /give_mech и после отправьте шаблон")
+
+    commands_bot(message)
 
     distribut = DD(id_people=us_id)
     distribut.write_temporary_user(user_id=us_id,
@@ -163,9 +158,10 @@ def start(message):
                                    user_surname=us_sname,
                                    username=username)
 
+
 # Обработчик команды /run_program
-@bot.message_handler(commands=['run_program'])
-def run_program(message):
+@bot.message_handler(commands=['run_traxial'])
+def run_traxial(message):
     initialize_user(message)
 
     distribut = DD(id_people=us_id)
@@ -173,18 +169,32 @@ def run_program(message):
     distribut.write_data_in_database()
 
     # Команда для запуска локального сервера Bokeh
-    BOKEH_SERVER_PORT = 5011
-    PROGRAM_PATH = [r'Graph_server.py', us_id]
-    args = [f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH}']
+    BOKEH_SERVER_PORT = 5012
+    PROGRAM_PATH = [r'Graph_server.py', us_id, 'traxial']
 
-    BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id}'
+    BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"traxial"}'
     subprocess.Popen(BOKEH_SERVER_COMMAND, shell=True)
 
-    bot.send_message(message.chat.id, "Программа для графиков запущена.")
+    # Отправка кликабельной ссылки на локальный сервер Bokeh
+    bot.send_message(message.chat.id, f"Ссылка на настройки трехосных графиков: http://localhost:{BOKEH_SERVER_PORT}/Graph_server")
+
+# Обработчик команды /run_program
+@bot.message_handler(commands=['run_consolidation'])
+def run_consolidation(message):
+    initialize_user(message)
+
+    distribut = DD(id_people=us_id)
+    distribut.check_schemas_people()
+    distribut.write_data_in_database()
+
+    # Команда для запуска локального сервера Bokeh
+    BOKEH_SERVER_PORT = 5013
+    PROGRAM_PATH = [r'Graph_consolidation.py', us_id, 'consolidation']
+
+    BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"consolidation"}'
+    subprocess.Popen(BOKEH_SERVER_COMMAND, shell=True)
 
     # Отправка кликабельной ссылки на локальный сервер Bokeh
-    bot.send_message(message.chat.id, f"Ссылка на локальный сервер Bokeh: http://localhost:{BOKEH_SERVER_PORT}/Graph_server")
-    """except Exception as e:
-        bot.send_message(message.chat.id, "Произошла ошибка при запуске программы для графиков.")"""
+    bot.send_message(message.chat.id, f"Ссылка на настройки графика консолидации: http://localhost:{BOKEH_SERVER_PORT}/Graph_consolidation")
 
 bot.polling()

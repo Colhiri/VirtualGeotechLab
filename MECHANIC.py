@@ -1,23 +1,19 @@
 import math
 import random
 import os
+import sys
+import time
 
 import GEOF.main_part.graphic.TPDS_on_CF as TPDSCF
 import GEOF.main_part.graphic.TPDS_on_E50 as TPDS50
-
 
 import GEOF.main_part.graphic.SPS as SPS
 import GEOF.main_part.graphic.SPD as SPD
 import GEOF.main_part.graphic.TPDS_on_CF_RZG as TPDSRZG
 import GEOF.main_part.graphic.TPDS_on_CF_RZG_50 as TPDSRZG50
 import GEOF.main_part.graphic.OCR as OCR_ISP
-
-
 import GEOF.main_part.main_tools as main_tools
-
 import GEOF.main_part.read_shablons as read_shablons
-
-import sys
 
 def start(worksheet_journal, id_user, dct_combination):
 
@@ -126,7 +122,7 @@ def start(worksheet_journal, id_user, dct_combination):
 
             # Расчет для графиков по трем значениям
             press16 = pressStart1 * 1.6
-            countPoint = 200
+            countPoint = 20000
             endE1 = 11.4
 
             N = 2 * math.tan(math.pi * F / 180) * (
@@ -192,6 +188,8 @@ def start(worksheet_journal, id_user, dct_combination):
                        }
 
                 if mode == 1:
+
+
                     DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(name=name,
                                                                     data_mech=dct_for_mech,
                                                                     organise_dct=organise_dct,
@@ -254,7 +252,10 @@ def start(worksheet_journal, id_user, dct_combination):
 
                 print(f"{row}--{LAB_NO}--{name}--------DONE")
 
+            start = time.time()
             read_shablons.shablonExcel_TPS_CD_4(row, save_DF, dct_for_mech, organise_dct, values_for_Excel_right, mode)
+            stop = time.time()
+            print(f'Время работы: {stop - start}')
 
         # Графики по срезам КД
         if str(worksheet_journal['fi'][row]) not in ["None", "nan"]:
