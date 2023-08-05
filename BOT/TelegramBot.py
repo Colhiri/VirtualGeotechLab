@@ -170,7 +170,7 @@ def run_traxial(message):
 
     # Команда для запуска локального сервера Bokeh
     BOKEH_SERVER_PORT = 5012
-    PROGRAM_PATH = [r'Graph_server.py', us_id, 'traxial']
+    PROGRAM_PATH = [r'Graph_server_volume.py', us_id, 'traxial']
 
     BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"traxial"}'
     subprocess.Popen(BOKEH_SERVER_COMMAND, shell=True)

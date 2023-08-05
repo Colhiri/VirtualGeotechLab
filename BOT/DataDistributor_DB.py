@@ -70,7 +70,7 @@ class DataDitributor:
                     {
                         "test":
                             {
-                                "point_values_X": [0.0, 0.1, 0.2, 0.3],
+                                "point_values_X": [0.0, 0.0, 0.0, 0.0],
                                 "point_values_Y": [0.0, 0.4, 0.8, 1.6],
                                 "method_interpolate": "PchipInterpolator",
                                 # Лимиты п осям
@@ -209,10 +209,15 @@ class DataDitributor:
         for type_schema in ('traxial', 'volume_traxial', 'unaxial', 'consolidation'):
             """Пройтись по схемам в словаре"""
             name_schemas = list(self.data.get(type_schema).keys())
-            try:
-                name_schemas.remove("scheme_now")
-            except:
-                pass
+
+            for scheme_now in ['traxial_scheme_now', 'volume_traxial_scheme_now', 'unaxial_scheme_now', 'consolidation_scheme_now']:
+                try:
+                    name_schemas.remove(scheme_now)
+                except:
+                    pass
+
+
+            print("New_schem ", name_schemas)
 
             for name in name_schemas:
                 """Пройтись по именам схем в словаре"""
@@ -374,7 +379,7 @@ class DataDitributor:
             self.data.get('volume_traxial').setdefault(
                 name,
                 {
-                    "point_values_X": [0.0, 0.1, 0.2, 0.3],
+                    "point_values_X": [0.0, 0.0, 0.0, 0.0],
                     "point_values_Y": [0.0, 0.4, 0.8, 1.6],
                     "method_interpolate": "PchipInterpolator",
                     "limit_axe_X": None,
