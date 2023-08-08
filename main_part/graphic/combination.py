@@ -8,7 +8,8 @@ import random
 from GEOF.main_part.main_tools.main_functions import interpolation
 
 """
-Необходимо сделать выбор кол-ва точек на графике в функции интерполяции
+
+
 """
 
 class AnalyzeGraph:

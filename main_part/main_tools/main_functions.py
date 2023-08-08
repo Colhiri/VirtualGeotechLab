@@ -46,6 +46,28 @@ def interpolation(x, y=None, count_point=None, method_interpolate="PchipInterpol
     if method_interpolate == "cubic":
         pchip = interpolate.interp1d(y, x, kind='cubic')
 
+    if method_interpolate == "nearest_volume":
+        pchip = interpolate.PchipInterpolator(y, x)
+        xnew = pchip(yfit)
+
+        i = 0
+        filtered_data_x = []
+        filtered_data_y = []
+
+        while i < len(xnew):
+            if i + 3 <= len(xnew):
+                filtered_data_x.append(xnew[i])
+                filtered_data_y.append(yfit[i])
+            i += 4
+
+        filtered_data_x.append(xnew[-1])
+        filtered_data_y.append(yfit[-1])
+
+        filtered_data_x = np.asarray(filtered_data_x)
+        filtered_data_y = np.asarray(filtered_data_y)
+
+        pchip = interpolate.interp1d(filtered_data_y, filtered_data_x, kind='nearest')
+
     xnew = pchip(yfit)
 
     if type(yfit) != list:

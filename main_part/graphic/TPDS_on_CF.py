@@ -147,8 +147,6 @@ def start_TPDS_CF(name: str, data_mech: dict, organise_dct, dct_combination: dic
     """
     delta_EV_E0 = (koef_puasson * otn_p16) * 2 + otn_p16
 
-
-
     control_point = {
         "y_press16": y_press16,
         "y_pressE50": y_pressE50,
@@ -178,16 +176,21 @@ def start_TPDS_CF(name: str, data_mech: dict, organise_dct, dct_combination: dic
                                         data=dct_combination,
                                         type_grunt_dct=type_grunt_schemas)
     analyze_volume.calculate_perc()
-    new_point_x, _ = analyze_volume.points_reload()
+    new_point_x, _, EV_END_1, EV_END_2 = analyze_volume.points_reload()
     parameters_points_dct = analyze_volume.get_parameters_points()
+
+    parameters_points_dct.update({'method_interpolate': 'nearest_volume'})
+
+
     xnew, yfit = interpolation(x=new_point_x, y=new_point_y, parameters=parameters_points_dct)
 
-    index_x_delta_EV_E0 = xnew.index(nearest(xnew, delta_EV_E0))
-    index_x_EV_END_1 = xnew.index(nearest(xnew, EV_END_1))
-    index_x_EV_END_2 = xnew.index(nearest(xnew, EV_END_2))
+    # index_x_delta_EV_E0 = xnew.index(nearest(xnew, delta_EV_E0))
+    # index_x_EV_END_1 = xnew.index(nearest(xnew, EV_END_1))
+    # index_x_EV_END_2 = xnew.index(nearest(xnew, EV_END_2))
+
 
     xnew = random_values(points_x=xnew,
-                         dont_touch_indexes=[0, index_x_delta_EV_E0, index_x_EV_END_1, index_x_EV_END_2],
+                         dont_touch_indexes=[0, ],
                          parameters_points=parameters_points_dct
                          )
 

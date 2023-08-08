@@ -19,7 +19,7 @@ class Graph_traxial:
         self.schema = dct.get(f"{self.global_schema}_scheme_now")
         ### Точки для основной кривой
         self.point_values_X = dct.get(self.global_schema).get(self.schema).get("point_values_X")
-        self.point_values_Y = dct.get(self.global_schema).get(self.schema).get("point_values_Y")
+        self.point_values_Y = [y / 76 for y in dct.get(self.global_schema).get(self.schema).get("point_values_Y")]
         self.limit_axe_X = max(self.point_values_X) + 0.05
         self.limit_axe_Y = dct.get(self.global_schema).get(self.schema).get("limit_axe_Y")
         self.method_interpolate = dct.get(self.global_schema).get(self.schema).get("method_interpolate")
@@ -35,12 +35,20 @@ class Graph_traxial:
         """
         Объем
         """
+        self.multiple_value = 1
+
+        for volume_perc, traxial_perc in zip(dct.get('volume_traxial').get(self.schema).get("list_X_min"), self.list_X_min):
+            if volume_perc != traxial_perc:
+                self.multiple_value = volume_perc / traxial_perc
+
+        self.multiple_volume = TextInput(title="Set increase percent multiple", value=str(self.multiple_value))
+
         self.points_volume_X = dct.get('volume_traxial').get(self.schema).get("point_values_X")
         self.limit_volume_axe_X = max(self.points_volume_X) + 0.05
         self.volume_method_interpolate = dct.get('volume_traxial').get(self.schema).get("method_interpolate")
-        self.plot_volume = figure(width=1000, height=1000, x_range=(0, self.limit_axe_Y))
+        self.plot_volume = figure(width=1000, height=1000, x_range=(0, self.limit_axe_Y / 76))
         self.plot_volume.x_range.start = 0
-        self.plot_volume.x_range.end = 20
+        self.plot_volume.x_range.end = 0.2
         self.volume_mid_line_values = ColumnDataSource(data=dict(x=self.points_volume_X, y=self.point_values_Y), )
         # Интерполяция точек по основной линии
         self.volume_mid_line_interpolate_values = ColumnDataSource(
@@ -84,8 +92,8 @@ class Graph_traxial:
         Давление
         """
         ### Инициализация графика и графических утилит
-        self.plot = figure(width=1000, height=1000, y_range=(self.limit_axe_Y, 0))
-        self.plot.y_range.start = 20
+        self.plot = figure(width=1000, height=1000, y_range=(self.limit_axe_Y / 76, 0))
+        self.plot.y_range.start = 0.2
         self.plot.y_range.end = 0
         ### Создание значений для линий
         # Основная линия
@@ -162,6 +170,7 @@ class Graph_traxial:
         self.random_percent_min_text = TextInput(title="Set random min", value=self.random_percent_min)
         self.random_percent_max_text = TextInput(title="Set random max", value=self.random_percent_max)
 
+
         # Кнопка для применения параметров количества точек и рандома
         self.button_update_point_random = Button(label="Update", button_type='success', height=40)
         self.button_update_point_random.on_click(self.update_percents)
@@ -217,10 +226,11 @@ class Graph_traxial:
         Обновление значений исходя из значений в текстовых полях
         :return:
         """
-        self.count_points_min = int(self.count_points_min_text.value),
-        self.count_points_max = int(self.count_points_max_text.value),
-        self.random_percent_min = float(self.random_percent_min_text.value),
+        self.count_points_min = int(self.count_points_min_text.value)
+        self.count_points_max = int(self.count_points_max_text.value)
+        self.random_percent_min = float(self.random_percent_min_text.value)
         self.random_percent_max = float(self.random_percent_max_text.value)
+        self.multiple_value = float(self.multiple_volume.value)
 
         if isinstance(self.count_points_min, tuple):
             self.count_points_min = self.count_points_min[0]
@@ -230,11 +240,14 @@ class Graph_traxial:
             self.random_percent_min = self.random_percent_min[0]
         if isinstance(self.random_percent_max, tuple):
             self.random_percent_max = self.random_percent_max[0]
+        if isinstance(self.multiple_value, tuple):
+            self.multiple_value = self.multiple_value[0]
 
         self.count_points_min_text.value = str(self.count_points_min)
         self.count_points_max_text.value = str(self.count_points_max)
         self.random_percent_min_text.value = str(self.random_percent_min)
         self.random_percent_max_text.value = str(self.random_percent_max)
+        self.multiple_volume.value = str(self.multiple_value)
 
     def random_percent(self):
         """
@@ -314,7 +327,7 @@ class Graph_traxial:
                                   "limit_axe_Y": max(self.point_values_Y),
 
                                   "point_values_X": self.point_values_X,
-                                  "point_values_Y": self.point_values_Y,
+                                  "point_values_Y": [y * 76 for y in self.point_values_Y],
 
                                   "list_X_min": self.list_X_min,
                                   "list_X_max": self.list_X_max,
@@ -332,15 +345,15 @@ class Graph_traxial:
                                       "method_interpolate": self.volume_method_interpolate,
 
                                       "point_values_X": self.points_volume_X,
-                                      "point_values_Y": self.point_values_Y,
+                                      "point_values_Y": [y * 76 for y in self.point_values_Y],
 
                                       "limit_axe_X": max(self.point_values_X),
                                       "limit_axe_Y": max(self.point_values_Y),
 
-                                      "list_X_min": self.list_X_min,
-                                      "list_X_max": self.list_X_max,
-                                      "list_Y_min": self.list_Y_min,
-                                      "list_Y_max": self.list_Y_max,
+                                      "list_X_min": [perc * self.multiple_value for perc in self.list_X_min],
+                                      "list_X_max": [perc * self.multiple_value for perc in self.list_X_max],
+                                      "list_Y_min": [perc * self.multiple_value for perc in self.list_Y_min],
+                                      "list_Y_max": [perc * self.multiple_value for perc in self.list_Y_max],
 
                                       "count_points_min": int(self.count_points_min_text.value),
                                       "count_points_max": int(self.count_points_max_text.value),
@@ -481,7 +494,7 @@ class Graph_traxial:
         ### Основная линия
         ### Основная линия
         self.point_values_X = dct.get(self.global_schema).get(self.schema).get("point_values_X")
-        self.point_values_Y = dct.get(self.global_schema).get(self.schema).get("point_values_Y")
+        self.point_values_Y = [y / 76 for y in dct.get(self.global_schema).get(self.schema).get("point_values_Y")]
         self.limit_axe_X = max(self.point_values_X) + 0.05
         self.limit_axe_Y = dct.get(self.global_schema).get(self.schema).get("limit_axe_Y")
         self.method_interpolate = dct.get(self.global_schema).get(self.schema).get("method_interpolate")
@@ -534,9 +547,9 @@ class Graph_traxial:
         self.min_line_values.data['x'] = [AX * ((100 - perc) / 100) for AX, perc in zip(self.mid_line_values.data['x'], self.table_values_perc.data['x_min'])]
         self.max_line_values.data['x'] = [AX * ((100 + perc) / 100) for AX, perc in zip(self.mid_line_values.data['x'], self.table_values_perc.data['x_max'])]
 
-        self.volume_min_line_values.data['x'] = [AX * ((100 - perc) / 100) for AX, perc in
+        self.volume_min_line_values.data['x'] = [AX * ((100 - perc * self.multiple_value) / 100) for AX, perc in
                                           zip(self.volume_mid_line_values.data['x'], self.table_values_perc.data['x_min'])]
-        self.volume_max_line_values.data['x'] = [AX * ((100 + perc) / 100) for AX, perc in
+        self.volume_max_line_values.data['x'] = [AX * ((100 + perc * self.multiple_value) / 100) for AX, perc in
                                           zip(self.volume_mid_line_values.data['x'], self.table_values_perc.data['x_max'])]
 
     def handle_table_edit(self, event):
@@ -647,6 +660,7 @@ class Graph_traxial:
         :param Y:
         :return:
         """
+        Y = [y * 76 for y in Y]
 
         yfit = np.linspace(min(Y), max(Y), num=50)
 
@@ -691,7 +705,7 @@ class Graph_traxial:
 
         xnew = pchip(yfit)
 
-        return {'x': xnew, 'y': yfit}
+        return {'x': xnew, 'y': [y / 76 for y in yfit]}
 
     def volume_interpolation_line(self, X, Y):
         """
@@ -700,6 +714,7 @@ class Graph_traxial:
         :param Y:
         :return:
         """
+        Y = [y * 76 for y in Y]
 
         yfit = np.linspace(min(Y), max(Y), num=50)
 
@@ -744,7 +759,7 @@ class Graph_traxial:
 
         xnew = pchip(yfit)
 
-        return {'x': xnew, 'y': yfit}
+        return {'x': xnew, 'y': [y / 76 for y in yfit]}
 
     def run(self):
         """
@@ -768,6 +783,7 @@ class Graph_traxial:
                               self.count_points_max_text,
                               self.random_percent_min_text,
                               self.random_percent_max_text,
+                              self.multiple_volume,
                               self.button_update_point_random,
                               self.random_activate,
                               ))
@@ -781,8 +797,8 @@ class Graph_traxial:
 
         self.plot_volume.on_event('pan', self.volume_move_point_handler)  # Обработчик перемещения точки
 
-
 """
+
 distribut = DD(id_people='356379915') # sys.argv[1])
 distribut.check_schemas_people()
 distribut.write_data_in_database()

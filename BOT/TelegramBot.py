@@ -20,6 +20,7 @@ def commands_bot(message):
     bot.send_message(message.chat.id, "Список доступных команд:")
     bot.send_message(message.chat.id, "Для настройки трехосных графиков (вертикальные и объемные деформации): /run_traxial")
     bot.send_message(message.chat.id, "Для настройки графиков консолидации: /run_consolidation")
+    bot.send_message(message.chat.id, "Для настройки графиков одноплоскостного среза: /run_unaxial")
     bot.send_message(message.chat.id, "Для инициализация пользователя в системе: /initialize")
     bot.send_message(message.chat.id, "Для отправки файла шаблона механики: /get_mech_shablon")
     bot.send_message(message.chat.id, "Для запуска записи по шаблону: /give_mech и после отправьте шаблон")
@@ -158,8 +159,25 @@ def start(message):
                                    user_surname=us_sname,
                                    username=username)
 
+@bot.message_handler(commands=['run_unaxial'])
+def run_unaxial(message):
+    initialize_user(message)
 
-# Обработчик команды /run_program
+    distribut = DD(id_people=us_id)
+    distribut.check_schemas_people()
+    distribut.write_data_in_database()
+
+    # Команда для запуска локального сервера Bokeh
+    BOKEH_SERVER_PORT = 5020
+    PROGRAM_PATH = [r'Graph_unaxial.py', us_id, 'unaxial']
+
+    BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"unaxial"}'
+    subprocess.Popen(BOKEH_SERVER_COMMAND, shell=True)
+
+    # Отправка кликабельной ссылки на локальный сервер Bokeh
+    bot.send_message(message.chat.id, f"Ссылка на настройки трехосных графиков: http://localhost:{BOKEH_SERVER_PORT}/Unaxial")
+
+
 @bot.message_handler(commands=['run_traxial'])
 def run_traxial(message):
     initialize_user(message)
@@ -169,16 +187,15 @@ def run_traxial(message):
     distribut.write_data_in_database()
 
     # Команда для запуска локального сервера Bokeh
-    BOKEH_SERVER_PORT = 5015
+    BOKEH_SERVER_PORT = 5005
     PROGRAM_PATH = [r'Graph_server_volume.py', us_id, 'traxial']
 
     BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"traxial"}'
     subprocess.Popen(BOKEH_SERVER_COMMAND, shell=True)
 
     # Отправка кликабельной ссылки на локальный сервер Bokeh
-    bot.send_message(message.chat.id, f"Ссылка на настройки трехосных графиков: http://localhost:{BOKEH_SERVER_PORT}/Graph_server")
+    bot.send_message(message.chat.id, f"Ссылка на настройки трехосных графиков: http://localhost:{BOKEH_SERVER_PORT}/Traxial")
 
-# Обработчик команды /run_program
 @bot.message_handler(commands=['run_consolidation'])
 def run_consolidation(message):
     initialize_user(message)
@@ -188,13 +205,13 @@ def run_consolidation(message):
     distribut.write_data_in_database()
 
     # Команда для запуска локального сервера Bokeh
-    BOKEH_SERVER_PORT = 5014
+    BOKEH_SERVER_PORT = 5010
     PROGRAM_PATH = [r'Graph_consolidation.py', us_id, 'consolidation']
 
     BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"consolidation"}'
     subprocess.Popen(BOKEH_SERVER_COMMAND, shell=True)
 
     # Отправка кликабельной ссылки на локальный сервер Bokeh
-    bot.send_message(message.chat.id, f"Ссылка на настройки графика консолидации: http://localhost:{BOKEH_SERVER_PORT}/Graph_consolidation")
+    bot.send_message(message.chat.id, f"Ссылка на настройки графика консолидации: http://localhost:{BOKEH_SERVER_PORT}/Consolidation")
 
 bot.polling()

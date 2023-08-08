@@ -95,11 +95,11 @@ def start(worksheet_journal, id_user, dct_combination):
                 "clay": 'clay',
                         },
             "unaxial": {
-                "gravel": '1',
-                "sand": '1',
-                "sandy_loam": '1',
-                "loam": '1',
-                "clay": '1',
+                "gravel": 'gravel',
+                "sand": 'sand',
+                "sandy_loam": 'sandy_loam',
+                "loam": 'loam',
+                "clay": 'clay',
                         },
                                 }
 
@@ -146,7 +146,7 @@ def start(worksheet_journal, id_user, dct_combination):
             # mode = 3 --- запись 4 графиков (деформация с разгрузкой + прочности с модулями)
             # mode = 4 --- запись 3 графиков (деформация с разгрузкой на первой прочности + 2 прочности с модулями)
 
-            mode = 1
+            mode = 2
 
             # Стандартная формула
             K_0 = 1 - math.sin(math.radians(F))
@@ -317,7 +317,11 @@ def start(worksheet_journal, id_user, dct_combination):
                        'pathSave': pathSave,
                        }
 
-                NewDF, values_for_Excel_right = SPS.start_SPS_CD(dct, name, "PchipInterpolator")
+                NewDF, values_for_Excel_right = SPS.start_SPS_CD(name=name,
+                                                                data_mech=dct,
+                                                                organise_dct=organise_dct,
+                                                                dct_combination=dct_combination,
+                                                                type_grunt_schemas=type_grunt_schemas)
 
                 save_DF.append(NewDF)
 

@@ -603,3 +603,4 @@ distribut.write_data_in_database()
 if sys.argv[2] == 'traxial':
     graphs = Graph_traxial(distribut.data)
     graphs.run()
+

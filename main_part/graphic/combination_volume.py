@@ -37,13 +37,8 @@ class AnalyzeGraph:
 
         self.koef_puasson = self.control_points.get("Puasson")
         self.angle_dilatanci = self.control_points.get("Dilatanci")
-        self.otnVertDef = self.control_points.get('otnVertDef')
-        self.deviator = self.control_points.get('deviator')
 
         self.delta_EV_E0 = self.control_points.get("delta_EV_E0")
-        # self.EV_END_1 = self.control_points.get("EV_END_1")
-        # self.EV_END_2 = self.control_points.get("EV_END_2")
-
 
         self.yfit = self.control_points.get("y_done")
 
@@ -71,6 +66,8 @@ class AnalyzeGraph:
         self.count_points_max = int(self.data.get('volume_traxial').get(self.schema).get("count_points_max"))
         self.random_percent_min = float(self.data.get('volume_traxial').get(self.schema).get("random_percent_min"))
         self.random_percent_max = float(self.data.get('volume_traxial').get(self.schema).get("random_percent_max"))
+
+        self.multiple_percent = 3
 
     def random_percent(self):
         """
@@ -101,14 +98,14 @@ class AnalyzeGraph:
         Считает проценты отхождения от опорных точек графика
         :return:
         """
-        self.max_point = max(self.point_values_X)
+        self.max_point = min(self.point_values_X)
 
         # Получили проценты расчетом
         self.new_percents_min_x = []
         self.new_percents_max_x = []
         for count, val in enumerate(self.point_values_X, 0):
-            val_new_min_x = ((val / self.max_point) * 100 - self.list_X_min[count])
-            val_new_max_x = ((val / self.max_point) * 100 + self.list_X_max[count])
+            val_new_min_x = ((val / self.max_point) * 100 - self.list_X_min[count] * self.multiple_percent)
+            val_new_max_x = ((val / self.max_point) * 100 + self.list_X_max[count] * self.multiple_percent)
             self.new_percents_min_x.append(val_new_min_x)
             self.new_percents_max_x.append(val_new_max_x)
 
@@ -122,44 +119,63 @@ class AnalyzeGraph:
 
         EV_END_1 = self.point_values_X[max_index_press]
 
-        try:
+        self.otnVertDef = [x / 76 for x in self.point_values_Y]
+
+        if self.points_press[max_index_press] == self.points_press[-1]:
+
             if self.angle_dilatanci > 0:
-                EV_END_2 = EV_END_1 + ((-(2 * (self.otnVertDef[self.deviator.index(max(self.deviator)) + 1] - self.otnVertDef[
-                    self.deviator.index(max(self.deviator))]) * math.sin(math.radians(self.angle_dilatanci))) / (
-                                                1 - math.sin(math.radians(self.angle_dilatanci)))))
+                EV_END_2 = EV_END_1 + (
+                (-(2 * (self.otnVertDef[max_index_press - 1] - self.otnVertDef[
+                    max_index_press]) * math.sin(math.radians(self.angle_dilatanci))) / (
+                         1 - math.sin(math.radians(self.angle_dilatanci)))))
             if self.angle_dilatanci <= 0:
-                EV_END_2 = EV_END_1 - ((-(2 * (self.otnVertDef[self.deviator.index(max(self.deviator)) + 1] - self.otnVertDef[
-                    self.deviator.index(max(self.deviator))]) * math.sin(math.radians(self.angle_dilatanci))) / (
-                                                1 - math.sin(math.radians(self.angle_dilatanci)))))
-        except IndexError:
-            if self.angle_dilatanci > 0:
-                EV_END_2 = EV_END_1 + ((-(2 * (self.otnVertDef[self.deviator.index(max(self.deviator))] - self.otnVertDef[
-                    self.deviator.index(max(self.deviator)) - 1]) * math.sin(math.radians(self.angle_dilatanci))) / (
-                                                1 - math.sin(math.radians(self.angle_dilatanci)))))
-            if self.angle_dilatanci <= 0:
-                EV_END_2 = EV_END_1 - ((-(2 * (self.otnVertDef[self.deviator.index(max(self.deviator))] - self.otnVertDef[
-                    self.deviator.index(max(self.deviator)) - 1]) * math.sin(math.radians(self.angle_dilatanci))) / (
-                                                1 - math.sin(math.radians(self.angle_dilatanci)))))
+                EV_END_2 = EV_END_1 - (
+                    (-(2 * (self.otnVertDef[max_index_press - 1] - self.otnVertDef[
+                        max_index_press]) * math.sin(math.radians(self.angle_dilatanci))) / (
+                             1 - math.sin(math.radians(self.angle_dilatanci)))))
+
+            max_index_press -= 1
 
 
-        max_x_real = max(self.point_x) - self.point_x[0]
+        else:
+
+            if self.angle_dilatanci > 0:
+                EV_END_2 = EV_END_1 + ((-(2 * (self.otnVertDef[max_index_press] - self.otnVertDef[
+                    max_index_press + 1]) * math.sin(math.radians(self.angle_dilatanci))) / (
+                         1 - math.sin(math.radians(self.angle_dilatanci)))))
+            if self.angle_dilatanci <= 0:
+                EV_END_2 = EV_END_1 - ((-(2 * (self.otnVertDef[max_index_press] - self.otnVertDef[
+                    max_index_press + 1]) * math.sin(math.radians(self.angle_dilatanci))) / (
+                         1 - math.sin(math.radians(self.angle_dilatanci)))))
+
+
+        self.point_x = [0, -self.delta_EV_E0, EV_END_1, EV_END_2]
+
+
+        max_x_real = min(self.point_values_X) # min(self.point_x)
 
         percents_x = [random.randint(int(perc_min * 100), int(perc_max * 100)) / 10000 for perc_min, perc_max in
                       zip(self.new_percents_min_x, self.new_percents_max_x)]
-
-        self.point_x = [0, -self.delta_EV_E0, EV_END_1, EV_END_2]
 
         new_point_x = []
         for count, perc in enumerate(percents_x, 0):
             if count in [1]:
                 new_point_x.append(self.point_x[count])
                 continue
+            if count in [max_index_press]:
+                new_point_x.append(self.point_x[-2])
+                continue
+            if count in [max_index_press + 1]:
+                new_point_x.append(self.point_x[-1])
+                continue
+            if count > max_index_press + 1:
+                new_point_x.append(perc * max_x_real + abs(EV_END_2 * 1.5))
+                continue
             new_point_x.append(perc * max_x_real + self.point_x[0])
 
         self.new_point_x = new_point_x
 
-
-        return self.new_point_x, self.yfit
+        return self.new_point_x, self.yfit, EV_END_1, EV_END_2
 
     def get_parameters_points(self):
         return {'method_interpolate': self.method_interpolate,
