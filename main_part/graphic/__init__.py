@@ -1,6 +1,5 @@
 from .TPDS_on_E50 import *
 from .TPDS_on_CF import *
-from .TPS import *
 
 
 from .SPS import *

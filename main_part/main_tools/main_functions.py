@@ -1,0 +1,126 @@
+import random
+
+import numpy as np
+from scipy.stats import stats
+from scipy.special import comb
+from scipy import interpolate
+
+"""
+Интерполяция значений исходя из настроек в интерактивной схеме
+"""
+def interpolation(x, y=None, count_point=None, method_interpolate="PchipInterpolator", parameters=None):
+    if parameters:
+        method_interpolate = parameters.get('method_interpolate')
+        if not count_point:
+            count_point = parameters.get('count_point')
+
+    yfit = np.linspace(min(y), max(y), num=count_point)
+
+    if method_interpolate == "interp1d":
+        pchip = interpolate.interp1d(y, x, kind='linear')
+
+    if method_interpolate == "CubicSpline":
+        pchip = interpolate.CubicSpline(y, x)
+
+    if method_interpolate == "PchipInterpolator":
+        pchip = interpolate.PchipInterpolator(y, x)
+
+    if method_interpolate == "Akima1DInterpolator":
+        pchip = interpolate.Akima1DInterpolator(y, x)
+
+    if method_interpolate == "BarycentricInterpolator":
+        pchip = interpolate.BarycentricInterpolator(y, x)
+
+    if method_interpolate == "KroghInterpolator":
+        pchip = interpolate.KroghInterpolator(y, x)
+
+    if method_interpolate == "make_interp_spline":
+        pchip = interpolate.make_interp_spline(y, x)
+
+    if method_interpolate == "nearest":
+        pchip = interpolate.interp1d(y, x, kind='nearest')
+
+    if method_interpolate == "quadratic":
+        pchip = interpolate.interp1d(y, x, kind='quadratic')
+
+    if method_interpolate == "cubic":
+        pchip = interpolate.interp1d(y, x, kind='cubic')
+
+    xnew = pchip(yfit)
+
+    if type(yfit) != list:
+        yfit = yfit.tolist()
+    if type(xnew) != list:
+        xnew = xnew.tolist()
+
+    if type(xnew) == list:
+        pass
+
+    return xnew, yfit
+
+"""
+Нахождение ближайшей точки в массиве, исходя из заданного значения
+"""
+def nearest(lst, target):
+    try:
+        pressMAX = lst.tolist().index(max(lst))
+    except:
+        pressMAX = lst.index(max(lst))
+    return min(lst[:pressMAX], key=lambda x: abs(x - target))
+
+
+"""
+Рассчёт процента исходя из заданного отхождения в интерактивной настройке
+"""
+def random_percent(random_percent_min, random_percent_max):
+    """
+    Функция рандомного процента
+    :return:
+    """
+    perc_min = int((100 - float(random_percent_min)) * 100)
+    perc_max = int((100 + float(random_percent_max)) * 100)
+    return random.randint(perc_min, perc_max) / 10000
+
+def random_values(points_x, dont_touch_indexes, parameters_points):
+    random_percent_min = parameters_points.get('random_percent_min')
+    random_percent_max = parameters_points.get('random_percent_max')
+    points_x = [random_percent(random_percent_min, random_percent_max) * x_value if count not in dont_touch_indexes else x_value for count, x_value in enumerate(points_x, 0)]
+    return points_x
+
+"""
+Кривая Безье
+Используется для петель разгрузки
+"""
+def bernstein_poly(i, n, t):
+    """
+     The Bernstein polynomial of n, i as a function of t
+    """
+
+    return comb(n, i) * (t ** (n - i)) * (1 - t) ** i
+
+def bezier_curve(points, nTimes=1000):
+    """
+       Given a set of control points, return the
+       bezier curve defined by the control points.
+
+       points should be a list of lists, or list of tuples
+       such as [ [1,1],
+                 [2,3],
+                 [4,5], ..[Xn, Yn] ]
+        nTimes is the number of time steps, defaults to 1000
+
+        See http://processingjs.nihongoresources.com/bezierinfo/
+    """
+
+    nPoints = len(points)
+    xPoints = np.array([p[0] for p in points])
+    yPoints = np.array([p[1] for p in points])
+
+    t = np.linspace(0.0, 1.0, nTimes)
+
+    polynomial_array = np.array([bernstein_poly(i, nPoints - 1, t) for i in range(0, nPoints)])
+
+    xvals = np.dot(xPoints, polynomial_array)
+    yvals = np.dot(yPoints, polynomial_array)
+
+    return xvals, yvals

@@ -116,6 +116,10 @@ def start(worksheet_journal, id_user, dct_combination):
             F = worksheet_journal['CD_fi'][row]
             C = worksheet_journal['CD_c'][row]
 
+            koef_puasson = 0.25
+            angle_dilatanci = 5
+
+
             pathSave = os.path.join(pathSave, 'Трехосные_КД_ПП')
             if not os.path.exists(pathSave):
                 os.mkdir(pathSave)
@@ -142,7 +146,7 @@ def start(worksheet_journal, id_user, dct_combination):
             # mode = 3 --- запись 4 графиков (деформация с разгрузкой + прочности с модулями)
             # mode = 4 --- запись 3 графиков (деформация с разгрузкой на первой прочности + 2 прочности с модулями)
 
-            mode = 3
+            mode = 1
 
             # Стандартная формула
             K_0 = 1 - math.sin(math.radians(F))
@@ -185,6 +189,9 @@ def start(worksheet_journal, id_user, dct_combination):
                        'pressEnd': pressEnd,
                        'pathSave': pathSave,
                        'name': name,
+
+                       'Puasson': koef_puasson,
+                       'Dilatanci': angle_dilatanci,
                        }
 
                 if mode == 1:

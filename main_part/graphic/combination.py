@@ -5,6 +5,8 @@ from scipy.stats import stats
 import json
 import random
 
+from GEOF.main_part.main_tools.main_functions import interpolation
+
 """
 Необходимо сделать выбор кол-ва точек на графике в функции интерполяции
 """
@@ -115,11 +117,7 @@ class AnalyzeGraph:
             self.new_percents_min_x.append(val_new_min_x)
             self.new_percents_max_x.append(val_new_max_x)
 
-        # Убрали проценты с тех ячеек, что меньше или равно максимальной точке
-        for count in range(len(self.new_percents_min_x)):
-            if count in [0, 1, 2]:
-                self.new_percents_min_x[count] = 100
-                self.new_percents_max_x[count] = 100
+
 
     def points_reload(self):
         """
@@ -142,11 +140,6 @@ class AnalyzeGraph:
             self.new_percents_min_y.append(val_new_min_y)
             self.new_percents_max_y.append(val_new_max_y)
 
-        # Убрали проценты с тех ячеек, что меньше или равно максимальной точке
-        for count in range(len(self.new_percents_max_y)):
-            if count in [0,1,2]:
-                self.new_percents_min_y[count] = 100
-                self.new_percents_max_y[count] = 100
 
         percents_y = [(random.randint(int(perc_min * 100), int(perc_max * 100)) / 10000) for perc_min, perc_max in
                       zip(self.new_percents_min_y, self.new_percents_max_y)]
@@ -173,53 +166,9 @@ class AnalyzeGraph:
 
         return self.new_point_x, self.new_point_y
 
-    def interpolation(self):
-        """
-        Применяет метод интерполяции к выбранным точкам
-        :return:
-        """
-        yfit = np.linspace(min(self.new_point_y), max(self.new_point_y), num=random.randint(int(self.count_points_min), int(self.count_points_max)))
-
-        if self.method_interpolate == "interp1d":
-            pchip = interpolate.interp1d(self.new_point_y, self.new_point_x, kind='linear')
-
-        if self.method_interpolate == "CubicSpline":
-            pchip = interpolate.CubicSpline(self.new_point_y, self.new_point_x)
-
-        if self.method_interpolate == "PchipInterpolator":
-            pchip = interpolate.PchipInterpolator(self.new_point_y, self.new_point_x)
-
-        if self.method_interpolate == "Akima1DInterpolator":
-            pchip = interpolate.Akima1DInterpolator(self.new_point_y, self.new_point_x)
-
-        if self.method_interpolate == "BarycentricInterpolator":
-            pchip = interpolate.BarycentricInterpolator(self.new_point_y, self.new_point_x)
-
-        if self.method_interpolate == "KroghInterpolator":
-            pchip = interpolate.KroghInterpolator(self.new_point_y, self.new_point_x)
-
-        if self.method_interpolate == "make_interp_spline":
-            pchip = interpolate.make_interp_spline(self.new_point_y, self.new_point_x)
-
-        if self.method_interpolate == "nearest":
-            pchip = interpolate.interp1d(self.new_point_y, self.new_point_x, kind='nearest')
-
-        if self.method_interpolate == "quadratic":
-            pchip = interpolate.interp1d(self.new_point_y, self.new_point_x, kind='quadratic')
-
-        if self.method_interpolate == "cubic":
-            pchip = interpolate.interp1d(self.new_point_y, self.new_point_x, kind='cubic')
-
-        xnew = pchip(yfit)
-
-        if type(yfit) != list:
-            yfit = yfit.tolist()
-        if type(xnew) != list:
-            xnew = xnew.tolist()
-
-        if type(xnew) == list:
-            pass
-
-        xnew = [self.random_percent() * x_value for x_value in xnew]
-
-        return xnew, yfit
+    def get_parameters_points(self):
+        return {'method_interpolate': self.method_interpolate,
+                'count_point': random.randint(int(self.count_points_min), int(self.count_points_max)),
+                'random_percent_min': self.random_percent_min,
+                'random_percent_max': self.random_percent_max,
+                }

@@ -9,94 +9,7 @@ from scipy.stats import stats
 from scipy.special import comb
 
 from GEOF.main_part.graphic.combination import AnalyzeGraph
-
-# Функция ближайщего соседа
-def nearest(lst, target):
-    try:
-        pressMAX = lst.tolist().index(max(lst))
-    except:
-        pressMAX = lst.index(max(lst))
-    return min(lst[:pressMAX], key=lambda x: abs(x - target))
-
-def bernstein_poly(i, n, t):
-    """
-     The Bernstein polynomial of n, i as a function of t
-    """
-
-    return comb(n, i) * ( t**(n-i) ) * (1 - t)**i
-
-def bezier_curve(points, nTimes=1000):
-    """
-       Given a set of control points, return the
-       bezier curve defined by the control points.
-
-       points should be a list of lists, or list of tuples
-       such as [ [1,1],
-                 [2,3],
-                 [4,5], ..[Xn, Yn] ]
-        nTimes is the number of time steps, defaults to 1000
-
-        See http://processingjs.nihongoresources.com/bezierinfo/
-    """
-
-    nPoints = len(points)
-    xPoints = np.array([p[0] for p in points])
-    yPoints = np.array([p[1] for p in points])
-
-    t = np.linspace(0.0, 1.0, nTimes)
-
-    polynomial_array = np.array([ bernstein_poly(i, nPoints-1, t) for i in range(0, nPoints)   ])
-
-    xvals = np.dot(xPoints, polynomial_array)
-    yvals = np.dot(yPoints, polynomial_array)
-
-    return xvals, yvals
-
-def splain(x, y, count_point, methodINTERPOLATION):
-
-    yfit = np.linspace(min(y), max(y), num=count_point)
-
-    if methodINTERPOLATION == "interp1d":
-        pchip = interpolate.interp1d(y, x, kind='linear')
-
-    if methodINTERPOLATION == "CubicSpline":
-        pchip = interpolate.CubicSpline(y, x)
-
-    if methodINTERPOLATION == "PchipInterpolator":
-        pchip = interpolate.PchipInterpolator(y, x)
-
-    if methodINTERPOLATION == "Akima1DInterpolator":
-        pchip = interpolate.Akima1DInterpolator(y, x)
-
-    if methodINTERPOLATION == "BarycentricInterpolator":
-        pchip = interpolate.BarycentricInterpolator(y, x)
-
-    if methodINTERPOLATION == "KroghInterpolator":
-        pchip = interpolate.KroghInterpolator(y, x)
-
-    if methodINTERPOLATION == "make_interp_spline":
-        pchip = interpolate.make_interp_spline(y, x)
-
-    if methodINTERPOLATION == "nearest":
-        pchip = interpolate.interp1d(y, x, kind='nearest')
-
-    if methodINTERPOLATION == "quadratic":
-        pchip = interpolate.interp1d(y, x, kind='quadratic')
-
-    if methodINTERPOLATION == "cubic":
-        pchip = interpolate.interp1d(y, x, kind='cubic')
-
-    xnew = pchip(yfit)
-
-    if type(yfit) != list:
-        yfit = yfit.tolist()
-    if type(xnew) != list:
-        xnew = xnew.tolist()
-
-    if type(xnew) == list:
-        pass
-
-    return xnew, yfit
+from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve
 
 def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
     # Выбор давлений
@@ -112,7 +25,6 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
     endE1 = data_mech.get("endE1")
     stepE1 = endE1 / countPoint
     pressEnd1 = data_mech.get("pressEnd")
-
 
     name = data_mech.get('name')
     if name == 'graph1' or name == 'graph0':
@@ -174,9 +86,7 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
         otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
         y_press16 = 76 * otn_p16 - otn_p16 * stepE1
 
-
-
-    E_rzg = E_0 * random.randint(45,60) / 10
+    E_rzg = E_0 * random.randint(45, 60) / 10
     press_rzg = (pressE50 - pressStart1) / 2 + pressE50
 
     press_rzg_END = press_rzg - 0.0005
@@ -235,6 +145,7 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
                            type_grunt_dct=type_grunt_schemas)
     analyze.calculate_perc()
     x_end, y_end = analyze.points_reload()
+    parameters_points_dct = analyze.get_parameters_points()
 
     try:
         x_end = x_end.tolist()
@@ -253,14 +164,17 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
     x_end.insert(0, press_rzg_END)
     y_end.insert(0, y_pressR_RZG)
 
-    fifth_x, fifth_y = splain(x=x_end, y=y_end, count_point=100, methodINTERPOLATION="PchipInterpolator")
+    fifth_x, fifth_y = interpolation(x=x_end, y=y_end,
+                                     count_point=100,
+                                     parameters=parameters_points_dct)
 
     y = np.array(
         [0.0, y_press16, y_pressE50, y_pressR_RZG])
     x = np.array(
         [pressStart1, press16, pressE50, press_rzg])
-    xnew, yfit = splain(x, y, 100, 'PchipInterpolator')
-
+    xnew, yfit = interpolation(x=x_end, y=y_end,
+                               count_point=100,
+                               parameters=parameters_points_dct)
 
     # Вставка значений по найденному индексу приближенного значения для нахождения модулей для E0, E50, pressMax
     index_x_E_0 = xnew.index(nearest(xnew, press16))
@@ -278,16 +192,6 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
     xnew[index_y_E_0] = press16
     xnew[index_y_E_50] = pressE50
     fifth_x[index_x_pressMax] = pressEnd1
-
-    # # Рандом для значений, исключая те, которые являются необходимыми для расчетов необходимых парамтров
-    # for count, x_value in enumerate(xnew, 0):
-    #     if count in (0, index_x_E_0, index_x_E_50, index_x_pressMax, index_y_E_0, index_y_E_50, index_y_pressMax):
-    #         continue
-    #     valueRandom = random.randint(0, int((pressEnd1 - pressStart1) * 100)) / 1000
-    #     if xnew[count] - valueRandom <= 0:
-    #         continue
-    #     xnew[count] = xnew[count] - valueRandom
-
 
     x = np.concatenate((xnew, low_curve_x, high_curve_x, fifth_x))
     y = np.concatenate((yfit, low_curve_y, high_curve_y, fifth_y))
@@ -307,6 +211,7 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
 
                         "devE0": deviator[index_y_E_0],
                         "devE50": deviator[index_y_E_50],
-                        "devMAX": deviator[index_x_pressMax]}
+                        "devMAX": pressEnd1 - pressStart1,
+                        }
 
     return NewDF, values_for_Excel

@@ -141,7 +141,7 @@ def get_mech_shablon(message):
     :param message:
     :return:
     """
-    file_path = f"..\\srcs\\Data.xlsx"
+    file_path = f"..\\srcs\\shablons\\Data.xlsx"
     with open(file_path, 'rb') as file:
         bot.send_document(message.chat.id, file)
 
@@ -169,7 +169,7 @@ def run_traxial(message):
     distribut.write_data_in_database()
 
     # Команда для запуска локального сервера Bokeh
-    BOKEH_SERVER_PORT = 5012
+    BOKEH_SERVER_PORT = 5015
     PROGRAM_PATH = [r'Graph_server_volume.py', us_id, 'traxial']
 
     BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"traxial"}'
@@ -188,7 +188,7 @@ def run_consolidation(message):
     distribut.write_data_in_database()
 
     # Команда для запуска локального сервера Bokeh
-    BOKEH_SERVER_PORT = 5013
+    BOKEH_SERVER_PORT = 5014
     PROGRAM_PATH = [r'Graph_consolidation.py', us_id, 'consolidation']
 
     BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"consolidation"}'

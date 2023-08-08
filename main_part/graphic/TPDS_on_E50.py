@@ -10,6 +10,8 @@ from scipy import interpolate
 import scipy.stats as stats
 
 from GEOF.main_part.graphic.combination import AnalyzeGraph
+from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve, random_values
+
 
 """
 TPD, где последняя точка рассчитывается исходя из модуля Е50 и нахождения его на вертикальном значении 
@@ -19,14 +21,6 @@ TPD, где последняя точка рассчитывается исхо�
 
 Всегда ищет модуль на точке 1.6 от бытового давления (Теперь уже иногда от 1.3 или от 1.15
 """
-
-# Функция ближайщего соседа
-def nearest(lst, target):
-    try:
-        pressMAX = lst.tolist().index(max(lst))
-    except:
-        pressMAX = lst.index(max(lst))
-    return min(lst[:pressMAX], key=lambda x: abs(x - target))
 
 def start_TPDS_E50(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
 
@@ -112,8 +106,9 @@ def start_TPDS_E50(name: str, data_mech: dict, organise_dct, dct_combination: di
                            data=dct_combination,
                            type_grunt_dct=type_grunt_schemas)
     analyze.calculate_perc()
-    analyze.points_reload()
-    xnew, yfit = analyze.interpolation()
+    new_point_x, new_point_y = analyze.points_reload()
+    parameters_points_dct = analyze.get_parameters_points()
+    xnew, yfit = interpolation(x=new_point_x, y=new_point_y, parameters=parameters_points_dct)
 
 
     # Вставка значений по найденному индексу приближенного значения для нахождения модулей для E0, E50, pressMax
@@ -133,14 +128,11 @@ def start_TPDS_E50(name: str, data_mech: dict, organise_dct, dct_combination: di
     xnew[index_y_E_50] = pressE50
     xnew[index_x_pressMax] = pressEnd1
 
-    # Рандом для значений, исключая те, которые являются необходимыми для расчетов необходимых парамтров
-    for count, x_value in enumerate(xnew, 0):
-        if count in (0, index_x_E_0, index_x_E_50, index_x_pressMax, index_y_E_0, index_y_E_50, index_y_pressMax):
-            continue
-        valueRandom = random.randint(0, int((pressEnd1 - pressStart1) * 100)) / 1000
-        if xnew[count] - valueRandom <= 0:
-            continue
-        xnew[count] = xnew[count] - valueRandom
+    xnew = random_values(points_x=xnew,
+                         dont_touch_indexes=[0, index_x_E_0, index_x_E_50, index_x_pressMax, index_y_E_0, index_y_E_50,
+                                             index_y_pressMax],
+                         parameters_points=parameters_points_dct
+                         )
 
     # Кривая для датафрейма и дапма файла (Девиаторное нагружение - Относительная вертикальная деформация)
     otnVertDef = [value / 76 for value in yfit]
@@ -157,6 +149,7 @@ def start_TPDS_E50(name: str, data_mech: dict, organise_dct, dct_combination: di
 
                         "devE0": deviator[index_y_E_0],
                         "devE50": deviator[index_y_E_50],
-                        "devMAX": deviator[index_x_pressMax]}
+                        "devMAX": pressEnd1 - pressStart1,
+                        }
 
     return NewDF, values_for_Excel

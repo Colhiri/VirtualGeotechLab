@@ -11,15 +11,6 @@ import numpy as np
 import openpyxl
 import pandas as pd
 
-def _decorator(func):
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        stop = time.time()
-        print(f'Время работы: {start - stop}')
-        return result
-    return wrapper
-
 def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel: dict, mode: int) -> None:
     # Организационные моменты
     LAB_NO = organise_dct.get("LAB_NO")
@@ -62,10 +53,10 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
     else:
         prot_name = LAB_NO + '.xlsx'
     try:
-        shutil.copy('..\\srcs\\shablons\\TPDS_CD.xlsx'
+        shutil.copy('..\\srcs\\shablons\\TPDS_CD_test.xlsx'
                     ,f'{pathSave}\\{prot_name}')
         os.rename(
-            f'..\\prot\\TPDS_CD.xlsx',
+            f'..\\prot\\TPDS_CD_test.xlsx',
             f'{pathSave}\\{prot_name}')
     except:
         pass
@@ -74,44 +65,41 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
         f'{pathSave}\\{prot_name}')
     ws = wb.active
 
-    ws['O20'] = LAB_NO
-    ws['O21'] = boreHole
-    ws['O22'] = depth
-    ws['O23'] = nameSoil
+    ws['C17'] = LAB_NO
+    ws['C18'] = boreHole
+    ws['C19'] = depth
+    ws['C20'] = nameSoil
 
-    ws['U20'] = We
-    ws['U21'] = p
-    ws['U22'] = ps
-    ws['U23'] = e
-    ws['U24'] = IL
+    ws['J17'] = We
+    ws['J18'] = p
+    ws['J19'] = ps
+    ws['J20'] = e
+    ws['J21'] = IL
 
     ### Модули
-    ws['A65'] = values_Excel.get('devE50')
-    ws['B65'] = values_Excel.get('epsE50')
-    ws['B70'] = values_Excel.get('devE0')
-    ws['A70'] = values_Excel.get('epsE0')
+    ws['D85'] = values_Excel.get('devE50')
+    ws['E85'] = values_Excel.get('epsE50')
 
-    ws['O53'] = dct.get('F')
-    ws['O54'] = dct.get('C')
+    ws['A85'] = values_Excel.get('devE0')
+    ws['B85'] = values_Excel.get('epsE0')
 
-    if mode in [1, 2, 3]:
-        # Давления
-        # K_0
-        ws['B47'] = 'K0, д.е.'
-        ws['C47'] = (1 - math.sin(math.radians(dct.get('F'))))
+    ws['O56'] = dct.get('F')
+    ws['O57'] = dct.get('C')
 
-        ws['B48'] = 'q_zg, МПа'
-        ws['C48'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
-
-        ws['F50'] = 'Точки модуля (полное напр.), МПа'
-        ws['F51'] = 'qf (полное напр.), МПа'
-
-        # Первая точка модуля E0
-        ws['J50'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
-        # Вторая точка модуля E0
-        ws['K50'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F')))) * 1.6
-        # Точка на Е50
-        ws['J51'] = values_Excel.get('devE50') + dct.get('pressStart1')
+    # Давления
+    # K0, д.е.
+    ws['D62'] = (1 - math.sin(math.radians(dct.get('F'))))
+    # Эффективное напряжение, Мпа:
+    ws['J62'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
+    # Точки нахождения модуля Е0, Мпа (полное напряжение):
+    # Первая точка модуля E0
+    ws['J63'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
+    # Вторая точка модуля E0
+    ws['K63'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F')))) + values_Excel.get('devE0')
+    # Максимальный девиатор
+    ws['J64'] = values_Excel.get('devMAX')
+    # Точка на Е50
+    ws['J65'] = values_Excel.get('devE50')
 
     ws['N47'] = dct.get('pressStart1')
     ws['N48'] = dct.get('pressStart2')
@@ -124,19 +112,19 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
     date_protocol = [str(x) for x in date_protocol.replace(' 00:00:00', '').split('-')]
     date_protocol.reverse()
     str_prot = "Протокол испытаний № " + number_protocol + ' от ' + str('-'.join(map(str, date_protocol)))
-    ws['M9'] = str_prot
+    ws['A9'] = str_prot
 
-    ws['M11'] = 'Наименование и адрес заказчика: ' + nameClient
-    ws['M12'] = 'Наименование объекта: ' + nameObject
+    ws['A10'] = 'Наименование и адрес заказчика: ' + nameClient
+    ws['A11'] = 'Наименование объекта: ' + nameObject
 
     date_isp_object = [str(x) for x in date_isp_object.replace(' 00:00:00', '').split('-')]
     date_isp_object.reverse()
-    ws['M15'] = 'Дата получение объекта подлежащего испытаниям: ' + str('-'.join(map(str, date_isp_object)))
+    ws['A14'] = 'Дата получение объекта подлежащего испытаниям: ' + str('-'.join(map(str, date_isp_object)))
 
     if isinstance(date_isp, str):
-        ws['M16'] = 'Дата испытания: ' + date_isp
+        ws['A15'] = 'Дата испытания: ' + date_isp
     else:
-        ws['M16'] = 'Дата испытания: ' + date_isp
+        ws['A15'] = 'Дата испытания: ' + date_isp
 
     wb.save(f'{pathSave}\\{prot_name}')
 
@@ -151,19 +139,19 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
         dataframe2 = dataframes[2]
         dataframe3 = dataframes[3]
 
-        dataframe0.to_excel(writer, sheet_name='1', startcol=5, startrow=64, index=False,
+        dataframe0.to_excel(writer, sheet_name='1', startcol=5, startrow=84, index=False,
                             index_label=False,
                             header=False)
 
-        dataframe1.to_excel(writer, sheet_name='1', startcol=9, startrow=64, index=False,
+        dataframe1.to_excel(writer, sheet_name='1', startcol=9, startrow=84, index=False,
                             index_label=False,
                             header=False)
 
-        dataframe2.to_excel(writer, sheet_name='1', startcol=11, startrow=64, index=False,
+        dataframe2.to_excel(writer, sheet_name='1', startcol=12, startrow=84, index=False,
                             index_label=False,
                             header=False)
 
-        dataframe3.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
+        dataframe3.to_excel(writer, sheet_name='1', startcol=15, startrow=84, index=False,
                             index_label=False,
                             header=False)
 
@@ -172,19 +160,19 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
         dataframe1 = dataframes[1]
         dataframe2 = dataframes[2]
 
-        dataframe0.to_excel(writer, sheet_name='1', startcol=5, startrow=64, index=False,
+        dataframe0.to_excel(writer, sheet_name='1', startcol=5, startrow=84, index=False,
                             index_label=False,
                             header=False)
 
-        dataframe0.to_excel(writer, sheet_name='1', startcol=9, startrow=64, index=False,
+        dataframe0.to_excel(writer, sheet_name='1', startcol=9, startrow=84, index=False,
                             index_label=False,
                             header=False)
 
-        dataframe1.to_excel(writer, sheet_name='1', startcol=11, startrow=64, index=False,
+        dataframe1.to_excel(writer, sheet_name='1', startcol=12, startrow=84, index=False,
                             index_label=False,
                             header=False)
 
-        dataframe2.to_excel(writer, sheet_name='1', startcol=13, startrow=64, index=False,
+        dataframe2.to_excel(writer, sheet_name='1', startcol=15, startrow=84, index=False,
                             index_label=False,
                             header=False)
     writer.close()
