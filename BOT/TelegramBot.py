@@ -70,7 +70,6 @@ def handle_file(message):
 
         deleteRows.DeleteDefinitionRows(['P1', 'P_r', 'ocr',
                                          'fi', 'c',
-                                         'fi_nn', 'c_nn',
                                          'Eoed01_02_MPa', 'Eobs01_02_Mpa',
                                          # 'CD_sigma1', 'CD_sigma2', 'CD_sigma3',
                                          'CD_E0', 'E50', 'CD_fi', 'CD_c',
@@ -81,7 +80,6 @@ def handle_file(message):
         deleteRows.replaceChar(',', '.', ['Depth', 'We', 'ps', 'p', 'pd', 'n', 'e', 'Sr', 'WL', 'WP', 'IP', 'IL', 'Ir',
                                           'P1', 'P_r', 'ocr',
                                           'fi', 'c',
-                                          'fi_nn', 'c_nn',
                                           'Eoed01_02_MPa', 'Eobs01_02_Mpa',
                                           'CD_sigma1', 'CD_sigma2', 'CD_sigma3',
                                           'CD_u1', 'CD_u2', 'CD_u3',
@@ -89,6 +87,9 @@ def handle_file(message):
                                           'CD_E0', 'E50', 'CD_fi', 'CD_c',
                                           'CU_sigma1', 'CU_sigma2', 'CU_sigma3', 'CU_E50', 'CU_fi', 'CU_c',
                                           'UU_sigma1', 'UU_sigma2', 'UU_sigma3', 'UU_c',
+                                          'Dilatanci',    'E_rzg',    'CD_v_rzg',
+                                          'GGR10', 'G10_5', 'G5_2', 'G2_1', 'G1_05', 'G05_025', 'G025_01',
+                                          'G01_005', 'G005_001', 'G001_0002', 'G0002',
                                           ], typeRewrite='float64')
 
         worksheet_journal = deleteRows.returnDATAFRAME()
@@ -100,7 +101,7 @@ def handle_file(message):
         start_mech(worksheet_journal, us_id, dct_combination)
 
         # Путь к папке, которую нужно добавить в архив
-        folder_to_add = f'..\\prot\\{us_id}\\ООО Регионстрой\\Трехосные_КД_ПП\\'
+        folder_to_add = f'..\\prot\\{us_id}'
 
         files = os.listdir(folder_to_add)
 
@@ -187,7 +188,7 @@ def run_traxial(message):
     distribut.write_data_in_database()
 
     # Команда для запуска локального сервера Bokeh
-    BOKEH_SERVER_PORT = 5005
+    BOKEH_SERVER_PORT = 5007
     PROGRAM_PATH = [r'Graph_server_volume.py', us_id, 'traxial']
 
     BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"traxial"}'
@@ -205,7 +206,7 @@ def run_consolidation(message):
     distribut.write_data_in_database()
 
     # Команда для запуска локального сервера Bokeh
-    BOKEH_SERVER_PORT = 5010
+    BOKEH_SERVER_PORT = 5011
     PROGRAM_PATH = [r'Graph_consolidation.py', us_id, 'consolidation']
 
     BOKEH_SERVER_COMMAND = f'bokeh serve --show --port {BOKEH_SERVER_PORT} {PROGRAM_PATH[0]} --args {us_id} {"consolidation"}'

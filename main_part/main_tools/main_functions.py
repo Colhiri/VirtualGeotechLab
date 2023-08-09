@@ -110,6 +110,68 @@ def random_values(points_x, dont_touch_indexes, parameters_points):
     return points_x
 
 """
+Еще одна версия кривой Безье
+"""
+class Bezier():
+    def TwoPoints(t, P1, P2):
+        """
+        Returns a point between P1 and P2, parametised by t.
+        INPUTS:
+            t     float/int; a parameterisation.
+            P1    numpy array; a point.
+            P2    numpy array; a point.
+        OUTPUTS:
+            Q1    numpy array; a point.
+        """
+        Q1 = (1 - t) * P1 + t * P2
+        return Q1
+
+    def Points(t, points):
+        """
+        Returns a list of points interpolated by the Bezier process
+        INPUTS:
+            t            float/int; a parameterisation.
+            points       list of numpy arrays; points.
+        OUTPUTS:
+            newpoints    list of numpy arrays; points.
+        """
+        newpoints = []
+        for i1 in range(0, len(points) - 1):
+            newpoints += [Bezier.TwoPoints(t, points[i1], points[i1 + 1])]
+        return newpoints
+
+    def Point(t, points):
+        """
+        Returns a point interpolated by the Bezier process
+        INPUTS:
+            t            float/int; a parameterisation.
+            points       list of numpy arrays; points.
+        OUTPUTS:
+            newpoint     numpy array; a point.
+        """
+        newpoints = points
+        while len(newpoints) > 1:
+            newpoints = Bezier.Points(t, newpoints)
+
+        return newpoints[0]
+
+    def Curve(t_values, points):
+        """
+        Returns a point interpolated by the Bezier process
+        INPUTS:
+            t_values     list of floats/ints; a parameterisation.
+            points       list of numpy arrays; points.
+        OUTPUTS:
+            curve        list of numpy arrays; points.
+        """
+        curve = np.array([[0.0] * len(points[0])])
+        for t in t_values:
+            curve = np.append(curve, [Bezier.Point(t, points)], axis=0)
+
+        curve = np.delete(curve, 0, 0)
+        return curve
+
+"""
 Кривая Безье
 Используется для петель разгрузки
 """
@@ -146,3 +208,6 @@ def bezier_curve(points, nTimes=1000):
     yvals = np.dot(yPoints, polynomial_array)
 
     return xvals, yvals
+
+def definition_type_grunt(IP=None, IL=None, e=None):
+    pass

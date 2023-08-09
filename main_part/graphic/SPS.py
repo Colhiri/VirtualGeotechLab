@@ -9,25 +9,16 @@ from scipy import interpolate
 from GEOF.main_part.graphic.combination_unaxial import AnalyzeGraph
 from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve, random_values
 
-def start_SPS_CD(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
+def start_SPS_CD(organise_dct, dct_combination: dict, type_grunt_schemas: dict):
 
-    F = data_mech.get("F")
-    C = data_mech.get("C")
-    countPoint = data_mech.get("countPoint")
-    endE1 = data_mech.get("endE1")
-    stepE1 = endE1 / countPoint
+    F = organise_dct.get("F_unaxial")
+    C = organise_dct.get("C_unaxial")
 
-    pressStart = data_mech.get("pressStart")
-    pressEnd = data_mech.get("pressEnd")
-
-    # Выделение возможной максимальной разницы между точками
-
-
-    differencePress = pressEnd / 100
+    pressStart = organise_dct.get("PressStart_unaxial_now")
+    pressEnd = organise_dct.get("PressEnd_unaxial_now")
 
     dct_Combination = {
         "pressStart": pressStart,
-        "endE1": endE1,
         "pressEnd": pressEnd,
     }
 
@@ -39,7 +30,6 @@ def start_SPS_CD(name: str, data_mech: dict, organise_dct, dct_combination: dict
     new_point_x, new_point_y = analyze.points_reload()
     parameters_points_dct = analyze.get_parameters_points()
     xnew, yfit = interpolation(x=new_point_x, y=new_point_y, parameters=parameters_points_dct)
-
 
     index_x = xnew.index(nearest(xnew, pressEnd))
     xnew[index_x] = pressEnd

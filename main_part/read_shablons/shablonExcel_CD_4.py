@@ -11,7 +11,7 @@ import numpy as np
 import openpyxl
 import pandas as pd
 
-def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel: dict, mode: int) -> None:
+def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Excel: dict, mode: int) -> None:
     # Организационные моменты
     LAB_NO = organise_dct.get("LAB_NO")
     N_IG = organise_dct.get("N_IG")
@@ -21,7 +21,10 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
 
 
     # Путь для сохранения протоколов
-    pathSave = dct.get("pathSave")
+    pathSave = organise_dct.get("pathSave_traxial_CD")
+
+    print(pathSave)
+
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))
@@ -48,18 +51,21 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
     e = organise_dct.get('e')
     IL = organise_dct.get('IL')
 
-    if LAB_NO is None or LAB_NO == np.nan or LAB_NO == np.NAN or LAB_NO == "None" or LAB_NO == "nAn":
+    if LAB_NO in [None, np.nan, np.NAN, "None", "nAn"]:
         prot_name = str(row) + '.xlsx'
     else:
         prot_name = LAB_NO + '.xlsx'
-    try:
+    """try:
         shutil.copy('..\\srcs\\shablons\\TPDS_CD_test.xlsx'
                     ,f'{pathSave}\\{prot_name}')
         os.rename(
             f'..\\prot\\TPDS_CD_test.xlsx',
             f'{pathSave}\\{prot_name}')
     except:
-        pass
+        pass"""
+
+    shutil.copy('..\\srcs\\shablons\\TPDS_CD_test.xlsx'
+                , f'{pathSave}\\{prot_name}')
 
     wb = openpyxl.load_workbook(
         f'{pathSave}\\{prot_name}')
@@ -83,31 +89,31 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, dct: dict, organise_dct: dict, 
     ws['A85'] = values_Excel.get('devE0')
     ws['B85'] = values_Excel.get('epsE0')
 
-    ws['O56'] = dct.get('F')
-    ws['O57'] = dct.get('C')
+    ws['O56'] = organise_dct.get('F_traxial')
+    ws['O57'] = organise_dct.get('C_traxial')
 
     # Давления
     # K0, д.е.
-    ws['D62'] = (1 - math.sin(math.radians(dct.get('F'))))
+    ws['D62'] = (1 - math.sin(math.radians(organise_dct.get('F_traxial'))))
     # Эффективное напряжение, Мпа:
-    ws['J62'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
+    ws['J62'] = organise_dct.get('pressStart1_traxial') * (1 - math.sin(math.radians(organise_dct.get('F_traxial'))))
     # Точки нахождения модуля Е0, Мпа (полное напряжение):
     # Первая точка модуля E0
-    ws['J63'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F'))))
+    ws['J63'] = organise_dct.get('pressStart1_traxial') * (1 - math.sin(math.radians(organise_dct.get('F_traxial'))))
     # Вторая точка модуля E0
-    ws['K63'] = dct.get('pressStart1') * (1 - math.sin(math.radians(dct.get('F')))) + values_Excel.get('devE0')
+    ws['K63'] = organise_dct.get('pressStart1_traxial') * (1 - math.sin(math.radians(organise_dct.get('F_traxial')))) + values_Excel.get('devE0')
     # Максимальный девиатор
     ws['J64'] = values_Excel.get('devMAX')
     # Точка на Е50
     ws['J65'] = values_Excel.get('devE50')
 
-    ws['N47'] = dct.get('pressStart1')
-    ws['N48'] = dct.get('pressStart2')
-    ws['N49'] = dct.get('pressStart3')
+    ws['N47'] = organise_dct.get('pressStart1_traxial')
+    ws['N48'] = organise_dct.get('pressStart2_traxial')
+    ws['N49'] = organise_dct.get('pressStart3_traxial')
 
-    ws['O47'] = dct.get('pressEnd1')
-    ws['O48'] = dct.get('pressEnd2')
-    ws['O49'] = dct.get('pressEnd3')
+    ws['O47'] = organise_dct.get('pressEnd1_traxial')
+    ws['O48'] = organise_dct.get('pressEnd2_traxial')
+    ws['O49'] = organise_dct.get('pressEnd3_traxial')
 
     date_protocol = [str(x) for x in date_protocol.replace(' 00:00:00', '').split('-')]
     date_protocol.reverse()

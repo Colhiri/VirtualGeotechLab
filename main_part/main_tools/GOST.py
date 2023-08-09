@@ -1,6 +1,8 @@
 import math
 
-def getting_parameters_from_enggeo(organise_dct: dict, GRANSOST=None):
+import numpy as np
+
+def getting_parameters_from_enggeo(organise_dct: dict):
 
     IP = organise_dct.get('IP')
     IL = organise_dct.get('IL')
@@ -8,20 +10,20 @@ def getting_parameters_from_enggeo(organise_dct: dict, GRANSOST=None):
     Sr = organise_dct.get('Sr')
 
     # основной тип грунта для механики
-    if IP == None:
+    if str(IP) in [None, 'nan', 'None']:
         consistency = None
         water_saturation = None
         IL = None
         main_type = 'incoherent'  # несвязный
 
-        GGR10 = GRANSOST[1]
-        G10_5 = GRANSOST[2]
-        G5_2 = GRANSOST[3]
-        G2_1 = GRANSOST[4]
-        G1_05 = GRANSOST[5]
-        G05_025 = GRANSOST[6]
-        G025_01 = GRANSOST[7]
-        G01_005 = GRANSOST[8]
+        GGR10 = organise_dct.get('GGR10')
+        G10_5 = organise_dct.get('G10_5')
+        G5_2 = organise_dct.get('G5_2')
+        G2_1 = organise_dct.get('G2_1')
+        G1_05 = organise_dct.get('G1_05')
+        G05_025 = organise_dct.get('G05_025')
+        G025_01 = organise_dct.get('G025_01')
+        G01_005 = organise_dct.get('G01_005')
 
         # гравелистый
         if (G5_2 + G10_5 + GGR10) > 25:
@@ -63,6 +65,9 @@ def getting_parameters_from_enggeo(organise_dct: dict, GRANSOST=None):
         elif (G025_01 + G05_025 + G1_05 + G2_1 + G5_2 + G10_5 + GGR10) < 75:
             grunt_type = 'dust'
             density = None
+        else:
+            grunt_type = 'mid'
+            density = 'mid_plotn'
     else:
         IP = float(IP)
         IL = float(IL)
@@ -128,7 +133,6 @@ def getting_parameters_from_enggeo(organise_dct: dict, GRANSOST=None):
     for parametr, value in zip(param_proba, param_proba_value):
         parametr_proba.setdefault(parametr, value)
     return parametr_proba
-
 
 
 def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
@@ -212,7 +216,7 @@ def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
                         press_2 = 0.150
                         press_3 = 0.200
     else:
-        press_1, press_2, press_3 = None, None, None
+        press_1, press_2, press_3 = 0.1, 0.2, 0.3
 
     if typeISP == "TPD" or typeISP == "TPS" or typeISP == "TPDS":
 
@@ -241,6 +245,9 @@ def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
             pass
     else:
         press = None
+        press_1 = None
+        press_2 = None
+        press_3 = None
 
     # parametr_press = {'press': , 'press_1': press_1, 'press_2': press_2, 'press_3': press_3}
 

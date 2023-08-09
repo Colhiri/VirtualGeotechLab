@@ -14,37 +14,37 @@ from GEOF.main_part.graphic.combination_volume import AnalyzeGraph as AnalyzeGra
 from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve, random_values
 
 
-def start_TPDS_CF(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
+def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict):
     # Выбор давлений
-    pressStart1 = data_mech.get("pressStart")
-    press16 = pressStart1 * 1.6
-    otn_pStart = 0
+    pressStart1 = organise_dct.get("PressStart_traxial_now")
+    name = organise_dct.get('name_traxial_now')
+    pressEnd1 = organise_dct.get("PressEnd_traxial_now")
 
-    name = data_mech.get('name')
+    F = organise_dct.get("F_traxial")
+    C = organise_dct.get("C_traxial")
+    koef_puasson = organise_dct.get("CD_v")
+    angle_dilatanci = organise_dct.get("Dilatanci")
+
     if name == 'graph1' or name == 'graph0':
-        E_0 = data_mech.get("E_0")
-        E_50 = data_mech.get("E_50")
+        E_0 = organise_dct.get("E_0")
+        E_50 = organise_dct.get("E_50")
 
-    if name == 'graph2':
-        random_press = (data_mech.get("pressStart") / data_mech.get("pressStart1")) * random.randint(90, 110) / 100
-        E_0 = data_mech.get("E_0") * random_press
-        E_50 = data_mech.get("E_50") * random_press
+    if name == 'graph2' or name == 'graph3':
+        random_press = (organise_dct.get("PressStart_traxial_now") / organise_dct.get("pressStart1_traxial")) * random.randint(90, 110) / 100
+        E_0 = organise_dct.get("E_0") * random_press
+        E_50 = organise_dct.get("E_50") * random_press
 
-    if name == 'graph3':
-        random_press = (data_mech.get("pressStart") / data_mech.get("pressStart1")) * random.randint(90, 110) / 100
+    get_parameters = AnalyzeGraph(organise_values=organise_dct,
+                           control_points={},
+                           data=dct_combination,
+                           type_grunt_dct=type_grunt_schemas)
+    parameters_points_dct = get_parameters.get_parameters_points()
+    countPoint = parameters_points_dct.get("count_point")
+    endE1 = parameters_points_dct.get("endE1")
 
-        E_0 = data_mech.get("E_0") * random_press
-        E_50 = data_mech.get("E_50") * random_press
-
-    F = data_mech.get("F")
-    C = data_mech.get("C")
-    countPoint = data_mech.get("countPoint")
-    endE1 = data_mech.get("endE1")
+    otn_pStart = 0
+    press16 = pressStart1 * 1.6
     stepE1 = endE1 / countPoint
-    pressEnd1 = data_mech.get("pressEnd")
-
-    ### Разница для расчёта коэффициента отклонения давления в функции комбинации
-    differencePress = (press16 - pressStart1) / 5
 
     # Расчет E1 и относительных вертикальных деформаций
     press16 = pressStart1 * 1.6
@@ -86,10 +86,6 @@ def start_TPDS_CF(name: str, data_mech: dict, organise_dct, dct_combination: dic
     """
     Объемные деформации
     """
-
-    koef_puasson = data_mech.get("Puasson")
-    angle_dilatanci = data_mech.get("Dilatanci")
-
     # Словарь для передачи в функцию комбинации
     control_point = {
         "y_press16": y_press16,
@@ -187,7 +183,6 @@ def start_TPDS_CF(name: str, data_mech: dict, organise_dct, dct_combination: dic
     # index_x_delta_EV_E0 = xnew.index(nearest(xnew, delta_EV_E0))
     # index_x_EV_END_1 = xnew.index(nearest(xnew, EV_END_1))
     # index_x_EV_END_2 = xnew.index(nearest(xnew, EV_END_2))
-
 
     xnew = random_values(points_x=xnew,
                          dont_touch_indexes=[0, ],

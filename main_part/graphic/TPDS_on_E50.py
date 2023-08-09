@@ -2,7 +2,6 @@ import math
 import random
 import sys
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -13,7 +12,6 @@ from GEOF.main_part.graphic.combination import AnalyzeGraph
 from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve, random_values
 from GEOF.main_part.graphic.combination_volume import AnalyzeGraph as AnalyzeGraphVolume
 
-
 """
 TPD, где последняя точка рассчитывается исходя из модуля Е50 и нахождения его на вертикальном значении 
 относительной деформации 
@@ -23,22 +21,33 @@ TPD, где последняя точка рассчитывается исхо�
 Всегда ищет модуль на точке 1.6 от бытового давления (Теперь уже иногда от 1.3 или от 1.15
 """
 
-def start_TPDS_E50(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
+def start_TPDS_E50(organise_dct: dict, dct_combination: dict, type_grunt_schemas: dict):
+    # Выбор давлений
+    pressStart1 = organise_dct.get("PressStart_traxial_now")
+    name = organise_dct.get('name_traxial_now')
+    pressEnd1 = organise_dct.get("PressEnd_traxial_now")
 
-    # Выбор значений механики
-    E_0 = data_mech.get("E_0")
-    E_50 = data_mech.get("E_50")
-    F = data_mech.get("F")
-    C = data_mech.get("C")
-    countPoint = data_mech.get("countPoint")
+    F = organise_dct.get("F_traxial")
+    C = organise_dct.get("C_traxial")
+    koef_puasson = organise_dct.get("CD_v")
+    angle_dilatanci = organise_dct.get("Dilatanci")
 
-    endE1 = data_mech.get("endE1")
+    E_0 = organise_dct.get("E_0")
+    E_50 = organise_dct.get("E_50")
+
+
+    get_parameters = AnalyzeGraph(organise_values=organise_dct,
+                                  control_points={},
+                                  data=dct_combination,
+                                  type_grunt_dct=type_grunt_schemas)
+    parameters_points_dct = get_parameters.get_parameters_points()
+    countPoint = parameters_points_dct.get("count_point")
+    endE1 = parameters_points_dct.get("endE1")
+
+    otn_pStart = 0
     stepE1 = endE1 / countPoint
 
 
-    # Выбор давлений
-    pressStart1 = data_mech.get("pressStart")
-    otn_pStart = 0
 
     # Расчет E1 и относительных вертикальных деформаций
     press16 = pressStart1 * 1.6
@@ -89,9 +98,6 @@ def start_TPDS_E50(name: str, data_mech: dict, organise_dct, dct_combination: di
 
 
     pressEnd1 = 2 * pressE50 - pressStart1
-
-    koef_puasson = data_mech.get("Puasson")
-    angle_dilatanci = data_mech.get("Dilatanci")
 
     # Словарь для передачи в функцию комбинации
     control_point = {

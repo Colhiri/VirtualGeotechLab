@@ -6,6 +6,7 @@ from time import strftime
 import time
 import datetime
 import json
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,22 +16,14 @@ from scipy import interpolate
 
 import GEOF.main_part.graphic.TPDS_on_CF as TPDSCF
 import GEOF.main_part.graphic.TPDS_on_E50 as TPDS50
-
-
 import GEOF.main_part.graphic.SPS as SPS
 import GEOF.main_part.graphic.SPD as SPD
 import GEOF.main_part.graphic.TPDS_on_CF_RZG as TPDSRZG
 import GEOF.main_part.graphic.TPDS_on_CF_RZG_50 as TPDSRZG50
 import GEOF.main_part.graphic.OCR as OCR_ISP
 
-
 import GEOF.main_part.main_tools as main_tools
-
 import GEOF.main_part.read_shablons as read_shablons
-
-import sys
-
-
 
 ### Удалить строки без механики
 deleteRows = main_tools.ExcelModules(  # path=".\\Data.xlsx",
@@ -71,7 +64,6 @@ worksheet_journal = deleteRows.returnDATAFRAME()
 
 count_rows = len(worksheet_journal)
 for row in range(0, count_rows):
-
 
     # Список для сохранения датафреймов, которые возвращаются из TPDS
     save_DF = []

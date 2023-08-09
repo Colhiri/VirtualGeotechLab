@@ -12,7 +12,7 @@ import openpyxl
 import pandas as pd
 from scipy import interpolate
 
-def shablonExcel_SPD(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel):
+def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
     # Организационные моменты
     LAB_NO = organise_dct.get("LAB_NO")
     N_IG = organise_dct.get("N_IG")
@@ -20,10 +20,8 @@ def shablonExcel_SPD(row, dataframes: list, dct: dict, organise_dct: dict, value
     depth = organise_dct.get("depth")
     nameSoil = organise_dct.get("nameSoil")
 
-
     # Путь для сохранения протоколов
-    pathSave = dct.get("pathSave")
-
+    pathSave = organise_dct.get("pathSave")
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))
@@ -61,7 +59,6 @@ def shablonExcel_SPD(row, dataframes: list, dct: dict, organise_dct: dict, value
     """os.rename(
             f'{pathSave}\\SPD.xlsx',
             f'{pathSave}\\{prot_name}')"""
-
 
     wb = openpyxl.load_workbook(
         f'{pathSave}\\{prot_name}')
@@ -135,8 +132,5 @@ def shablonExcel_SPD(row, dataframes: list, dct: dict, organise_dct: dict, value
     dataframe1.to_excel(writer, sheet_name='1', startcol=5, startrow=29, index=False,
                         index_label=False,
                         header=False, float_format="%.20f")
-
-
-
 
     writer.close()

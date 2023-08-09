@@ -118,8 +118,6 @@ class AnalyzeGraph:
             self.new_percents_min_x.append(val_new_min_x)
             self.new_percents_max_x.append(val_new_max_x)
 
-
-
     def points_reload(self):
         """
         Создает новые точки на основе контрольных и опорных точек и отхождений.
@@ -172,4 +170,5 @@ class AnalyzeGraph:
                 'count_point': random.randint(int(self.count_points_min), int(self.count_points_max)),
                 'random_percent_min': self.random_percent_min,
                 'random_percent_max': self.random_percent_max,
+                'endE1': max(self.point_values_Y)
                 }

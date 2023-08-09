@@ -11,28 +11,53 @@ from scipy.special import comb
 from GEOF.main_part.graphic.combination import AnalyzeGraph
 from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve, random_values
 
-def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: dict, type_grunt_schemas: dict):
+def start_TPDS_RZG(organise_dct: dict, dct_combination: dict, type_grunt_schemas: dict):
     # Выбор давлений
-    pressStart1 = data_mech.get("pressStart")
+    pressStart1 = organise_dct.get("PressStart_traxial_now")
+    name = organise_dct.get('name_traxial_now')
+    pressEnd1 = organise_dct.get("PressEnd_traxial_now")
 
-    # Выбор значений механики
-    E_0 = data_mech.get("E_0")
-    E_50 = data_mech.get("E_50")
-    F = data_mech.get("F")
-    C = data_mech.get("C")
-    countPoint = data_mech.get("countPoint")
-    endE1 = data_mech.get("endE1")
+    F = organise_dct.get("F_traxial")
+    C = organise_dct.get("C_traxial")
+
+    if name == 'graph1' or name == 'graph0':
+        E_0 = organise_dct.get("E_0")
+        E_50 = organise_dct.get("E_50")
+
+    if name == 'graph2' or name == 'graph3':
+        random_press = (organise_dct.get("PressStart_traxial_now") / organise_dct.get("pressStart1_traxial")) * random.randint(90,
+                                                                                                           110) / 100
+        E_0 = organise_dct.get("E_0") * random_press
+        E_50 = organise_dct.get("E_50") * random_press
+
+    E_rzg = organise_dct.get("E_rzg")
+    CD_v_rzg = organise_dct.get("CD_v_rzg")
+    if not E_rzg:
+        E_rzg = E_0 * random.randint(4, 5)
+    if not CD_v_rzg:
+        CD_v_rzg = random.randint(14, 16) / 100
+
+    koef_puasson = organise_dct.get("CD_v")
+    angle_dilatanci = organise_dct.get("Dilatanci")
+
+
+
+    get_parameters = AnalyzeGraph(organise_values=organise_dct,
+                                  control_points={},
+                                  data=dct_combination,
+                                  type_grunt_dct=type_grunt_schemas)
+    parameters_points_dct = get_parameters.get_parameters_points()
+    countPoint = parameters_points_dct.get("count_point")
+    endE1 = parameters_points_dct.get("endE1")
+
+    otn_pStart = 0
     stepE1 = endE1 / countPoint
 
-    # Расчет E1 и относительных вертикальных деформаций
-    otn_pStart = 0
+
 
     press16 = pressStart1 * 1.6
     otn_p16 = (press16 - pressStart1 + E_0 * otn_pStart) / E_0
     y_press16 = 76 * otn_p16 - otn_p16 * stepE1
-
-    ### Разница для расчёта коэффициента отклонения давления в функции комбинации
-    differencePress = (press16 - pressStart1) / 5
 
     otn_E50 = otn_p16 * 3
     pressEnd1 = pressStart1 + 2 * E_50 * otn_E50 - 2 * E_50 * otn_pStart
@@ -71,7 +96,6 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
 
     pressEnd1 = 2 * pressE50 - pressStart1
 
-    E_rzg = E_0 * random.randint(45, 60) / 10
     press_rzg = (pressE50 - pressStart1) / 2 + pressE50
 
     press_rzg_END = press_rzg - 0.0005
@@ -158,7 +182,6 @@ def start_TPDS_RZG(name: str, data_mech: dict, organise_dct, dct_combination: di
     xnew, yfit = interpolation(x=x_end, y=y_end,
                                      count_point=100,
                                      parameters=parameters_points_dct)
-
 
     # Вставка значений по найденному индексу приближенного значения для нахождения модулей для E0, E50, pressMax
     index_x_E_0 = xnew.index(nearest(xnew, press16))

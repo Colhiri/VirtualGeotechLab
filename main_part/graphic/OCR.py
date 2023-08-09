@@ -7,75 +7,7 @@ import pandas as pd
 from scipy import interpolate
 import scipy.stats as stats
 
-
-class Bezier():
-    def TwoPoints(t, P1, P2):
-        """
-        Returns a point between P1 and P2, parametised by t.
-        INPUTS:
-            t     float/int; a parameterisation.
-            P1    numpy array; a point.
-            P2    numpy array; a point.
-        OUTPUTS:
-            Q1    numpy array; a point.
-        """
-        Q1 = (1 - t) * P1 + t * P2
-        return Q1
-
-    def Points(t, points):
-        """
-        Returns a list of points interpolated by the Bezier process
-        INPUTS:
-            t            float/int; a parameterisation.
-            points       list of numpy arrays; points.
-        OUTPUTS:
-            newpoints    list of numpy arrays; points.
-        """
-        newpoints = []
-        for i1 in range(0, len(points) - 1):
-            newpoints += [Bezier.TwoPoints(t, points[i1], points[i1 + 1])]
-        return newpoints
-
-    def Point(t, points):
-        """
-        Returns a point interpolated by the Bezier process
-        INPUTS:
-            t            float/int; a parameterisation.
-            points       list of numpy arrays; points.
-        OUTPUTS:
-            newpoint     numpy array; a point.
-        """
-        newpoints = points
-        while len(newpoints) > 1:
-            newpoints = Bezier.Points(t, newpoints)
-
-        return newpoints[0]
-
-    def Curve(t_values, points):
-        """
-        Returns a point interpolated by the Bezier process
-        INPUTS:
-            t_values     list of floats/ints; a parameterisation.
-            points       list of numpy arrays; points.
-        OUTPUTS:
-            curve        list of numpy arrays; points.
-        """
-        curve = np.array([[0.0] * len(points[0])])
-        for t in t_values:
-            curve = np.append(curve, [Bezier.Point(t, points)], axis=0)
-
-        curve = np.delete(curve, 0, 0)
-        return curve
-
-
-# Функция ближайщего соседа
-def nearest(lst, target):
-    try:
-        pressMAX = lst.tolist().index(max(lst))
-    except:
-        pressMAX = lst.index(max(lst))
-    return min(lst[:pressMAX], key=lambda x: abs(x - target))
-
+from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve, random_values, Bezier
 
 def return_index(lst, lst2, target):
     try:
@@ -92,12 +24,10 @@ def return_index(lst, lst2, target):
 
     return new_value
 
-
 class CustomLine:
     def __init__(self, slope, const):
         self.m = slope
         self.c = const
-
 
 def findSolution(L1, L2):
     if L1.c > L2.c:
@@ -113,7 +43,7 @@ def findSolution(L1, L2):
     return x, y
 
 
-def OCR_start(dct: dict, name: str, organise_dct: dict, methodINTERPOLATION):
+def OCR_start(organise_dct: dict):
     IP = organise_dct.get('IP')
     IL = organise_dct.get('IL')
     e = organise_dct.get('e')
@@ -121,8 +51,8 @@ def OCR_start(dct: dict, name: str, organise_dct: dict, methodINTERPOLATION):
     g = 9.80665
     depth = organise_dct.get('depth')
 
-    OCR = dct.get('OCR')
-    effective_press = dct.get('effective_press')
+    OCR = organise_dct.get('OCR')
+    effective_press = organise_dct.get('effective_press')
 
     if 1 <= IP <= 7:
         beta = 0.7

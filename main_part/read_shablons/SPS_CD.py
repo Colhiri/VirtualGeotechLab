@@ -12,7 +12,7 @@ import openpyxl
 import pandas as pd
 from scipy import interpolate
 
-def shablonExcel_SPS_CD(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel):
+def shablonExcel_SPS_CD(row, dataframes: list, organise_dct: dict, values_Excel):
     # Организационные моменты
     LAB_NO = organise_dct.get("LAB_NO")
     N_IG = organise_dct.get("N_IG")
@@ -20,9 +20,8 @@ def shablonExcel_SPS_CD(row, dataframes: list, dct: dict, organise_dct: dict, va
     depth = organise_dct.get("depth")
     nameSoil = organise_dct.get("nameSoil")
 
-
     # Путь для сохранения протоколов
-    pathSave = dct.get("pathSave")
+    pathSave = organise_dct.get("pathSave_unaxial")
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))
@@ -83,17 +82,17 @@ def shablonExcel_SPS_CD(row, dataframes: list, dct: dict, organise_dct: dict, va
     ws['B70'] = values_Excel.get('devE0')
     ws['A70'] = values_Excel.get('epsE0')
 
-    ws['O53'] = dct.get('F')
-    ws['O54'] = dct.get('C')
+    ws['O53'] = organise_dct.get('F_unaxial')
+    ws['O54'] = organise_dct.get('C_unaxial')
 
     # Давления
-    ws['N47'] = dct.get('pressStart1')
-    ws['N48'] = dct.get('pressStart2')
-    ws['N49'] = dct.get('pressStart3')
+    ws['N47'] = organise_dct.get('pressStart1_unaxial')
+    ws['N48'] = organise_dct.get('pressStart2_unaxial')
+    ws['N49'] = organise_dct.get('pressStart3_unaxial')
 
-    ws['O47'] = dct.get('pressEnd1')
-    ws['O48'] = dct.get('pressEnd2')
-    ws['O49'] = dct.get('pressEnd3')
+    ws['O47'] = organise_dct.get('pressEnd1_unaxial')
+    ws['O48'] = organise_dct.get('pressEnd2_unaxial')
+    ws['O49'] = organise_dct.get('pressEnd3_unaxial')
 
     date_protocol = [str(x) for x in date_protocol.replace(' 00:00:00', '').split('-')]
     date_protocol.reverse()

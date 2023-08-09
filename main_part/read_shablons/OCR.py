@@ -12,7 +12,7 @@ import openpyxl
 import pandas as pd
 from scipy import interpolate
 
-def shablonExcel_OCR(row, dataframes: list, dct: dict, organise_dct: dict, values_Excel):
+def shablonExcel_OCR(row, dataframes: list, organise_dct: dict, values_Excel):
     # Организационные моменты
     LAB_NO = organise_dct.get("LAB_NO")
     N_IG = organise_dct.get("N_IG")
@@ -21,7 +21,7 @@ def shablonExcel_OCR(row, dataframes: list, dct: dict, organise_dct: dict, value
     nameSoil = organise_dct.get("nameSoil")
 
     # Путь для сохранения протоколов
-    pathSave = dct.get("pathSave")
+    pathSave = organise_dct.get("pathSave")
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))
