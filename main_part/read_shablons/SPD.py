@@ -56,10 +56,6 @@ def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
     shutil.copy('..\\srcs\\shablons\\SPD.xlsx'
                     ,f'{pathSave}\\{prot_name}')
 
-    """os.rename(
-            f'{pathSave}\\SPD.xlsx',
-            f'{pathSave}\\{prot_name}')"""
-
     wb = openpyxl.load_workbook(
         f'{pathSave}\\{prot_name}')
     ws = wb.active

@@ -165,7 +165,7 @@ class DataDitributor:
             "traxial_scheme_now": self.cursor.execute('SELECT traxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
             "volume_traxial_scheme_now": self.cursor.execute('SELECT volume_traxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
             "unaxial_scheme_now": self.cursor.execute('SELECT unaxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
-            "consolidation_scheme_now": self.cursor.execute('SELECT unaxial FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
+            "consolidation_scheme_now": self.cursor.execute('SELECT consolidation FROM peoples WHERE id = ?', (self.id_people,)).fetchone()[0],
             "traxial": {},
             "volume_traxial": {},
             "unaxial": {},
@@ -326,7 +326,6 @@ class DataDitributor:
                             (id_user, None, self.name_company,))
         self.conn.commit()
         print('Данные пользователя записаны в базу данных')
-
 
     def write_temporary_user(self, user_id: int, user_name: str, user_surname: str, username: str):
         self.cursor.execute('INSERT INTO temp_user (user_id, user_name, user_surname, username) VALUES (?, ?, ?, ?)',

@@ -52,14 +52,12 @@ def shablonExcel_SPS_CD(row, dataframes: list, organise_dct: dict, values_Excel)
         prot_name = str(row) + '.xlsx'
     else:
         prot_name = LAB_NO + '.xlsx'
-    try:
-        shutil.copy('..\\srcs\\shablons\\SPS_CD.xlsx'
-                    ,f'{pathSave}\\{prot_name}')
-        os.rename(
-            f'..\\prot\\SPS_CD.xlsx',
-            f'{pathSave}\\{prot_name}')
-    except:
-        pass
+
+
+
+    shutil.copy('..\\srcs\\shablons\\SPS_CD.xlsx'
+                ,f'{pathSave}\\{prot_name}')
+
 
     wb = openpyxl.load_workbook(
         f'{pathSave}\\{prot_name}')

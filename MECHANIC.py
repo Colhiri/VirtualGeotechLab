@@ -158,17 +158,28 @@ def start(worksheet_journal, id_user, dct_combination):
             'PressEnd_unaxial_now': None,
         }
 
-        pressEnd1, pressEnd2, pressEnd3 = calculate_values.Traxial_value(organise_dct=organise_dct)
-        organise_dct.setdefault('pressEnd1_traxial', pressEnd1)
-        organise_dct.setdefault('pressEnd2_traxial', pressEnd2)
-        organise_dct.setdefault('pressEnd3_traxial', pressEnd3)
-
         _, pressStart1, pressStart2, pressStart3 = calculate_press_gost("SPS", organise_dct.get('F_unaxial'),
                                                                         organise_dct.get('C_unaxial'), organise_dct)
+        organise_dct.setdefault('pressStart1_unaxial', pressStart1)
+        organise_dct.setdefault('pressStart2_unaxial', pressStart2)
+        organise_dct.setdefault('pressStart3_unaxial', pressStart3)
+
         pressEnd1, pressEnd2, pressEnd3 = calculate_values.SPS_value(organise_dct=organise_dct)
         organise_dct.setdefault('pressEnd1_unaxial', pressEnd1)
         organise_dct.setdefault('pressEnd2_unaxial', pressEnd2)
         organise_dct.setdefault('pressEnd3_unaxial', pressEnd3)
+
+
+
+
+        organise_dct.setdefault('pressStart1_traxial', pressStart1)
+        organise_dct.setdefault('pressStart2_traxial', pressStart2)
+        organise_dct.setdefault('pressStart3_traxial', pressStart3)
+
+        pressEnd1, pressEnd2, pressEnd3 = calculate_values.Traxial_value(organise_dct=organise_dct)
+        organise_dct.setdefault('pressEnd1_traxial', pressEnd1)
+        organise_dct.setdefault('pressEnd2_traxial', pressEnd2)
+        organise_dct.setdefault('pressEnd3_traxial', pressEnd3)
 
         normative_analyze = GruntNormative(organise_values=organise_dct)
         normative_parameters = normative_analyze.return_parameters()
@@ -313,6 +324,10 @@ def start(worksheet_journal, id_user, dct_combination):
             pressStart1 = organise_dct.get('pressStart1_unaxial')
             pressStart2 = organise_dct.get('pressStart2_unaxial')
             pressStart3 = organise_dct.get('pressStart3_unaxial')
+
+            pressEnd1 = organise_dct.get('pressEnd1_unaxial')
+            pressEnd2 = organise_dct.get('pressEnd2_unaxial')
+            pressEnd3 = organise_dct.get('pressEnd3_unaxial')
 
             namesISP = ["graph1", "graph2", "graph3"]
             pressStarts = [pressStart1, pressStart2, pressStart3]

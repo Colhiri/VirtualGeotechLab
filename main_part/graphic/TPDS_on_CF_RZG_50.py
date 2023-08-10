@@ -33,7 +33,7 @@ def start_TPDS_RZG(organise_dct: dict, dct_combination: dict, type_grunt_schemas
     E_rzg = organise_dct.get("E_rzg")
     CD_v_rzg = organise_dct.get("CD_v_rzg")
     if not E_rzg:
-        E_rzg = E_0 * random.randint(4, 5)
+        E_rzg = E_0 * 1.5 # random.randint(4, 5)
     if not CD_v_rzg:
         CD_v_rzg = random.randint(14, 16) / 100
 
@@ -100,7 +100,7 @@ def start_TPDS_RZG(organise_dct: dict, dct_combination: dict, type_grunt_schemas
 
     press_rzg_END = press_rzg - 0.0005
 
-    otn_E_RZG = otn_E50 + random.randint(4, 5) / 100
+    otn_E_RZG = otn_E50 + random.randint(1, 2) / 100
     y_pressR_RZG = 76 * otn_E_RZG - otn_E_RZG * stepE1
 
     # Стартовое напряжение повторного нагружения
@@ -179,7 +179,7 @@ def start_TPDS_RZG(organise_dct: dict, dct_combination: dict, type_grunt_schemas
         [0.0, y_press16, y_pressE50, y_pressR_RZG])
     x = np.array(
         [pressStart1, press16, pressE50, press_rzg])
-    xnew, yfit = interpolation(x=x_end, y=y_end,
+    xnew, yfit = interpolation(x=x, y=y,
                                      count_point=100,
                                      parameters=parameters_points_dct)
 

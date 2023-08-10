@@ -141,7 +141,7 @@ def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
     Depth = organise_dct.get('Depth')
     parametr_proba = getting_parameters_from_enggeo(organise_dct)
 
-    press, press_1, press_3, press_3 = None, None, None, None
+    press, press_1, press_2, press_3 = None, None, None, None
 
     if typeISP == "SPS":
 
@@ -220,6 +220,11 @@ def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
 
     if typeISP == "TPD" or typeISP == "TPS" or typeISP == "TPDS":
 
+        press = None
+        press_1 = None
+        press_2 = None
+        press_3 = None
+
         K_0 = 1
 
         if parametr_proba.get('grunt_type') == 'supes' or parametr_proba.get(
@@ -243,11 +248,6 @@ def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
             press = 0.050
         else:
             pass
-    else:
-        press = None
-        press_1 = None
-        press_2 = None
-        press_3 = None
 
     # parametr_press = {'press': , 'press_1': press_1, 'press_2': press_2, 'press_3': press_3}
 

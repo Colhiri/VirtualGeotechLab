@@ -55,14 +55,6 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Exce
         prot_name = str(row) + '.xlsx'
     else:
         prot_name = LAB_NO + '.xlsx'
-    """try:
-        shutil.copy('..\\srcs\\shablons\\TPDS_CD_test.xlsx'
-                    ,f'{pathSave}\\{prot_name}')
-        os.rename(
-            f'..\\prot\\TPDS_CD_test.xlsx',
-            f'{pathSave}\\{prot_name}')
-    except:
-        pass"""
 
     shutil.copy('..\\srcs\\shablons\\TPDS_CD_test.xlsx'
                 , f'{pathSave}\\{prot_name}')

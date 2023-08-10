@@ -52,14 +52,11 @@ def shablonExcel_OCR(row, dataframes: list, organise_dct: dict, values_Excel):
         prot_name = str(row) + '.xlsx'
     else:
         prot_name = LAB_NO + '.xlsx'
-    try:
-        shutil.copy('.\\srcs\\shablons\\OCR.xlsx'
-                    ,f'{pathSave}\\{prot_name}')
-        os.rename(
-            f'.\\prot\\OCR.xlsx',
-            f'{pathSave}\\{prot_name}')
-    except:
-        pass
+
+
+    shutil.copy('..\\srcs\\shablons\\OCR.xlsx'
+                ,f'{pathSave}\\{prot_name}')
+
 
     wb = openpyxl.load_workbook(
         f'{pathSave}\\{prot_name}')
