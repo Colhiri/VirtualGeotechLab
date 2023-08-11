@@ -11,7 +11,7 @@ from scipy.stats import stats
 
 from GEOF.main_part.graphic.combination import AnalyzeGraph
 from GEOF.main_part.graphic.combination_volume import AnalyzeGraph as AnalyzeGraphVolume
-from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve, random_values
+from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bezier_curve, random_values, volume_random_values
 
 
 def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict):
@@ -178,16 +178,18 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict)
     parameters_points_dct.update({'method_interpolate': 'nearest_volume'})
 
 
-    xnew, yfit = interpolation(x=new_point_x, y=new_point_y, parameters=parameters_points_dct)
 
     # index_x_delta_EV_E0 = xnew.index(nearest(xnew, delta_EV_E0))
     # index_x_EV_END_1 = xnew.index(nearest(xnew, EV_END_1))
     # index_x_EV_END_2 = xnew.index(nearest(xnew, EV_END_2))
 
-    xnew = random_values(points_x=xnew,
+    xnew = volume_random_values(points_x=xnew,
                          dont_touch_indexes=[0, ],
                          parameters_points=parameters_points_dct
                          )
+
+    xnew, yfit = interpolation(x=new_point_x, y=new_point_y, parameters=parameters_points_dct)
+
 
     curve1 = np.array([(x, y, z) for x, y, z in zip(deviator, otnVertDef, xnew)])
 

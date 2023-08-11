@@ -22,10 +22,11 @@ class ConsolidationGraph(Graph_traxial):
 
         ### Точки для основной кривой
         self.point_values_X = dct.get(self.global_schema).get(self.schema).get("point_values_X")
-        self.point_values_Y = dct.get(self.global_schema).get(self.schema).get("point_values_Y")
+        self.point_values_Y = [y / 76 for y in dct.get(self.global_schema).get(self.schema).get("point_values_Y")]
+
         ### Лимит
         self.limit_axe_X = max(self.point_values_X) + 0.05
-        self.limit_axe_Y = dct.get(self.global_schema).get(self.schema).get("limit_axe_Y")
+        self.limit_axe_Y = dct.get(self.global_schema).get(self.schema).get("limit_axe_Y") / 76
         ### Интерполяция
         self.method_interpolate = dct.get(self.global_schema).get(self.schema).get("method_interpolate")
         ### Проценты с APP
@@ -41,7 +42,7 @@ class ConsolidationGraph(Graph_traxial):
 
         ### Инициализация графика и графических утилит
         self.plot = figure(width=1000, height=1000, y_range=(self.limit_axe_Y, 0))
-        self.plot.y_range.start = 4
+        self.plot.y_range.start = 0.15
         self.plot.y_range.end = 0
         ### Создание значений для линий
         # Основная линия
@@ -164,6 +165,68 @@ class ConsolidationGraph(Graph_traxial):
         self.schema_select = Select(title='Choice schema',
                                     value=distribut.data.get(f"{self.global_schema}_scheme_now"),
                                     options=self.schemas)
+
+    def schema_select_handler(self, attr, old, new):
+        """
+        Выбор схемы, ее загрузка, и отображение
+        :param attr:
+        :param old:
+        :param new:
+        :return:
+        """
+        distribut.write_data_in_database()
+
+        self.schema = new
+
+        distribut.data.update({f"{self.global_schema}_scheme_now": self.schema})
+        if self.global_schema in ['traxial']:
+            distribut.data.update({"volume_traxial_scheme_now": self.schema})
+
+        dct = distribut.data_give()
+
+        ### Распаковка элементов
+        ### Точки для основной кривой
+        self.point_values_X = dct.get(self.global_schema).get(self.schema).get("point_values_X")
+        self.point_values_Y = [y / 76 for y in dct.get(self.global_schema).get(self.schema).get("point_values_Y")]
+        ### Лимиты
+        self.limit_axe_X = max(self.point_values_X) + 0.05
+        self.limit_axe_Y = dct.get(self.global_schema).get(self.schema).get("limit_axe_Y") / 76
+        ### Интерполяция
+        self.method_interpolate = dct.get(self.global_schema).get(self.schema).get("method_interpolate")
+        ### Проценты с APP
+        self.list_X_min = dct.get(self.global_schema).get(self.schema).get("list_X_min")
+        self.list_X_max = dct.get(self.global_schema).get(self.schema).get("list_X_max")
+        self.list_Y_min = dct.get(self.global_schema).get(self.schema).get("list_Y_min")
+        self.list_Y_max = dct.get(self.global_schema).get(self.schema).get("list_Y_max")
+        ### Проценты с APP
+        self.count_points_min = str(dct.get(self.global_schema).get(self.schema).get("count_points_min"))
+        self.count_points_max = str(dct.get(self.global_schema).get(self.schema).get("count_points_max"))
+        self.random_percent_min = str(dct.get(self.global_schema).get(self.schema).get("random_percent_min"))
+        self.random_percent_max = str(dct.get(self.global_schema).get(self.schema).get("random_percent_max"))
+
+        self.count_points_min_text.value = self.count_points_min
+        self.count_points_max_text.value = self.count_points_max
+        self.random_percent_min_text.value = self.random_percent_min
+        self.random_percent_max_text.value = self.random_percent_max
+
+        self.mid_line_values.data = dict(x=self.point_values_X, y=self.point_values_Y)
+
+        self.table_values.data = dict(x=self.mid_line_values.data['x'], y=self.mid_line_values.data['y'], )
+
+        self.table_values_perc.data = dict(x=self.point_values_X, y=self.point_values_Y,
+                                           x_min=self.list_X_min, x_max=self.list_X_max,
+                                           y_min=self.list_Y_min, y_max=self.list_Y_max)
+
+        self.interpolation_select.value = self.method_interpolate
+
+        self.calculate()
+
+        self.Y_boundaries()
+
+        self.save_schema()
+
+        self.update_plot()
+
     def interpolation_line(self, X, Y):
         """
         Интерполяция по контрольным предоставляемым откуда угодно точкам в соответствии с выбранным методом интерполяции
@@ -171,6 +234,7 @@ class ConsolidationGraph(Graph_traxial):
         :param Y:
         :return:
         """
+        Y = [y * 7600 for y in Y]
 
         yfit = np.linspace(min(Y), max(Y), num=50)
 
@@ -215,37 +279,41 @@ class ConsolidationGraph(Graph_traxial):
 
         xnew = pchip(yfit)
 
-        return {'x': xnew, 'y': yfit}
+        return {'x': xnew, 'y': [y / 7600 for y in yfit]}
 
-    def run(self):
+    def save_schema(self):
         """
-        Запуск программы
+        Переопределить для другого класса
         :return:
         """
-        # Подключение обработчика события изменения выбранного метода интерполяции
-        self.interpolation_select.on_change('value', self.interpolation_select_handler)
-        self.schema_select.on_change('value', self.schema_select_handler)
-        self.table_values_perc.js_on_change('patching', CustomJS(code="console.log(cb_obj);"))
+        distribut.data.get(self.global_schema)[self.schema] = {
+                                  "method_interpolate": self.method_interpolate,
+                                  "limit_axe_X": self.limit_axe_X,
+                                  "limit_axe_Y": max(self.point_values_Y) * 76,
 
-        # Подключение обработчиков событий
-        curdoc().add_root(row(self.plot, column(self.name_new_shema, self.button_add_schema, self.button_delete_schema)))
-        curdoc().add_root(row(self.interpolation_select,
-                              self.schema_select,
-                              self.button_save_schema,
-                              self.button_reset_schema,
-                              self.count_points_min_text,
-                              self.count_points_max_text,
-                              self.random_percent_min_text,
-                              self.random_percent_max_text,
-                              self.button_update_point_random,
-                              self.random_activate,
-                              ))
+                                  "point_values_X": self.point_values_X,
+                                  "point_values_Y": [y * 76 for y in self.point_values_Y],
 
-        curdoc().add_root(column(row(self.data_table, self.data_table_perc)))
-        curdoc().add_periodic_callback(self.update_plot, 100)  # Обновление графика каждые 100 мс
+                                  "list_X_min": self.list_X_min,
+                                  "list_X_max": self.list_X_max,
+                                  "list_Y_min": self.list_Y_min,
+                                  "list_Y_max": self.list_Y_max,
 
-        self.plot.on_event('tap', self.add_point_handler)  # Обработчик нажатия на график
-        self.plot.on_event('pan', self.move_point_handler)  # Обработчик перемещения точки
+                                  "count_points_min": int(self.count_points_min_text.value),
+                                  "count_points_max": int(self.count_points_max_text.value),
+                                  "random_percent_min": float(self.random_percent_min_text.value),
+                                  "random_percent_max": float(self.random_percent_max_text.value),
+                                                    }
+
+        distribut.write_data_in_database()
+
+distribut = DD(id_people='356379915') # sys.argv[1])
+distribut.check_schemas_people()
+distribut.write_data_in_database()
+graphs = ConsolidationGraph(distribut.data)
+graphs.run()
+"""
+
 
 distribut = DD(id_people=sys.argv[1]) # sys.argv[1])
 distribut.check_schemas_people()
@@ -253,3 +321,4 @@ distribut.write_data_in_database()
 if sys.argv[2] == 'consolidation':
     graphs = ConsolidationGraph(distribut.data)
     graphs.run()
+"""

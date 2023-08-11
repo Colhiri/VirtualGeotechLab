@@ -35,15 +35,11 @@ class Graph_traxial:
         """
         Объем
         """
-        self.multiple_value = 1
-
-        for volume_perc, traxial_perc in zip(dct.get('volume_traxial').get(self.schema).get("list_X_min"), self.list_X_min):
-            if volume_perc != traxial_perc:
-                self.multiple_value = volume_perc / traxial_perc
-
-        self.multiple_volume = TextInput(title="Set increase percent multiple", value=str(self.multiple_value))
 
         self.points_volume_X = dct.get('volume_traxial').get(self.schema).get("point_values_X")
+        self.volume_list_X_min = dct.get('volume_traxial').get(self.schema).get("list_X_min")
+        self.volume_list_X_max = dct.get('volume_traxial').get(self.schema).get("list_X_max")
+
         self.limit_volume_axe_X = max(self.points_volume_X) + 0.05
         self.volume_method_interpolate = dct.get('volume_traxial').get(self.schema).get("method_interpolate")
         self.plot_volume = figure(width=1000, height=1000, x_range=(0, self.limit_axe_Y / 76))
@@ -52,8 +48,9 @@ class Graph_traxial:
         self.volume_mid_line_values = ColumnDataSource(data=dict(x=self.points_volume_X, y=self.point_values_Y), )
         # Интерполяция точек по основной линии
         self.volume_mid_line_interpolate_values = ColumnDataSource(
-            data=dict(self.volume_interpolation_line(self.volume_mid_line_values.data['x'],
-                                              self.volume_mid_line_values.data['y'])), )
+            data=dict(self.interpolation_line(self.volume_mid_line_values.data['x'],
+                                              self.volume_mid_line_values.data['y'],
+                                              'volume_traxial')), )
         # Отображение точек на графике
         self.volume_glyph = self.plot_volume.circle('y', 'x', size=10, color='blue', alpha=0.5, source=self.volume_mid_line_values)
 
@@ -77,16 +74,17 @@ class Graph_traxial:
                          zip(self.volume_mid_line_values.data['x'], self.list_X_max)],
                       y=self.volume_mid_line_values.data['y']), )
         self.volume_min_line_interpolate_values = ColumnDataSource(
-            data=dict(self.volume_interpolation_line(self.volume_min_line_values.data['x'],
-                                              self.volume_min_line_values.data['y'])))
+            data=dict(self.interpolation_line(self.volume_min_line_values.data['x'],
+                                              self.volume_min_line_values.data['y'],
+                                              'volume_traxial')))
         self.volume_max_line_interpolate_values = ColumnDataSource(
-            data=dict(self.volume_interpolation_line(self.volume_max_line_values.data['x'],
-                                              self.volume_max_line_values.data['y'])))
+            data=dict(self.interpolation_line(self.volume_max_line_values.data['x'],
+                                              self.volume_max_line_values.data['y'],
+                                              'volume_traxial')))
         self.plot_volume.line(x='y', y='x', line_color='blue', line_width=1, source=self.volume_min_line_interpolate_values,
                        legend_label='Min value')
         self.plot_volume.line(x='y', y='x', line_color='red', line_width=1, source=self.volume_max_line_interpolate_values,
                        legend_label='Max value')
-
 
         """
         Давление
@@ -100,7 +98,8 @@ class Graph_traxial:
         self.mid_line_values = ColumnDataSource(data=dict(x=self.point_values_X, y=self.point_values_Y),)
         # Интерполяция точек по основной линии
         self.mid_line_interpolate_values = ColumnDataSource(data=dict(self.interpolation_line(self.mid_line_values.data['x'],
-                                                                                              self.mid_line_values.data['y'])), )
+                                                                                              self.mid_line_values.data['y'],
+                                                                                              'traxial')), )
 
         # Вспомогательная минимальная линия по оси Х
         self.min_line_values = ColumnDataSource(
@@ -113,10 +112,12 @@ class Graph_traxial:
                       y=self.mid_line_values.data['y']), )
         self.min_line_interpolate_values = ColumnDataSource(
             data=dict(self.interpolation_line(self.min_line_values.data['x'],
-                                              self.min_line_values.data['y'])))
+                                              self.min_line_values.data['y'],
+                                              'traxial')))
         self.max_line_interpolate_values = ColumnDataSource(
             data=dict(self.interpolation_line(self.max_line_values.data['x'],
-                                              self.max_line_values.data['y'])))
+                                              self.max_line_values.data['y'],
+                                              'traxial')))
 
         # Создание таблицы со значениями линий
         self.table_values = ColumnDataSource(dict(x=self.mid_line_values.data['x'], y=self.mid_line_values.data['y'],))
@@ -142,6 +143,22 @@ class Graph_traxial:
                                     selectable=True, width=800,
                                     index_position=-1, index_header="row index", index_width=60)
 
+
+
+        """Объем"""
+        self.volume_table_values_perc = ColumnDataSource(dict(x_min=self.volume_list_X_min, x_max=self.volume_list_X_max))
+
+        self.volume_columns_table_perc = [
+            TableColumn(field="x_min", title="X MIN", formatter=NumberFormatter(format="0"), editor=IntEditor()),
+            TableColumn(field="x_max", title="X MAX", formatter=NumberFormatter(format="0"), editor=IntEditor()),
+        ]
+        self.volume_data_table_perc = DataTable(source=self.volume_table_values_perc, columns=self.volume_columns_table_perc, editable=True,
+                                         selectable=True, width=400,
+                                         index_position=-1, index_header="row index", index_width=60)
+
+
+
+        """Давление"""
         self.y_max_min_values = ColumnDataSource(dict(xs=self.Y_boundaries()[0],
                                                       ys=self.Y_boundaries()[1]))
         self.calculate()
@@ -230,7 +247,6 @@ class Graph_traxial:
         self.count_points_max = int(self.count_points_max_text.value)
         self.random_percent_min = float(self.random_percent_min_text.value)
         self.random_percent_max = float(self.random_percent_max_text.value)
-        self.multiple_value = float(self.multiple_volume.value)
 
         if isinstance(self.count_points_min, tuple):
             self.count_points_min = self.count_points_min[0]
@@ -240,14 +256,11 @@ class Graph_traxial:
             self.random_percent_min = self.random_percent_min[0]
         if isinstance(self.random_percent_max, tuple):
             self.random_percent_max = self.random_percent_max[0]
-        if isinstance(self.multiple_value, tuple):
-            self.multiple_value = self.multiple_value[0]
 
         self.count_points_min_text.value = str(self.count_points_min)
         self.count_points_max_text.value = str(self.count_points_max)
         self.random_percent_min_text.value = str(self.random_percent_min)
         self.random_percent_max_text.value = str(self.random_percent_max)
-        self.multiple_volume.value = str(self.multiple_value)
 
     def random_percent(self):
         """
@@ -350,10 +363,10 @@ class Graph_traxial:
                                       "limit_axe_X": max(self.point_values_X),
                                       "limit_axe_Y": max(self.point_values_Y),
 
-                                      "list_X_min": [perc * self.multiple_value for perc in self.list_X_min],
-                                      "list_X_max": [perc * self.multiple_value for perc in self.list_X_max],
-                                      "list_Y_min": [perc * self.multiple_value for perc in self.list_Y_min],
-                                      "list_Y_max": [perc * self.multiple_value for perc in self.list_Y_max],
+                                      "list_X_min": [perc for perc in self.volume_list_X_min],
+                                      "list_X_max": [perc for perc in self.volume_list_X_max],
+                                      "list_Y_min": [perc for perc in self.list_Y_min],
+                                      "list_Y_max": [perc for perc in self.list_Y_max],
 
                                       "count_points_min": int(self.count_points_min_text.value),
                                       "count_points_max": int(self.count_points_max_text.value),
@@ -404,6 +417,9 @@ class Graph_traxial:
         self.list_Y_min.pop(_index)
         self.list_Y_max.pop(_index)
 
+        self.volume_list_X_min.pop(_index)
+        self.volume_list_X_max.pop(_index)
+
         self.point_values_X = self.mid_line_values.data['x']
         self.point_values_Y = self.mid_line_values.data['y']
 
@@ -416,6 +432,13 @@ class Graph_traxial:
             'y_max': self.list_Y_max,
         }
         self.table_values_perc.data = new_data
+
+        new_data_volume = {
+            'x_min': self.volume_list_X_min,
+            'x_max': self.volume_list_X_max,
+        }
+
+        self.volume_table_values_perc.data = new_data_volume
 
         _index = None
 
@@ -526,6 +549,9 @@ class Graph_traxial:
         ### Объемная линия
         ### Объемная линия
         self.points_volume_X = dct.get('volume_traxial').get(self.schema).get("point_values_X")
+        self.volume_list_X_min = dct.get('volume_traxial').get(self.schema).get("list_X_min")
+        self.volume_list_X_max = dct.get('volume_traxial').get(self.schema).get("list_X_max")
+
         self.limit_volume_axe_X = max(self.points_volume_X) + 0.05
         self.volume_method_interpolate = dct.get('volume_traxial').get(self.schema).get("method_interpolate")
 
@@ -547,10 +573,10 @@ class Graph_traxial:
         self.min_line_values.data['x'] = [AX * ((100 - perc) / 100) for AX, perc in zip(self.mid_line_values.data['x'], self.table_values_perc.data['x_min'])]
         self.max_line_values.data['x'] = [AX * ((100 + perc) / 100) for AX, perc in zip(self.mid_line_values.data['x'], self.table_values_perc.data['x_max'])]
 
-        self.volume_min_line_values.data['x'] = [AX * ((100 - perc * self.multiple_value) / 100) for AX, perc in
-                                          zip(self.volume_mid_line_values.data['x'], self.table_values_perc.data['x_min'])]
-        self.volume_max_line_values.data['x'] = [AX * ((100 + perc * self.multiple_value) / 100) for AX, perc in
-                                          zip(self.volume_mid_line_values.data['x'], self.table_values_perc.data['x_max'])]
+        self.volume_min_line_values.data['x'] = [AX * ((100 - perc) / 100) for AX, perc in
+                                          zip(self.volume_mid_line_values.data['x'], self.volume_table_values_perc.data['x_min'])]
+        self.volume_max_line_values.data['x'] = [AX * ((100 + perc) / 100) for AX, perc in
+                                          zip(self.volume_mid_line_values.data['x'], self.volume_table_values_perc.data['x_max'])]
 
     def handle_table_edit(self, event):
         """
@@ -574,7 +600,8 @@ class Graph_traxial:
         self.delete_handler()
 
         self.mid_line_interpolate_values.data = self.update_random_and_count_point(self.interpolation_line(self.mid_line_values.data['x'],
-                                                                        self.mid_line_values.data['y']))
+                                                                        self.mid_line_values.data['y'],
+                                                                        'traxial'))
 
         """
         Объемные
@@ -587,14 +614,16 @@ class Graph_traxial:
             self.volume_mid_line_values.data['x'].pop(-1)
 
         self.volume_mid_line_interpolate_values.data = dict(
-            self.volume_interpolation_line(self.volume_mid_line_values.data['x'],
-                                    self.mid_line_values.data['y']))
+            self.interpolation_line(self.volume_mid_line_values.data['x'],
+                                    self.mid_line_values.data['y'],
+                                    'volume_traxial'))
         self.volume_min_line_values.data['y'] = self.mid_line_values.data['y']
         self.volume_max_line_values.data['y'] = self.mid_line_values.data['y']
 
         self.volume_mid_line_interpolate_values.data = self.update_random_and_count_point(
-            self.volume_interpolation_line(self.volume_mid_line_values.data['x'],
-                                           self.volume_mid_line_values.data['y']))
+            self.interpolation_line(self.volume_mid_line_values.data['x'],
+                                    self.volume_mid_line_values.data['y'],
+                                    'volume_traxial'))
 
         """
         Давление
@@ -621,6 +650,16 @@ class Graph_traxial:
             }
             self.table_values_perc.data = new_data
 
+
+            self.volume_list_X_min.append(0)
+            self.volume_list_X_max.append(0)
+
+            new_data = {
+                'x_min': self.volume_list_X_min,
+                'x_max': self.volume_list_X_max,
+            }
+            self.volume_table_values_perc.data = new_data
+
         # Обновление данных в таблице
         new_data = {
                 'x': self.point_values_X,
@@ -632,10 +671,12 @@ class Graph_traxial:
 
 
         self.min_line_interpolate_values.data = dict(self.interpolation_line(self.min_line_values.data['x'],
-                                                                             self.mid_line_values.data['y']))
+                                                                             self.mid_line_values.data['y'],
+                                                                             'traxial'))
 
         self.max_line_interpolate_values.data = dict(self.interpolation_line(self.max_line_values.data['x'],
-                                                                             self.mid_line_values.data['y']))
+                                                                             self.mid_line_values.data['y'],
+                                                                             'traxial'))
 
         self.y_max_min_values.data = dict(xs=self.Y_boundaries()[0], ys=self.Y_boundaries()[1])
 
@@ -645,15 +686,17 @@ class Graph_traxial:
         """
         Объемные
         """
-        self.volume_min_line_interpolate_values.data = dict(self.volume_interpolation_line(self.volume_min_line_values.data['x'],
-                                                                             self.volume_mid_line_values.data['y']))
+        self.volume_min_line_interpolate_values.data = dict(self.interpolation_line(self.volume_min_line_values.data['x'],
+                                                                             self.volume_mid_line_values.data['y'],
+                                                                             'volume_traxial'))
 
-        self.volume_max_line_interpolate_values.data = dict(self.volume_interpolation_line(self.volume_max_line_values.data['x'],
-                                                                             self.volume_mid_line_values.data['y']))
+        self.volume_max_line_interpolate_values.data = dict(self.interpolation_line(self.volume_max_line_values.data['x'],
+                                                                             self.volume_mid_line_values.data['y'],
+                                                                             'volume_traxial'))
 
         self.points_volume_X = self.volume_mid_line_values.data['x']
 
-    def interpolation_line(self, X, Y):
+    def interpolation_line(self, X, Y, type_schema):
         """
         Интерполяция по контрольным предоставляемым откуда угодно точкам в соответствии с выбранным методом интерполяции
         :param X:
@@ -662,6 +705,11 @@ class Graph_traxial:
         """
         Y = [y * 76 for y in Y]
 
+        if type_schema == 'traxial':
+            method_interpolate = self.method_interpolate
+        if type_schema == 'volume_traxial':
+            method_interpolate = self.volume_method_interpolate
+
         yfit = np.linspace(min(Y), max(Y), num=50)
 
         try:
@@ -669,34 +717,34 @@ class Graph_traxial:
                 if Y[index] + 0.05 >= Y[index + 1]:
                     raise ValueError
 
-            if self.method_interpolate == "linear":
+            if method_interpolate == "linear":
                 pchip = interpolate.interp1d(Y, X, kind='linear')
 
-            if self.method_interpolate == "CubicSpline":
+            if method_interpolate == "CubicSpline":
                 pchip = interpolate.CubicSpline(Y, X)
 
-            if self.method_interpolate == "PchipInterpolator":
+            if method_interpolate == "PchipInterpolator":
                 pchip = interpolate.PchipInterpolator(Y, X)
 
-            if self.method_interpolate == "Akima1DInterpolator":
+            if method_interpolate == "Akima1DInterpolator":
                 pchip = interpolate.Akima1DInterpolator(Y, X)
 
-            if self.method_interpolate == "BarycentricInterpolator":
+            if method_interpolate == "BarycentricInterpolator":
                 pchip = interpolate.BarycentricInterpolator(Y, X)
 
-            if self.method_interpolate == "KroghInterpolator":
+            if method_interpolate == "KroghInterpolator":
                 pchip = interpolate.KroghInterpolator(Y, X)
 
-            if self.method_interpolate == "make_interp_spline":
+            if method_interpolate == "make_interp_spline":
                 pchip = interpolate.make_interp_spline(Y, X)
 
-            if self.method_interpolate == "nearest":
+            if method_interpolate == "nearest":
                 pchip = interpolate.interp1d(Y, X, kind='nearest')
 
-            if self.method_interpolate == "quadratic":
+            if method_interpolate == "quadratic":
                 pchip = interpolate.interp1d(Y, X, kind='quadratic')
 
-            if self.method_interpolate == "cubic":
+            if method_interpolate == "cubic":
                 pchip = interpolate.interp1d(Y, X, kind='cubic')
 
         except ValueError:
@@ -707,59 +755,6 @@ class Graph_traxial:
 
         return {'x': xnew, 'y': [y / 76 for y in yfit]}
 
-    def volume_interpolation_line(self, X, Y):
-        """
-        Интерполяция по контрольным предоставляемым откуда угодно точкам в соответствии с выбранным методом интерполяции
-        :param X:
-        :param Y:
-        :return:
-        """
-        Y = [y * 76 for y in Y]
-
-        yfit = np.linspace(min(Y), max(Y), num=50)
-
-        try:
-            for index in range(len(Y) - 1):
-                if Y[index] + 0.05 >= Y[index + 1]:
-                    raise ValueError
-
-            if self.volume_method_interpolate == "linear":
-                pchip = interpolate.interp1d(Y, X, kind='linear')
-
-            if self.volume_method_interpolate == "CubicSpline":
-                pchip = interpolate.CubicSpline(Y, X)
-
-            if self.volume_method_interpolate == "PchipInterpolator":
-                pchip = interpolate.PchipInterpolator(Y, X)
-
-            if self.volume_method_interpolate == "Akima1DInterpolator":
-                pchip = interpolate.Akima1DInterpolator(Y, X)
-
-            if self.volume_method_interpolate == "BarycentricInterpolator":
-                pchip = interpolate.BarycentricInterpolator(Y, X)
-
-            if self.volume_method_interpolate == "KroghInterpolator":
-                pchip = interpolate.KroghInterpolator(Y, X)
-
-            if self.volume_method_interpolate == "make_interp_spline":
-                pchip = interpolate.make_interp_spline(Y, X)
-
-            if self.volume_method_interpolate == "nearest":
-                pchip = interpolate.interp1d(Y, X, kind='nearest')
-
-            if self.volume_method_interpolate == "quadratic":
-                pchip = interpolate.interp1d(Y, X, kind='quadratic')
-
-            if self.volume_method_interpolate == "cubic":
-                pchip = interpolate.interp1d(Y, X, kind='cubic')
-
-        except ValueError:
-            print("Невозможно интерполировать значения")
-            return
-
-        xnew = pchip(yfit)
-
-        return {'x': xnew, 'y': [y / 76 for y in yfit]}
 
     def run(self):
         """
@@ -771,6 +766,7 @@ class Graph_traxial:
         self.volume_interpolation_select.on_change('value', self.volume_interpolation_select_handler)
         self.schema_select.on_change('value', self.schema_select_handler)
         self.table_values_perc.js_on_change('patching', CustomJS(code="console.log(cb_obj);"))
+        self.volume_table_values_perc.js_on_change('patching', CustomJS(code="console.log(cb_obj);"))
 
         # Подключение обработчиков событий
         curdoc().add_root(row(self.plot, column(self.name_new_shema, self.button_add_schema, self.button_delete_schema), self.plot_volume))
@@ -783,21 +779,17 @@ class Graph_traxial:
                               self.count_points_max_text,
                               self.random_percent_min_text,
                               self.random_percent_max_text,
-                              self.multiple_volume,
                               self.button_update_point_random,
                               self.random_activate,
                               ))
 
-        curdoc().add_root(column(row(self.data_table, self.data_table_perc)))
+        curdoc().add_root(column(row(self.data_table, self.data_table_perc, self.volume_data_table_perc)))
         curdoc().add_periodic_callback(self.update_plot, 100)  # Обновление графика каждые 100 мс
 
         self.plot.on_event('tap', self.add_point_handler)  # Обработчик нажатия на график
         self.plot.on_event('pan', self.move_point_handler)  # Обработчик перемещения точки
-
-
         self.plot_volume.on_event('pan', self.volume_move_point_handler)  # Обработчик перемещения точки
 
-"""
 
 distribut = DD(id_people='356379915') # sys.argv[1])
 distribut.check_schemas_people()
@@ -812,3 +804,4 @@ distribut.write_data_in_database()
 if sys.argv[2] == 'traxial':
     graphs = Graph_traxial(distribut.data)
     graphs.run()
+"""

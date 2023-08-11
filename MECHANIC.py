@@ -181,17 +181,8 @@ def start(worksheet_journal, id_user, dct_combination):
         organise_dct.setdefault('pressEnd2_traxial', pressEnd2)
         organise_dct.setdefault('pressEnd3_traxial', pressEnd3)
 
-        normative_analyze = GruntNormative(organise_values=organise_dct)
-        normative_parameters = normative_analyze.return_parameters()
-
-        if str(organise_dct['Dilatanci']) in [None, 'nan', None]:
-            organise_dct['Dilatanci'] = normative_parameters['Dilatanci']
-        if str(organise_dct['CD_v']) in [None, 'nan', None]:
-            organise_dct['CD_v'] = normative_parameters['CD_v']
-        if str(organise_dct['E_rzg']) in [None, 'nan', None]:
-            organise_dct['E_rzg'] = normative_parameters['E_rzg']
-        if str(organise_dct['CD_v_rzg']) in [None, 'nan', None]:
-            organise_dct['CD_v_rzg'] = normative_parameters['CD_v_rzg']
+        normative_analyze = GruntNormative(organise_dct=organise_dct)
+        organise_dct = normative_analyze.return_parameters()
 
         type_grunt_schemas = {
             "traxial": {
@@ -247,6 +238,8 @@ def start(worksheet_journal, id_user, dct_combination):
                 pressEnds = [pressEnd1, pressEnd1, pressEnd2, pressEnd3]
 
             for name, pressStart, pressEnd in zip(namesISP, pressStarts, pressEnds):
+
+                organise_dct = normative_analyze.randomise()
 
                 organise_dct.update({'name_traxial_now': name})
                 organise_dct.update({'PressStart_traxial_now': pressStart})

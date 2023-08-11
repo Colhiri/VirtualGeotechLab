@@ -143,6 +143,7 @@ def get_mech_shablon(message):
     :param message:
     :return:
     """
+
     file_path = f"..\\srcs\\shablons\\Data.xlsx"
     with open(file_path, 'rb') as file:
         bot.send_document(message.chat.id, file)

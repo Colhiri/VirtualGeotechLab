@@ -148,6 +148,10 @@ class AnalyzeGraph:
                     max_index_press + 1]) * math.sin(math.radians(self.angle_dilatanci))) / (
                          1 - math.sin(math.radians(self.angle_dilatanci)))))
 
+        print(self.angle_dilatanci)
+        print(max_index_press)
+        print(EV_END_1)
+        print(EV_END_2)
 
         self.point_x = [0, -self.delta_EV_E0, EV_END_1, EV_END_2]
 
@@ -169,7 +173,7 @@ class AnalyzeGraph:
                 new_point_x.append(self.point_x[-1])
                 continue
             if count > max_index_press + 1:
-                new_point_x.append(perc * max_x_real + abs(EV_END_2 * 1.5))
+                new_point_x.append(perc * max_x_real + abs(EV_END_2))
                 continue
             new_point_x.append(perc * max_x_real + self.point_x[0])
 

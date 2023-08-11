@@ -21,7 +21,7 @@ def shablonExcel_OCR(row, dataframes: list, organise_dct: dict, values_Excel):
     nameSoil = organise_dct.get("nameSoil")
 
     # Путь для сохранения протоколов
-    pathSave = organise_dct.get("pathSave")
+    pathSave = organise_dct.get("pathSave_OCR")
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))

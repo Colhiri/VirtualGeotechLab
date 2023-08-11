@@ -109,6 +109,12 @@ def random_values(points_x, dont_touch_indexes, parameters_points):
     points_x = [random_percent(random_percent_min, random_percent_max) * x_value if count not in dont_touch_indexes else x_value for count, x_value in enumerate(points_x, 0)]
     return points_x
 
+def volume_random_values(points_x, dont_touch_indexes, parameters_points):
+    random_percent_min = parameters_points.get('random_percent_min') * 10
+    random_percent_max = parameters_points.get('random_percent_max') * 10
+    points_x = [random_percent(random_percent_min, random_percent_max) * x_value if count not in dont_touch_indexes else x_value for count, x_value in enumerate(points_x, 0)]
+    return points_x
+
 """
 Еще одна версия кривой Безье
 """

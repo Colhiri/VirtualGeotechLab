@@ -1,16 +1,16 @@
 import random
 
 class GruntNormative:
-    def __init__(self, organise_values):
-        self.organise_values = organise_values
+    def __init__(self, organise_dct):
+        self.organise_dct = organise_dct
 
         # Параметры пробы для включения схем
-        self.We = self.organise_values.get('We')
-        self.p = self.organise_values.get('p')
-        self.ps = self.organise_values.get('ps')
-        self.e = self.organise_values.get('e')
-        self.IL = self.organise_values.get('IL')
-        self.IP = self.organise_values.get('IP')
+        self.We = self.organise_dct.get('We')
+        self.p = self.organise_dct.get('p')
+        self.ps = self.organise_dct.get('ps')
+        self.e = self.organise_dct.get('e')
+        self.IL = self.organise_dct.get('IL')
+        self.IP = self.organise_dct.get('IP')
 
         self.normative_parameters = {
             'E_0': None,
@@ -39,11 +39,6 @@ class GruntNormative:
             'F_unaxial': None,
             'C_unaxial': None,
         }
-
-        self.get_type_grunt()
-        self.angle_dilatanci()
-        self.first_koef_puasson()
-        self.rzg_koef_puasson()
 
     def get_type_grunt(self):
         """
@@ -113,5 +108,30 @@ class GruntNormative:
     def E_normative(self):
         pass
 
+    def randomise(self):
+        self.get_type_grunt()
+        self.angle_dilatanci()
+        self.first_koef_puasson()
+        self.rzg_koef_puasson()
+
+        self.organise_dct['Dilatanci'] = self.normative_parameters['Dilatanci']
+        self.organise_dct['CD_v'] = self.normative_parameters['CD_v']
+        self.organise_dct['E_rzg'] = self.normative_parameters['E_rzg']
+        self.organise_dct['CD_v_rzg'] = self.normative_parameters['CD_v_rzg']
+
+        return self.organise_dct
+
     def return_parameters(self):
-        return self.normative_parameters
+
+        self.randomise()
+
+        if str(self.organise_dct['Dilatanci']) in ['None', 'nan', None]:
+            self.organise_dct['Dilatanci'] = self.normative_parameters['Dilatanci']
+        if str(self.organise_dct['CD_v']) in ['None', 'nan', None]:
+            self.organise_dct['CD_v'] = self.normative_parameters['CD_v']
+        if str(self.organise_dct['E_rzg']) in ['None', 'nan', None]:
+            self.organise_dct['E_rzg'] = self.normative_parameters['E_rzg']
+        if str(self.organise_dct['CD_v_rzg']) in ['None', 'nan', None]:
+            self.organise_dct['CD_v_rzg'] = self.normative_parameters['CD_v_rzg']
+
+        return self.organise_dct
