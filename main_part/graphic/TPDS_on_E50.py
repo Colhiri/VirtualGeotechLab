@@ -202,8 +202,6 @@ def start_TPDS_E50(organise_dct: dict, dct_combination: dict, type_grunt_schemas
                          parameters_points=parameters_points_dct
                          )
 
-    xnew, yfit = interpolation(x=xnew, y=yfit, parameters=parameters_points_dct)
-
     curve1 = np.array([(x, y, z) for x, y, z in zip(deviator, otnVertDef, xnew)])
 
     NewDF = pd.DataFrame(curve1)

@@ -183,11 +183,6 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict)
     # index_x_EV_END_1 = xnew.index(nearest(xnew, EV_END_1))
     # index_x_EV_END_2 = xnew.index(nearest(xnew, EV_END_2))
 
-    xnew = volume_random_values(points_x=xnew,
-                         dont_touch_indexes=[0, ],
-                         parameters_points=parameters_points_dct
-                         )
-
     xnew, yfit = interpolation(x=new_point_x, y=new_point_y, parameters=parameters_points_dct)
 
 

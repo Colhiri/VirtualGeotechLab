@@ -251,4 +251,7 @@ def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
 
     # parametr_press = {'press': , 'press_1': press_1, 'press_2': press_2, 'press_3': press_3}
 
+    if not press_1:
+        press_1, press_2, press_3 = 0.1, 0.2, 0.3
+
     return press, press_1, press_2, press_3

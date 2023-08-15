@@ -595,6 +595,7 @@ distribut.check_schemas_people()
 distribut.write_data_in_database()
 graphs = Graph_traxial(distribut.data)
 graphs.run()
+"""
 
 distribut = DD(id_people=sys.argv[1]) # sys.argv[1])
 distribut.check_schemas_people()
@@ -603,4 +604,3 @@ if sys.argv[2] == 'traxial':
     graphs = Graph_traxial(distribut.data)
     graphs.run()
 
-"""

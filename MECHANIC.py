@@ -364,10 +364,10 @@ def start(worksheet_journal, id_user, dct_combination):
                 os.mkdir(pathSave_OCR)
             organise_dct.update({'pathSave_OCR': pathSave_OCR})
 
-            NewDF, values_for_Excel = OCR_ISP.OCR_start(organise_dct)
+            values_for_Excel = OCR_ISP.OCR_start(organise_dct)
 
             read_shablons.shablonExcel_OCR(row=row,
-                                           dataframes=[NewDF],
+                                           dataframes=[values_for_Excel.get('DATA_CASAGRANDE'), values_for_Excel.get('DATA_BEKKER')],
                                            organise_dct=organise_dct,
                                            values_Excel=values_for_Excel)
 

@@ -40,6 +40,9 @@ class Graph_traxial:
         self.volume_list_X_min = dct.get('volume_traxial').get(self.schema).get("list_X_min")
         self.volume_list_X_max = dct.get('volume_traxial').get(self.schema).get("list_X_max")
 
+        self.volume_random_percent_min = str(dct.get('volume_traxial').get(self.schema).get("random_percent_min"))
+        self.volume_random_percent_max = str(dct.get('volume_traxial').get(self.schema).get("random_percent_max"))
+
         self.limit_volume_axe_X = max(self.points_volume_X) + 0.05
         self.volume_method_interpolate = dct.get('volume_traxial').get(self.schema).get("method_interpolate")
         self.plot_volume = figure(width=1000, height=1000, x_range=(0, self.limit_axe_Y / 76))
@@ -85,6 +88,11 @@ class Graph_traxial:
                        legend_label='Min value')
         self.plot_volume.line(x='y', y='x', line_color='red', line_width=1, source=self.volume_max_line_interpolate_values,
                        legend_label='Max value')
+
+
+
+        self.volume_random_percent_min_text = TextInput(title="Set volume random min", value=self.volume_random_percent_min)
+        self.volume_random_percent_max_text = TextInput(title="Set volume random max", value=self.volume_random_percent_max)
 
         """
         Давление
@@ -220,7 +228,7 @@ class Graph_traxial:
         # Список интерполяций
         self.interpolation_methods = ["linear", "CubicSpline", "PchipInterpolator", "Akima1DInterpolator",
                                       "BarycentricInterpolator", "KroghInterpolator", "make_interp_spline",
-                                      "nearest", "quadratic", "cubic"]
+                                      "nearest", "quadratic", "cubic", 'nearest_volume']
         self.interpolation_select = Select(title='Interpolation Method Press',
                                            value=distribut.data.get(self.global_schema).get(self.schema).get("method_interpolate"),
                                            options=self.interpolation_methods)
@@ -247,6 +255,9 @@ class Graph_traxial:
         self.count_points_max = int(self.count_points_max_text.value)
         self.random_percent_min = float(self.random_percent_min_text.value)
         self.random_percent_max = float(self.random_percent_max_text.value)
+        self.volume_random_percent_min = float(self.volume_random_percent_min_text.value)
+        self.volume_random_percent_max = float(self.volume_random_percent_max_text.value)
+
 
         if isinstance(self.count_points_min, tuple):
             self.count_points_min = self.count_points_min[0]
@@ -256,22 +267,37 @@ class Graph_traxial:
             self.random_percent_min = self.random_percent_min[0]
         if isinstance(self.random_percent_max, tuple):
             self.random_percent_max = self.random_percent_max[0]
+        if isinstance(self.volume_random_percent_min, tuple):
+            self.volume_random_percent_min = self.volume_random_percent_min[0]
+        if isinstance(self.volume_random_percent_max, tuple):
+            self.volume_random_percent_max = self.volume_random_percent_max[0]
 
         self.count_points_min_text.value = str(self.count_points_min)
         self.count_points_max_text.value = str(self.count_points_max)
         self.random_percent_min_text.value = str(self.random_percent_min)
         self.random_percent_max_text.value = str(self.random_percent_max)
+        self.volume_random_percent_min_text.value = str(self.volume_random_percent_min)
+        self.volume_random_percent_max_text.value = str(self.volume_random_percent_max)
 
     def random_percent(self):
         """
         Функция рандомного процента
         :return:
         """
-        perc_min = int((100 - float(self.random_percent_min)) * 100)
+        perc_min = int((100 + float(self.random_percent_min)) * 100)
         perc_max = int((100 + float(self.random_percent_max)) * 100)
         return random.randint(perc_min, perc_max) / 10000
 
-    def update_random_and_count_point(self, value):
+    def volume_random_percent(self):
+        """
+        Функция рандомного процента
+        :return:
+        """
+        perc_min = int((100 + float(self.volume_random_percent_min)) * 100)
+        perc_max = int((100 + float(self.volume_random_percent_max)) * 100)
+        return random.randint(perc_min, perc_max) / 10000
+
+    def update_random_and_count_point(self, value, type_schema):
         """
         Функция обновления определенной линии графика
         :param value:
@@ -279,7 +305,10 @@ class Graph_traxial:
         """
         points_x, points_y = value['x'], value['y']
         if self.random_activate.active == [1]:
-            points_x = [self.random_percent() * x_value for x_value in points_x]
+            if type_schema == 'traxial':
+                points_x = [self.random_percent() * x_value for x_value in points_x]
+            if type_schema == 'volume_traxial':
+                points_x = [self.volume_random_percent() * x_value for x_value in points_x]
         return {'x': points_x, 'y': points_y}
 
     def reset_schema(self):
@@ -370,8 +399,8 @@ class Graph_traxial:
 
                                       "count_points_min": int(self.count_points_min_text.value),
                                       "count_points_max": int(self.count_points_max_text.value),
-                                      "random_percent_min": float(self.random_percent_min_text.value),
-                                      "random_percent_max": float(self.random_percent_max_text.value),
+                                      "random_percent_min": float(self.volume_random_percent_min_text.value),
+                                      "random_percent_max": float(self.volume_random_percent_max_text.value),
                                                                           })
         distribut.write_data_in_database()
 
@@ -552,6 +581,12 @@ class Graph_traxial:
         self.volume_list_X_min = dct.get('volume_traxial').get(self.schema).get("list_X_min")
         self.volume_list_X_max = dct.get('volume_traxial').get(self.schema).get("list_X_max")
 
+        self.volume_random_percent_min = str(dct.get('volume_traxial').get(self.schema).get("random_percent_min"))
+        self.volume_random_percent_max = str(dct.get('volume_traxial').get(self.schema).get("random_percent_max"))
+
+        self.volume_random_percent_min_text.value = self.volume_random_percent_min
+        self.volume_random_percent_max_text.value = self.volume_random_percent_max
+
         self.limit_volume_axe_X = max(self.points_volume_X) + 0.05
         self.volume_method_interpolate = dct.get('volume_traxial').get(self.schema).get("method_interpolate")
 
@@ -601,7 +636,7 @@ class Graph_traxial:
 
         self.mid_line_interpolate_values.data = self.update_random_and_count_point(self.interpolation_line(self.mid_line_values.data['x'],
                                                                         self.mid_line_values.data['y'],
-                                                                        'traxial'))
+                                                                        'traxial'), 'traxial')
 
         """
         Объемные
@@ -623,7 +658,8 @@ class Graph_traxial:
         self.volume_mid_line_interpolate_values.data = self.update_random_and_count_point(
             self.interpolation_line(self.volume_mid_line_values.data['x'],
                                     self.volume_mid_line_values.data['y'],
-                                    'volume_traxial'))
+                                    'volume_traxial'),
+                                    'volume_traxial')
 
         """
         Давление
@@ -747,6 +783,30 @@ class Graph_traxial:
             if method_interpolate == "cubic":
                 pchip = interpolate.interp1d(Y, X, kind='cubic')
 
+            if method_interpolate == "nearest_volume":
+                pchip = interpolate.PchipInterpolator(Y, X)
+                xnew = pchip(yfit)
+
+                xnew = [self.volume_random_percent() * x_value for x_value in xnew]
+
+                i = 0
+                filtered_data_x = []
+                filtered_data_y = []
+
+                while i < len(xnew):
+                    if i + 3 <= len(xnew):
+                        filtered_data_x.append(xnew[i])
+                        filtered_data_y.append(yfit[i])
+                    i += 4
+
+                filtered_data_x.append(xnew[-1])
+                filtered_data_y.append(yfit[-1])
+
+                filtered_data_x = np.asarray(filtered_data_x)
+                filtered_data_y = np.asarray(filtered_data_y)
+
+                pchip = interpolate.interp1d(filtered_data_y, filtered_data_x, kind='nearest')
+
         except ValueError:
             print("Невозможно интерполировать значения")
             return
@@ -768,17 +828,16 @@ class Graph_traxial:
         self.table_values_perc.js_on_change('patching', CustomJS(code="console.log(cb_obj);"))
         self.volume_table_values_perc.js_on_change('patching', CustomJS(code="console.log(cb_obj);"))
 
-        # Подключение обработчиков событий
-        curdoc().add_root(row(self.plot, column(self.name_new_shema, self.button_add_schema, self.button_delete_schema), self.plot_volume))
-        curdoc().add_root(row(self.interpolation_select,
-                              self.volume_interpolation_select,
+        curdoc().add_root(row(self.plot, column(self.interpolation_select, self.random_percent_min_text, self.random_percent_max_text),
+                              self.plot_volume, column(self.volume_interpolation_select, self.volume_random_percent_min_text, self.volume_random_percent_max_text)))
+        curdoc().add_root(row(self.name_new_shema,
+                              self.button_add_schema,
+                              self.button_delete_schema,
                               self.schema_select,
                               self.button_save_schema,
                               self.button_reset_schema,
                               self.count_points_min_text,
                               self.count_points_max_text,
-                              self.random_percent_min_text,
-                              self.random_percent_max_text,
                               self.button_update_point_random,
                               self.random_activate,
                               ))
