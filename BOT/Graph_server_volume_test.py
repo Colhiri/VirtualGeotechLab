@@ -249,8 +249,6 @@ class Graph_traxial:
                                     options=self.schemas)
 
 
-
-
         self.dct = dct
 
     def update_percents(self):

@@ -53,8 +53,11 @@ def shablonExcel_OCR(row, dataframes: list, organise_dct: dict, values_Excel):
     else:
         prot_name = LAB_NO + '.xlsx'
 
-
-    shutil.copy('..\\srcs\\shablons\\OCR.xlsx'
+    """
+    Бот '..\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    Локальная '..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    """
+    shutil.copy('..\\GEOF\\srcs\\shablons\\OCR.xlsx'
                 ,f'{pathSave}\\{prot_name}')
 
 

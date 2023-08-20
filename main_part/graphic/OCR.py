@@ -220,7 +220,6 @@ def OCR_start(organise_dct: dict):
     START_END_LINE_X = [(press_spd[0]), (press_spd[-1])]
     START_END_LINE_Y = [(por_list[0]), (por_list[-1])]
 
-
     # Найдем точку диапазона Х по компрессионной кривой и найдем Y по уравнению выявленного диапазона
     point_1_diap = nearest(press_spd, point_X_CASS)
     if point_X_CASS > press_spd.index(point_1_diap):
@@ -282,38 +281,6 @@ def OCR_start(organise_dct: dict):
     # Касательная к точке пересечения касательных,
     xrange_CAS_B = np.linspace(min(press_spd), max(press_spd), 3)
     yrange_CAS_B = [math.log10(x) * res_diap_COMPLINE.slope + res_diap_COMPLINE.intercept for x in xrange_CAS_B]
-
-    # # Компрессионная кривая
-    # plt.xscale('log')
-    # plt.plot(press_spd, por_list, '.')
-    # plt.plot(press_spd, por_list)
-    # # Нижняя касательная
-    # plt.plot(CAS_1_X, CAS_1_Y)
-    # # Угловые линии к точке пересечения перпендикуляра и компрессионной кривой
-    # plt.plot(first_line_x, first_line_y)
-    # plt.plot(second_line_x, second_line_y)
-    # plt.plot(third_line_x, third_line_y)
-    # # Точка пересечения биссетрисы и нижней касательной
-    # plt.plot(point_X_GG, point_Y_GG, '*')
-    # # Перпендикуляр от точки GG
-    # plt.plot(perp_GG_X, perp_GG_Y)
-#
-    # plt.plot(xrange, line(xrange, x1, y1), 'C1--', linewidth=2)
-
-    # # Тестовый перпендикуляр
-    # plt.plot([x_test, x_test1], perpendicular_START_END_Y)
-    # plt.plot(point_X_CASS, point_Y_CASS , '*')
-
-    # # Верхняя касательная
-    # plt.plot(CAS_2_X, CAS_2_Y)
-    # #Перпендикуляр
-    # plt.plot((l2[0], l2[2]), (l2[1], l2[3]))
-    # #Прямая конечных точек
-    # plt.plot(START_END_LINE_X, START_END_LINE_Y)
-    # #Точка пересечения перпендикуляра и прямой конечных точек
-    # plt.plot(point_X_COMP, point_Y_COMP, '*')
-    # plt.grid()
-    # plt.show()
 
     # Основной датафрейм для Казагранде
     prepare_df = np.asarray([(press, otn, por) for press, otn, por in

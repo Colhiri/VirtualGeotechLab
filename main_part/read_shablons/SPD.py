@@ -53,7 +53,12 @@ def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
     else:
         prot_name = LAB_NO + '.xlsx'
 
-    shutil.copy('..\\srcs\\shablons\\SPD.xlsx'
+
+    """
+    Бот '..\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    Локальная '..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    """
+    shutil.copy('..\\GEOF\\srcs\\shablons\\SPD.xlsx'
                     ,f'{pathSave}\\{prot_name}')
 
     wb = openpyxl.load_workbook(

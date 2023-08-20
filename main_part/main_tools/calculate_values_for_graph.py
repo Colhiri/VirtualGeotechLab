@@ -16,7 +16,7 @@ def SPS_value(organise_dct):
 
         Rad = math.radians(F)
 
-        valueRANDOM_to_press2 = random.choice([x for x in [random.randint(-2, 2) / 100 for x in range(5)] if x != 0.0])
+        valueRANDOM_to_press2 = random.choice([x for x in [random.randint(-10, 10) / 1000 for x in range(5)] if x != 0.0])
 
         pressEnd1 = (pressStart1 * math.tan(Rad) + C) - valueRANDOM_to_press2 / 2
         pressEnd2 = (pressStart2 * math.tan(Rad) + C) + valueRANDOM_to_press2
@@ -66,3 +66,5 @@ def Traxial_value(organise_dct):
         pass
 
     return pressEnd1, pressEnd2, pressEnd3
+
+

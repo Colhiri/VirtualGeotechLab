@@ -101,17 +101,18 @@ def handle_file(message):
         start_mech(worksheet_journal, us_id, dct_combination)
 
         # Путь к папке, которую нужно добавить в архив
-        folder_to_add = f'..\\prot\\{us_id}'
+        folder_to_add = f'C:\\Users\\MSI GP66\\PycharmProjects\\dj_project\\GEOF\\prot\\{us_id}'
 
         files = os.listdir(folder_to_add)
-
         if os.path.exists(f"temp.rar"):
             os.remove(f"temp.rar")
+        if os.path.exists(f"{us_id}.rar"):
+            os.remove(f"{us_id}.rar")
 
-        files = tuple([folder_to_add+excel for excel in files])
+        # files = folder_to_add # tuple([folder_to_add+excel for excel in files])
 
         # Создаем архив
-        patoolib.create_archive(f"temp.rar", files)
+        patoolib.create_archive(f"temp.rar", tuple([folder_to_add]))
         patoolib.create_archive(f"{us_id}.rar", (f"temp.rar",))
 
         # Отправляем Zip-архив пользователю

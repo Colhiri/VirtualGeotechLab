@@ -1,13 +1,10 @@
 import math
-import random
 import os
 import shutil
 from time import strftime
 import time
 import datetime
-from functools import wraps
 
-import numpy as np
 import openpyxl
 import pandas as pd
 
@@ -51,12 +48,16 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Exce
     e = organise_dct.get('e')
     IL = organise_dct.get('IL')
 
-    if LAB_NO in [None, np.nan, np.NAN, "None", "nAn"]:
+    if str(LAB_NO) in ["NAN", "None", "nAn"]:
         prot_name = str(row) + '.xlsx'
     else:
         prot_name = LAB_NO + '.xlsx'
 
-    shutil.copy('..\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    """
+    Бот '..\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    Локальная '..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    """
+    shutil.copy('..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
                 , f'{pathSave}\\{prot_name}')
 
     wb = openpyxl.load_workbook(

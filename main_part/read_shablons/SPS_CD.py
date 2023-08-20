@@ -1,16 +1,11 @@
-import math
-import random
 import os
 import shutil
 from time import strftime
 import time
 import datetime
 
-import matplotlib.pyplot as plt
-import numpy as np
 import openpyxl
 import pandas as pd
-from scipy import interpolate
 
 def shablonExcel_SPS_CD(row, dataframes: list, organise_dct: dict, values_Excel):
     # Организационные моменты
@@ -48,14 +43,16 @@ def shablonExcel_SPS_CD(row, dataframes: list, organise_dct: dict, values_Excel)
     e = organise_dct.get('e')
     IL = organise_dct.get('IL')
 
-    if LAB_NO is None or LAB_NO == np.nan or LAB_NO == np.NAN or LAB_NO == "None" or LAB_NO == "nAn":
+    if str(LAB_NO) in ["NAN", "None", "nAn"]:
         prot_name = str(row) + '.xlsx'
     else:
         prot_name = LAB_NO + '.xlsx'
 
-
-
-    shutil.copy('..\\srcs\\shablons\\SPS_CD.xlsx'
+    """
+    Бот '..\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    Локальная '..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    """
+    shutil.copy('..\\GEOF\\srcs\\shablons\\SPS_CD.xlsx'
                 ,f'{pathSave}\\{prot_name}')
 
 
