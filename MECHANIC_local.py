@@ -26,6 +26,9 @@ from GEOF.main_part.log_isp_write import SPD_LOG
 from GEOF.main_part.log_isp_write import OCR_LOG
 from GEOF.main_part.log_isp_write import TRAXIAL_LOG
 
+from GEOF.main_part.logs_create import isp_SPD_OCR
+from GEOF.main_part.logs_create import isp_SPS
+from GEOF.main_part.logs_create import isp_TRAXIAL
 
 def start(worksheet_journal, id_user, dct_combination):
 
@@ -51,7 +54,6 @@ def start(worksheet_journal, id_user, dct_combination):
             nameObject = nameObject[0]
         if isinstance(nameObject, tuple):
             nameClient = nameClient[0]
-        print(LAB_NO)
 
         # Создание папки для складирования испытаний в объекте
         pathSave = os.path.join(f"..\\GEOF\\prot\\{id_user}")
@@ -125,6 +127,7 @@ def start(worksheet_journal, id_user, dct_combination):
             'C_traxial': worksheet_journal['CD_c'][row],
             'E_rzg': worksheet_journal['E_rzg'][row],
             'CD_v_rzg': worksheet_journal['CD_v_rzg'][row],
+            't_100': worksheet_journal['t_100'][row],
             'Dilatanci': worksheet_journal['Dilatanci'][row],
             'CD_v': worksheet_journal['CD_v'][row],
             'CD_u1': worksheet_journal['CD_u1'][row],
@@ -150,6 +153,9 @@ def start(worksheet_journal, id_user, dct_combination):
             'effective_press': worksheet_journal['P1'][row],
             'Eoed01_02_MPa': worksheet_journal['Eoed01_02_MPa'][row],
             'Eobs01_02_Mpa': worksheet_journal['Eobs01_02_Mpa'][row],
+
+            # Консолидация по компрессии
+            'Cv': worksheet_journal['Cv'][row],
 
             # Одноплоскостной срез
             'F_unaxial': worksheet_journal['fi'][row],
@@ -211,6 +217,8 @@ def start(worksheet_journal, id_user, dct_combination):
 
         # Графики по трехосникам КД
         if str(worksheet_journal['CD_sigma1'][row]) not in ["None", "nan"]:
+            # Таймер
+            start = time.time()
 
             pathSave_traxial = os.path.join(pathSave, 'Трехосные_КД_ПП')
             if not os.path.exists(pathSave_traxial):
@@ -301,19 +309,19 @@ def start(worksheet_journal, id_user, dct_combination):
 
                 save_DF.append(DF_ISP)
 
-                print(f"{row}--{LAB_NO}--{name}--------DONE")
-
-            start = time.time()
             read_shablons.shablonExcel_TPS_CD_4(row=row,
                                                 dataframes=save_DF,
                                                 organise_dct=organise_dct,
                                                 values_Excel=values_for_Excel_right,
                                                 mode=mode)
             stop = time.time()
-            print(f'Время работы: {stop - start}')
+            print(f"{LAB_NO} -- TPs -- DONE -- Время работы: {stop - start}")
 
         # Графики по срезам КД
         if str(worksheet_journal['fi'][row]) not in ["None", "nan"]:
+            # Таймер
+            start = time.time()
+
             pathSave_unaxial = os.path.join(pathSave, 'Cрезы КД')
             if not os.path.exists(pathSave_unaxial):
                 os.mkdir(pathSave_unaxial)
@@ -343,7 +351,7 @@ def start(worksheet_journal, id_user, dct_combination):
                                                                 dct_combination=dct_combination,
                                                                 type_grunt_schemas=type_grunt_schemas)
 
-                dataframe_ISP = SPS.ISP_SPS(dataframe_isp=NewDF,
+                dataframe_ISP = isp_SPS.ISP_SPS(dataframe_isp=NewDF,
                                             organise_dct=organise_dct)
 
                 SPS_LOG.write_log(row=row,
@@ -357,10 +365,14 @@ def start(worksheet_journal, id_user, dct_combination):
                                               organise_dct=organise_dct,
                                               values_Excel=values_for_Excel_right,
                                               )
+            stop = time.time()
+            print(f"{LAB_NO} -- SPS -- DONE -- Время работы: {stop - start}")
 
 
         # Графики по компрессия КД
         if str(worksheet_journal['Eoed01_02_MPa'][row]) not in ["None", "nan"]:
+            # Таймер
+            start = time.time()
 
             pathSave_spd = os.path.join(pathSave, 'Компрессии')
             if not os.path.exists(pathSave_spd):
@@ -369,7 +381,7 @@ def start(worksheet_journal, id_user, dct_combination):
 
             NewDF, values_for_Excel = SPD.SPD_start_new(organise_dct)
 
-            dataframe_ISP = SPD.ISP_SPD(dataframe_isp=NewDF,
+            dataframe_ISP = isp_SPD_OCR.ISP_SPD(dataframe_isp=NewDF,
                                         organise_dct=organise_dct)
 
             SPD_LOG.write_log(row=row,
@@ -378,8 +390,13 @@ def start(worksheet_journal, id_user, dct_combination):
 
             read_shablons.shablonExcel_SPD(row, [NewDF], organise_dct, values_for_Excel)
 
+            stop = time.time()
+            print(f"{LAB_NO} -- SPD -- DONE -- Время работы: {stop - start}")
+
         # Графики по OCR
         if str(worksheet_journal['ocr'][row]) not in ["None", "nan"]:
+            # Таймер
+            start = time.time()
 
             pathSave_OCR = os.path.join(pathSave, 'OCR')
             if not os.path.exists(pathSave_OCR):
@@ -390,7 +407,7 @@ def start(worksheet_journal, id_user, dct_combination):
 
             NewDF = values_for_Excel.get('DATA_CASAGRANDE')
 
-            dataframe_ISP = SPD.ISP_SPD(dataframe_isp=NewDF,
+            dataframe_ISP = isp_SPD_OCR.ISP_SPD(dataframe_isp=NewDF,
                                         organise_dct=organise_dct)
 
             OCR_LOG.write_log(row=row,
@@ -402,9 +419,9 @@ def start(worksheet_journal, id_user, dct_combination):
                                            organise_dct=organise_dct,
                                            values_Excel=values_for_Excel)
 
-        print(f"{LAB_NO} -- DONE \n")
+            stop = time.time()
+            print(f"{LAB_NO} -- OCR -- DONE -- Время работы: {stop - start}")
         print()
-
 
 """
 Ручное управление

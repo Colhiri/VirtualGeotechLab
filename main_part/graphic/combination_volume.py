@@ -148,10 +148,10 @@ class AnalyzeGraph:
                     max_index_press + 1]) * math.sin(math.radians(self.angle_dilatanci))) / (
                          1 - math.sin(math.radians(self.angle_dilatanci)))))
 
-        print(self.angle_dilatanci)
-        print(max_index_press)
-        print(EV_END_1)
-        print(EV_END_2)
+        # print(self.angle_dilatanci)
+        # print(max_index_press)
+        # print(EV_END_1)
+        # print(EV_END_2)
 
         self.point_x = [0, -self.delta_EV_E0, EV_END_1, EV_END_2]
 

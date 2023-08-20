@@ -20,8 +20,6 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Exce
     # Путь для сохранения протоколов
     pathSave = organise_dct.get("pathSave_traxial_CD")
 
-    print(pathSave)
-
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))

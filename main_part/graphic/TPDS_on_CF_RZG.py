@@ -105,8 +105,6 @@ def start_TPDS_RZG(organise_dct: dict, dct_combination: dict, type_grunt_schemas
     # Проверим модуль
     E_rzg_calc = (press_rzg_END - press_repeat_RZG) / (otn_E_RZG - otn_repeat_RZG)
 
-    print(E_rzg_calc)
-
     # Середины петель
     pressRZG_up = (press_rzg - press_repeat_RZG) / 2 + press_repeat_RZG + 0.004
     pressRZG_down = (press_rzg - press_repeat_RZG) / 2 + press_repeat_RZG - 0.004

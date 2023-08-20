@@ -38,7 +38,7 @@ def write_log(row, dataframe, organise_dct):
         os.mkdir(pathSave_Test)
 
     # 20230627 143100 ГТ 7.2.6.xml Дата, время, тип
-    shutil.copy('..\\GEOF\\main_part\\XML_LOG\\SPD_ГТ_7.1.4.xml'
-                , f'{pathSave}\\SPD_ГТ_7.1.4.xml')
+    shutil.copy('..\\GEOF\\main_part\\XML_LOG\\SPD_ГТ_7.1.4_FROZEN.xml'
+                , f'{pathSave}\\SPD_ГТ_7.1.4_FROZEN.xml')
 
     dataframe.to_csv(f"{pathSave_Test}\\Test.1.log", sep='\t', index=False, encoding="ANSI")
