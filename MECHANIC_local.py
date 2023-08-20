@@ -24,6 +24,7 @@ from GEOF.BOT.DataDistributor_DB import DataDitributor as DD
 from GEOF.main_part.log_isp_write import SPS_LOG
 from GEOF.main_part.log_isp_write import SPD_LOG
 from GEOF.main_part.log_isp_write import OCR_LOG
+from GEOF.main_part.log_isp_write import TRAXIAL_LOG
 
 
 def start(worksheet_journal, id_user, dct_combination):
