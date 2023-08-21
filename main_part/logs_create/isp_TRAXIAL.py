@@ -1,5 +1,6 @@
 import random
 import pandas as pd
+import numpy as np
 
 from GEOF.main_part.graphic.consolidation import traxial_consolidation
 
@@ -25,10 +26,6 @@ class Traxial_ISP:
         action_changed_none_value[0] = True
         action_changed_none_value[2] = True
         action_changed_none_value[4] = True
-
-        list_1000 = [float(1000) for x in range(6)]
-
-        Deviator_kPa_none_value = [float(0) for x in range(6)]
 
         value_none_cell_press = randint(10, 500) / 100
         CellPress_kPa_none_value = [float(0) for x in range(6)]
@@ -57,12 +54,6 @@ class Traxial_ISP:
         VolumeDeformation_cm3_none_value = [float(0) for x in range(6)]
         VolumeDeformation_cm3_none_value[0] = value_noneVolumeDeformation_cm3_none_value
         VolumeDeformation_cm3_none_value[1] = value_noneVolumeDeformation_cm3_none_value
-
-        Deviator_MPa_none_value = [float(0) for x in range(6)]
-
-        CellPress_MPa_none_value = [x / 1000 for x in CellPress_kPa_none_value]
-
-        VerticalPress_MPa_none_value = [x / 1000 for x in VerticalPress_kPa_none_value]
 
         Trajectory_none_value = [str('') for x in range(6)]
         Trajectory_none_value[-1] = 'ReconsolidationWoDrain'

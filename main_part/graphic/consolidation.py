@@ -96,8 +96,18 @@ def traxial_consolidation(organise_dct):
     VerticalPress_kPa = [round(press * 1000, 1) for press in VerticalPress_MPa]
 
     Action = ['Stabilization' for x in range(count_point)]
+    Action[0] = 'Wait'
+    Action[1] = 'LoadStage'
+    Action[2] = 'LoadStage'
+
+
     Trajectory = ['Consolidation' for x in range(count_point)]
+
     Action_Changed = ['' for x in range(count_point)]
+    Action[0] = 'True'
+    Action[2] = 'True'
+
+
     CellPress_MPa = VerticalPress_MPa
     CellPress_kPa = VerticalPress_kPa
 
@@ -112,6 +122,9 @@ def traxial_consolidation(organise_dct):
                        'VolumeDeformation_cm3': volume_cm3, 'Deviator_MPa': Deviator_MPa,
                        'CellPress_MPa': CellPress_MPa, 'VerticalPress_MPa': VerticalPress_MPa, 'Trajectory': Trajectory})
 
+    return df
+
+if __name__ == "__main__":
     """ax = plt.gca()
     ax.invert_yaxis()
     # 1
@@ -124,14 +137,10 @@ def traxial_consolidation(organise_dct):
     plt.plot(xpoints, ypoints, '*')
     plt.grid()
     plt.show()
-
-
-
     plt.plot(press, otn_vert_def)
     plt.grid()
     plt.show()"""
 
-    return df
-
-if __name__ == "__main__":
     traxial_consolidation()
+
+
