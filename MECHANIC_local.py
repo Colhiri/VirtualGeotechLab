@@ -35,9 +35,6 @@ def start(worksheet_journal, id_user, dct_combination):
     count_rows = len(worksheet_journal)
     for row in range(0, count_rows):
 
-        # Список для сохранения датафреймов, которые возвращаются из TPDS
-        save_DF = []
-
         # Распаковка параметров из Датафрейма
         LAB_NO = worksheet_journal['Ind_lab'][row]
         N_IG = worksheet_journal['Ind'][row]
@@ -217,6 +214,9 @@ def start(worksheet_journal, id_user, dct_combination):
 
         # Графики по трехосникам КД
         if str(worksheet_journal['CD_sigma1'][row]) not in ["None", "nan"]:
+
+            # Список для сохранения датафреймов, которые возвращаются из TPDS
+            save_DF = []
             # Таймер
             start = time.time()
 
@@ -315,7 +315,94 @@ def start(worksheet_journal, id_user, dct_combination):
                                                 values_Excel=values_for_Excel_right,
                                                 mode=mode)
             stop = time.time()
-            print(f"{LAB_NO} -- TPs -- DONE -- Время работы: {stop - start}")
+            print(f"{LAB_NO} -- TPs -- КД -- DONE -- Время работы: {stop - start}")
+
+        # Трехосники НН
+        if str(worksheet_journal['UU_sigma1'][row]) not in ["None", "nan"]:
+
+            # Список для сохранения датафреймов, которые возвращаются из TPDS
+            save_DF = []
+
+            # Таймер
+            start = time.time()
+
+            pathSave_traxial = os.path.join(pathSave, 'Трехосные_НН_ПП')
+            if not os.path.exists(pathSave_traxial):
+                os.mkdir(pathSave_traxial)
+            organise_dct.update({'pathSave_traxial_UU': pathSave_traxial})
+
+            pressStart1 = organise_dct.get('pressStart1_traxial_UU')
+            pressStart2 = organise_dct.get('pressStart2_traxial_UU')
+            pressStart3 = organise_dct.get('pressStart3_traxial_UU')
+
+            pressEnd1 = organise_dct.get('pressEnd1_traxial_UU')
+            pressEnd2 = organise_dct.get('pressEnd2_traxial_UU')
+            pressEnd3 = organise_dct.get('pressEnd3_traxial_UU')
+
+            namesISP = ["graph1", "graph2", "graph3"]
+            pressStarts = [pressStart1, pressStart2, pressStart3]
+            pressEnds = [pressEnd1, pressEnd2, pressEnd3]
+
+            for name, pressStart, pressEnd in zip(namesISP, pressStarts, pressEnds):
+
+                organise_dct = normative_analyze.randomise()
+
+                organise_dct.update({'name_traxial_now': name})
+                organise_dct.update({'PressStart_traxial_now': pressStart})
+                organise_dct.update({'PressEnd_traxial_now': pressEnd})
+
+                DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(organise_dct=organise_dct,
+                                                                dct_combination=dct_combination,
+                                                                type_grunt_schemas=type_grunt_schemas)
+            save_DF.append(DF_ISP)
+
+            read_shablons.shablonExcel_TPS_CD_4(row=row,
+                                                dataframes=save_DF,
+                                                organise_dct=organise_dct,
+                                                values_Excel=values_for_Excel_right,
+                                                mode=1)
+            stop = time.time()
+            print(f"{LAB_NO} -- TPs -- НН -- DONE -- Время работы: {stop - start}")
+
+        # Трехосники КН
+        if str(worksheet_journal['UU_sigma1'][row]) not in ["None", "nan"]:
+
+            # Список для сохранения датафреймов, которые возвращаются из TPDS
+            save_DF = []
+            # Таймер
+            start = time.time()
+
+            pathSave_traxial = os.path.join(pathSave, 'Трехосные_НН_ПП')
+            if not os.path.exists(pathSave_traxial):
+                os.mkdir(pathSave_traxial)
+            organise_dct.update({'pathSave_traxial_UU': pathSave_traxial})
+
+            pressStart1 = organise_dct.get('pressStart1_traxial_CU')
+            pressStart2 = organise_dct.get('pressStart2_traxial_CU')
+            pressStart3 = organise_dct.get('pressStart3_traxial_CU')
+
+            pressEnd1 = organise_dct.get('pressEnd1_traxial_CU')
+            pressEnd2 = organise_dct.get('pressEnd2_traxial_CU')
+            pressEnd3 = organise_dct.get('pressEnd3_traxial_CU')
+
+            namesISP = ["graph1", "graph2", "graph3"]
+            pressStarts = [pressStart1, pressStart2, pressStart3]
+            pressEnds = [pressEnd1, pressEnd2, pressEnd3]
+
+            for name, pressStart, pressEnd in zip(namesISP, pressStarts, pressEnds):
+
+                organise_dct = normative_analyze.randomise()
+
+                organise_dct.update({'name_traxial_now': name})
+                organise_dct.update({'PressStart_traxial_now': pressStart})
+                organise_dct.update({'PressEnd_traxial_now': pressEnd})
+
+                DF_ISP, values_for_Excel = TPDSCF.start_TPDS_CF(organise_dct=organise_dct,
+                                                                dct_combination=dct_combination,
+                                                                type_grunt_schemas=type_grunt_schemas)
+
+            stop = time.time()
+            print(f"{LAB_NO} -- TPs -- КН -- DONE -- Время работы: {stop - start}")
 
         # Графики по срезам КД
         if str(worksheet_journal['fi'][row]) not in ["None", "nan"]:
