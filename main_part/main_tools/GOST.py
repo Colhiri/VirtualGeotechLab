@@ -1,7 +1,5 @@
 import math
 
-import numpy as np
-
 def getting_parameters_from_enggeo(organise_dct: dict):
 
     IP = organise_dct.get('IP')
@@ -43,7 +41,7 @@ def getting_parameters_from_enggeo(organise_dct: dict):
                     density = 'plotn'  # плотность
                 if 0.55 < e and e <= 0.7:
                     density = 'mid_plotn'
-                if e > 0.7000000000000000001:
+                if e > 0.7:
                     density = 'pihl'
             else:
                 density = None
@@ -135,7 +133,7 @@ def getting_parameters_from_enggeo(organise_dct: dict):
     return parametr_proba
 
 
-def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
+def calculate_press_gost(typeISP, organise_dct: dict, GRANSOST=None,
                          K_0=True, Calc_K_0=False, DOP = None):
 
     Depth = organise_dct.get('Depth')
@@ -241,7 +239,12 @@ def calculate_press_gost(typeISP, F, C, organise_dct: dict, GRANSOST=None,
             Depth = 1
 
         if Calc_K_0:
-            K_0 = 1 - math.sin(math.radians(F))
+            """
+            FAKE
+            FAKE
+            FAKE
+            """
+            # K_0 = 1 - math.sin(math.radians(F))
 
         press = ((Depth * organise_dct.get('p')) / 1000) * K_0
         if press < 0.050:

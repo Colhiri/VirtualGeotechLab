@@ -8,7 +8,7 @@ import datetime
 import openpyxl
 import pandas as pd
 
-def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Excel: dict, mode: int) -> None:
+def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Excel: dict, mode: int, mode_traxial: str) -> None:
     # Организационные моменты
     LAB_NO = organise_dct.get("LAB_NO")
     N_IG = organise_dct.get("N_IG")
@@ -16,10 +16,8 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Exce
     depth = organise_dct.get("depth")
     nameSoil = organise_dct.get("nameSoil")
 
-
     # Путь для сохранения протоколов
     pathSave = organise_dct.get("pathSave_traxial_CD")
-
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))
@@ -73,6 +71,13 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Exce
     ws['J20'] = e
     ws['J21'] = IL
 
+    ### Тип схемы
+    ### Тип схемы
+    ### Тип схемы
+    ws['N21'] = mode_traxial
+
+    ### Модули
+    ### Модули
     ### Модули
     ws['D85'] = values_Excel.get('devE50')
     ws['E85'] = values_Excel.get('epsE50')

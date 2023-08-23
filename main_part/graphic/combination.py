@@ -13,13 +13,16 @@ from GEOF.main_part.main_tools.main_functions import interpolation
 """
 
 class AnalyzeGraph:
-    def __init__(self, organise_values, control_points, data, type_grunt_dct,):
+    def __init__(self, organise_values, control_points, data, type_grunt_dct, mode_traxial):
         """
         Загрузка данных с файла по сохраненным схемам
         :param type_grunt: Н данный момент это является сохраненной схемой
         :param path_to_data:
         :param data:
         """
+        self.mode_traxial = mode_traxial
+
+
         self.organise_values = organise_values
         self.control_points = control_points
         self.data = data
@@ -47,12 +50,16 @@ class AnalyzeGraph:
         press_rzg_END = self.control_points.get("press_rzg_END")
         y_pressR_RZG = self.control_points.get("y_pressR_RZG")
 
-        if press_rzg_END:
-            self.point_x = [pressStart1, press16, pressE50, press_rzg_END, pressEnd1]
-            self.point_y = [0, y_press16, y_pressE50, y_pressR_RZG]
+        if self.mode_traxial == 'КД':
+            if press_rzg_END:
+                self.point_x = [pressStart1, press16, pressE50, press_rzg_END, pressEnd1]
+                self.point_y = [0, y_press16, y_pressE50, y_pressR_RZG]
+            else:
+                self.point_x = [pressStart1, press16, pressE50, pressEnd1]
+                self.point_y = [0, y_press16, y_pressE50]
         else:
-            self.point_x = [pressStart1, press16, pressE50, pressEnd1]
-            self.point_y = [0, y_press16, y_pressE50]
+            self.point_x = [pressStart1, pressEnd1]
+            self.point_y = [0]
 
         # Существующие схемы
         self.get_type_grunt()
@@ -123,7 +130,10 @@ class AnalyzeGraph:
         Создает новые точки на основе контрольных и опорных точек и отхождений.
         :return:
         """
-        max_x_real = max(self.point_x) - self.point_x[0]
+        if self.mode_traxial == 'КД':
+            max_x_real = max(self.point_x) - self.point_x[0]
+        else:
+            max_x_real = max(self.point_x) - self.point_x[0]
 
         percents_x = [random.randint(int(perc_min * 100), int(perc_max * 100)) / 10000 for perc_min, perc_max in
                       zip(self.new_percents_min_x, self.new_percents_max_x)]

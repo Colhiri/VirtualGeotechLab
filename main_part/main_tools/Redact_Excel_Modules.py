@@ -55,7 +55,7 @@ class ExcelModules:
                     try:
                         self.worksheet[column][row] = self.worksheet[column][row].replace(oldChar, newChar)
                     except:
-                        continue
+                        self.worksheet[column][row] = None
 
         for column in columns:
             try:
