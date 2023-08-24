@@ -24,18 +24,13 @@ class GruntNormative:
             'CD_u1': None,
             'CD_u2': None,
             'CD_u3': None,
-            #None,
             'CU_E50': None,
             'CU_fi': None,
             'CU_c': None,
-            #None,
             'UU_c': None,
-            #None,
             'OCR': None,
-            #None,
             'Eoed01_02_MPa': None,
             'Eobs01_02_Mpa': None,
-            #None,
             'F_unaxial': None,
             'C_unaxial': None,
         }
@@ -57,19 +52,19 @@ class GruntNormative:
 
     def angle_dilatanci(self):
         if self.grunt == 'gravel':
-            self.dilatanci = random.randint(400, 900) / 100
+            self.dilatanci = random.uniform(4.00, 9.00)
 
         if self.grunt == 'sand':
-            self.dilatanci = random.randint(300, 600) / 100
+            self.dilatanci = random.uniform(3.00, 6.00)
 
         if self.grunt == 'sandy_loam':
-            self.dilatanci = random.randint(10, 200) / 100
+            self.dilatanci = random.uniform(.10, 2.00)
 
         if self.grunt == 'loam':
-            self.dilatanci = random.randint(50, 100) / 100
+            self.dilatanci = random.uniform(.50, 1.00)
 
         if self.grunt == 'clay':
-            self.dilatanci = random.randint(0, 50) / 100
+            self.dilatanci = random.uniform(.0, .50)
 
         self.normative_parameters.update({'Dilatanci': self.dilatanci})
 
@@ -79,19 +74,15 @@ class GruntNormative:
         :return:
         """
         if self.grunt == 'gravel':
-            self.first_puasson = random.randint(30, 35) / 100
-
+            self.first_puasson = random.uniform(.30, .35)
         if self.grunt == 'sand':
-            self.first_puasson = random.randint(30, 35) / 100
-
+            self.first_puasson = random.uniform(.30, .35)
         if self.grunt == 'sandy_loam':
-            self.first_puasson = random.randint(30, 35) / 100
-
+            self.first_puasson = random.uniform(.30, .35)
         if self.grunt == 'loam':
-            self.first_puasson = random.randint(35, 37) / 100
-
+            self.first_puasson = random.uniform(.35, .37)
         if self.grunt == 'clay':
-            self.first_puasson = random.randint(30, 45) / 100
+            self.first_puasson = random.uniform(.30, .45)
 
         self.normative_parameters.update({'CD_v': self.first_puasson})
 
@@ -99,7 +90,7 @@ class GruntNormative:
         pass
 
     def rzg_koef_puasson(self):
-        self.koef_rzg = random.randint(14, 16) / 100
+        self.koef_rzg = random.uniform(.14, .16)
         self.normative_parameters.update({'CD_v_rzg': self.koef_rzg})
 
     def C_F_normative(self):

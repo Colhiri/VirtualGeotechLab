@@ -36,8 +36,6 @@ def SPS_value(organise_dct):
 
     return pressEnd1, pressEnd2, pressEnd3
 
-def SPD_value():
-    pass
 
 def Traxial_value(organise_dct):
 

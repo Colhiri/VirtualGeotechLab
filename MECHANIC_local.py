@@ -179,9 +179,6 @@ def start(worksheet_journal, id_user, dct_combination):
         organise_dct.setdefault('pressEnd2_unaxial', pressEnd2)
         organise_dct.setdefault('pressEnd3_unaxial', pressEnd3)
 
-
-
-
         organise_dct.setdefault('pressStart1_traxial', pressStart1)
         organise_dct.setdefault('pressStart2_traxial', pressStart2)
         organise_dct.setdefault('pressStart3_traxial', pressStart3)
