@@ -100,7 +100,8 @@ class MechanicStart:
             return
 
         save_DF = []
-        pathSave_traxial = self.add_new_dir(name_dir=f'Traxial_{mode_main_isp}', key_dict=f'pathSave_traxial_{mode_main_isp}')
+        pathSave_traxial = self.add_new_dir(name_dir=f'Traxial_{mode_main_isp}',
+                                            key_dict=f'pathSave_traxial_{mode_main_isp}')
         pressStarts, pressEnds = self.Traxial_press_value()
 
         ['CC', 'CU'], ['CC', 'UU'], ['CC'], ['UU'], ['CU']
@@ -126,21 +127,21 @@ class MechanicStart:
                 case 2:
                     if name != "graph0":
                         DF_ISP, _ = TPDSCF.start_TPDS_CF(organise_dct=self.organise_dct,
-                                                                    dct_combination=dct_combination,
-                                                                    type_grunt_schemas=self.type_grunt_schemas)
+                                                         dct_combination=dct_combination,
+                                                         type_grunt_schemas=self.type_grunt_schemas)
                     else:
                         DF_ISP, values_for_Excel = TPDS50.start_TPDS_E50(organise_dct=self.organise_dct,
-                                                                    dct_combination=dct_combination,
-                                                                    type_grunt_schemas=self.type_grunt_schemas)
+                                                                         dct_combination=dct_combination,
+                                                                         type_grunt_schemas=self.type_grunt_schemas)
                 case 3:
                     if name != "graph0":
                         DF_ISP, _ = TPDSCF.start_TPDS_CF(organise_dct=self.organise_dct,
-                                                                    dct_combination=dct_combination,
-                                                                    type_grunt_schemas=self.type_grunt_schemas)
+                                                         dct_combination=dct_combination,
+                                                         type_grunt_schemas=self.type_grunt_schemas)
                     else:
                         DF_ISP, values_for_Excel = TPDSRZG50.start_TPDS_RZG(organise_dct=self.organise_dct,
-                                                                    dct_combination=dct_combination,
-                                                                    type_grunt_schemas=self.type_grunt_schemas)
+                                                                            dct_combination=dct_combination,
+                                                                            type_grunt_schemas=self.type_grunt_schemas)
                 case 4:
                     if name != "graph1":
                         DF_ISP, _ = TPDSCF.start_TPDS_CF(organise_dct=self.organise_dct,
@@ -148,8 +149,8 @@ class MechanicStart:
                                                          type_grunt_schemas=self.type_grunt_schemas)
                     if name == "graph1":
                         DF_ISP, values_for_Excel = TPDSRZG.start_TPDS_RZG(organise_dct=self.organise_dct,
-                                                                    dct_combination=dct_combination,
-                                                                    type_grunt_schemas=self.type_grunt_schemas)
+                                                                          dct_combination=dct_combination,
+                                                                          type_grunt_schemas=self.type_grunt_schemas)
             logging.info(f"The graph - {name} is succesfully created.")
 
             save_DF.append(DF_ISP)
@@ -159,7 +160,7 @@ class MechanicStart:
                                             organise_dct=self.organise_dct,
                                             values_Excel=values_for_Excel,
                                             mode=mode,
-                                            mode_traxial='КД',)
+                                            mode_traxial='КД', )
 
     def unaxial_sps_run(self, row):
         """
@@ -212,7 +213,7 @@ class MechanicStart:
 
     def comp_isp_run(self, row):
 
-        Eoed = worksheet_journal['Eoed'][row]
+        Eoed = self.organise_dct.get(f'Eoed')
 
         if not Eoed:
             logging.info(f"Compression test is not start. Value Eoed is missing.")
@@ -221,7 +222,7 @@ class MechanicStart:
         logging.info(f"Compression test start.")
 
         pathSave_spd = self.add_new_dir(name_dir=f'Compression',
-                                            key_dict=f'pathSave_spd')
+                                        key_dict=f'pathSave_spd')
 
         test = SPD.compression(organise_dct=self.organise_dct)
         test.aggregation()
@@ -241,10 +242,9 @@ class MechanicStart:
 
         logging.info(f"Protocol create. End compression test.")
 
-
     def OCR_isp_run(self, row):
 
-        OCR = worksheet_journal['ocr'][row]
+        OCR = self.organise_dct.get(f'OCR')
 
         if not OCR:
             logging.info(f"OCR test is not start. Value OCR is missing.")
@@ -313,7 +313,8 @@ class MechanicStart:
         if not os.path.exists(pathSave):
             os.mkdir(pathSave)
 
-        nameObject = self.worksheet_journal['nameObject'][row][0] if isinstance(self.worksheet_journal['nameObject'][row], tuple) else self.worksheet_journal['nameObject'][row]
+        nameObject = self.worksheet_journal['nameObject'][row][0] if isinstance(
+            self.worksheet_journal['nameObject'][row], tuple) else self.worksheet_journal['nameObject'][row]
         pathSave = os.path.join(f"..\\GEOF\\prot\\{self.id_user}\\{nameObject}")
         if not os.path.exists(pathSave):
             os.mkdir(pathSave)
@@ -328,28 +329,13 @@ class MechanicStart:
         :param row:
         :return:
         """
-        organise_dct = self.worksheet_journal[[row]].to_dict()
+        organise_dct = self.worksheet_journal.iloc[row].to_dict()
 
-        organise_dct = {
-            # Распаковка параметров из Датафрейма
-            'LAB_NO': self.worksheet_journal['Ind_lab'][row],
-            'N_IG': self.worksheet_journal['Ind'][row],
-            'boreHole': self.worksheet_journal['BH'][row],
-            'nameSoil': self.worksheet_journal['name_soil'][row][0] if isinstance(self.worksheet_journal['name_soil'][row], tuple) else self.worksheet_journal['name_soil'][row],
-            'depth': self.worksheet_journal['Depth'][row],
-            # Дата получение объекта подлежащего испытаниям
-            'date_isp_object': self.worksheet_journal['data_f'][row],
-            # Дата испытания
-            'date_isp': self.worksheet_journal['data_test'][row],
-            # Дата протокола
-            'date_protocol': self.worksheet_journal['data_prot'][row],
-            # Номер протокола
-            'number_protocol': self.worksheet_journal['Np'][row],
-            # Заказчик
-            'nameClient': self.worksheet_journal['nameClient'][row][0] if isinstance(self.worksheet_journal['nameObject'][row], tuple) else self.worksheet_journal['nameClient'][row],
-            # Объект
-            'nameObject': self.pathSave,
+        for key, item in organise_dct.items():
+            if isinstance(item, float | int) and math.isnan(item):
+                organise_dct.update({key: None})
 
+        organise_dct.update({
             'pathSave': None,
             'pathSave_traxial_CD': None,
             'pathSave_traxial_CU': None,
@@ -359,92 +345,22 @@ class MechanicStart:
             'pathSave_spd': None,
             'pathSave_OCR': None,
 
-            # Физические параметры для протокола
-            'We': self.worksheet_journal['We'][row],
-            'p': self.worksheet_journal['p'][row],
-            'ps': self.worksheet_journal['ps'][row],
-            'e': self.worksheet_journal['e'][row],
-            'IP': self.worksheet_journal['IP'][row],
-            'IL': self.worksheet_journal['IL'][row],
-            'Sr': self.worksheet_journal['Sr'][row],
-            'WL': self.worksheet_journal['WL'][row],
-            'WP': self.worksheet_journal['WP'][row],
-            'Ir': self.worksheet_journal['Ir'][row],
-
-            # Грансостав
-            'GGR10': self.worksheet_journal['GGR10'][row],
-            'G10_5': self.worksheet_journal['G10_5'][row],
-            'G5_2': self.worksheet_journal['G5_2'][row],
-            'G2_1': self.worksheet_journal['G2_1'][row],
-            'G1_05': self.worksheet_journal['G1_05'][row],
-            'G05_025': self.worksheet_journal['G05_025'][row],
-            'G025_01': self.worksheet_journal['G025_01'][row],
-            'G01_005': self.worksheet_journal['G01_005'][row],
-            'G005_001': self.worksheet_journal['G005_001'][row],
-            'G001_0002': self.worksheet_journal['G001_0002'][row],
-            'G0002': self.worksheet_journal['G0002'][row],
-
-            # Трехосники КД
-            'Start1_traxial_CD': self.worksheet_journal['CD_sigma1'][row],
-            'Start2_traxial_CD': self.worksheet_journal['CD_sigma2'][row],
-            'Start3_traxial_CD': self.worksheet_journal['CD_sigma3'][row],
             'End1_traxial_CD': None,
             'End2_traxial_CD': None,
             'End3_traxial_CD': None,
-            'E_0': self.worksheet_journal['CD_E0'][row],
-            'E_50': self.worksheet_journal['E50'][row],
-            'F_traxial_CD': self.worksheet_journal['CD_fi'][row],
-            'C_traxial_CD': self.worksheet_journal['CD_c'][row],
-            'E_rzg': self.worksheet_journal['E_rzg'][row],
-            'CD_v_rzg': self.worksheet_journal['CD_v_rzg'][row],
-            't_100': self.worksheet_journal['t_100'][row],
-            'Dilatanci': self.worksheet_journal['Dilatanci'][row],
-            'CD_v': self.worksheet_journal['CD_v'][row],
-            'CD_u1': self.worksheet_journal['CD_u1'][row],
-            'CD_u2': self.worksheet_journal['CD_u2'][row],
-            'CD_u3': self.worksheet_journal['CD_u3'][row],
 
-            # Трехосники КН
-            'Start1_traxial_CU': self.worksheet_journal['CU_sigma1'][row],
-            'Start2_traxial_CU': self.worksheet_journal['CU_sigma2'][row],
-            'Start3_traxial_CU': self.worksheet_journal['CU_sigma3'][row],
             'End1_traxial_CU': None,
             'End2_traxial_CU': None,
             'End3_traxial_CU': None,
-            'F_traxial_CU': self.worksheet_journal['CU_fi'][row],
-            'C_traxial_CU': self.worksheet_journal['CU_c'][row],
 
-            # Трехосники НН
-            'Start1_traxial_UU': self.worksheet_journal['UU_sigma1'][row],
-            'Start2_traxial_UU': self.worksheet_journal['UU_sigma2'][row],
-            'Start3_traxial_UU': self.worksheet_journal['UU_sigma3'][row],
             'End1_traxial_UU': None,
             'End2_traxial_UU': None,
             'End3_traxial_UU': None,
-            'UU_c': self.worksheet_journal['UU_c'][row],
 
-            # OCR и компрессия
-            'OCR': self.worksheet_journal['ocr'][row],
-            'effective_press': self.worksheet_journal['P1'][row],
-            'Eoed': self.worksheet_journal['Eoed'][row],
-            'Ecas': self.worksheet_journal['Ecas'][row],
-            'Erzg_comp': self.worksheet_journal['Erzg_comp'][row],
-            'press_rzg_comp': self.worksheet_journal['press_rzg_comp'][row],
-
-            # Консолидация по компрессии
-            'Cv': self.worksheet_journal['Cv'][row],
-
-            # Одноплоскостной срез
-            'F_unaxial': self.worksheet_journal['fi'][row],
-            'C_unaxial': self.worksheet_journal['c'][row],
-            'Start1_unaxial': self.worksheet_journal['UN_sigma1'][row],
-            'Start2_unaxial': self.worksheet_journal['UN_sigma2'][row],
-            'Start3_unaxial': self.worksheet_journal['UN_sigma3'][row],
             'End1_unaxial': None,
             'End2_unaxial': None,
             'End3_unaxial': None,
 
-            ### Текущие давления на срезах, трехосниках
             'name_traxial_now': None,
             'name_unaxial_now': None,
 
@@ -453,7 +369,7 @@ class MechanicStart:
 
             'PressEnd_traxial_now': None,
             'PressEnd_unaxial_now': None,
-        }
+        })
 
         logging.info(f"Sample {row} create successful.")
 
@@ -472,10 +388,10 @@ class MechanicStart:
         pressEnd1, pressEnd2, pressEnd3 = None, None, None
 
         if F and C:
-
             Rad = math.radians(F)
 
-            valueRANDOM_to_press2 = random.choice([x for x in [random.randint(-10, 10) / 1000 for x in range(5)] if x != 0.0])
+            valueRANDOM_to_press2 = random.choice(
+                [x for x in [random.randint(-10, 10) / 1000 for x in range(5)] if x != 0.0])
 
             pressEnd1 = (pressStart1 * math.tan(Rad) + C) - valueRANDOM_to_press2 / 2
             pressEnd2 = (pressStart2 * math.tan(Rad) + C) + valueRANDOM_to_press2
@@ -494,7 +410,7 @@ class MechanicStart:
                                   'Start3_unaxial': pressStart3,
                                   'End1_unaxial': pressEnd1,
                                   'End2_unaxial': pressEnd2,
-                                  'End3_unaxial': pressEnd3,})
+                                  'End3_unaxial': pressEnd3, })
 
         logging.info(f"Unaxial pressures are selected for the {self.LAB_NO}:\n"
                      f"Press Start 1: {pressStart1}, Press End 1: {pressEnd1}\n"
@@ -533,7 +449,7 @@ class MechanicStart:
                                   f'Start3_traxial_{mode}': pressStart3,
                                   f'End1_traxial_{mode}': pressEnd1,
                                   f'End2_traxial_{mode}': pressEnd2,
-                                  f'End3_traxial_{mode}': pressEnd3,})
+                                  f'End3_traxial_{mode}': pressEnd3, })
 
         logging.info(f"Traxial pressures are selected for the {self.LAB_NO}:\n"
                      f"Press Start 1: {pressStart1}, Press End 1: {pressEnd1}\n"

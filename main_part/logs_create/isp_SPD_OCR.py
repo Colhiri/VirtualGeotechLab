@@ -18,12 +18,12 @@ def SPD_time(quantity_point) -> list[float]:
 
 def ISP_SPD(dataframe_isp, organise_dct) -> pd.DataFrame:
 
-    press_spd = dataframe_isp[0]
-    otn_vert_def = dataframe_isp[1]
+    press_spd = dataframe_isp['press']
+    otn_vert_def = dataframe_isp['otn']
     p_y = [otn * 20 for otn in otn_vert_def]
-    por_list = dataframe_isp[2]
+    por_list = dataframe_isp['por']
     try:
-        koef_m0 = dataframe_isp[3]
+        koef_m0 = dataframe_isp['mo']
     except:
         pass
 

@@ -55,13 +55,23 @@ class ExcelModules:
                     try:
                         self.worksheet[column][row] = self.worksheet[column][row].replace(oldChar, newChar)
                     except:
-                        self.worksheet[column][row] = None
+                        pass
+
+        # for column in columns:
+        #     for row in range(len(self.worksheet)):
+        #         if str(self.worksheet[column][row]) in ['None', 'nan', 'nAn', '<NA>', 'NA']:
+        #             print(self.worksheet[column][row])
+        #             self.worksheet[column][row] = 'None'
+        # self.worksheet = self.worksheet.fillna(value=0)
 
         for column in columns:
             try:
                 self.worksheet[column] = self.worksheet[column].astype(typeRewrite)
             except:
                 continue
+
+        # self.worksheet.fillna(value=0)
+
 
     def returnDATAFRAME(self):
         return self.worksheet
@@ -74,24 +84,6 @@ class ExcelModules:
         Талые грунты
         KD - Трехоcники или обычная механика?
         """
-        mechanicDF = pd.DataFrame()
-        for name, index in columnsDF.items():
-            mechanicDF.insert(len(mechanicDF.columns), name, self.worksheet[index], True)
-
-        mechanicDF = mechanicDF.astype(object)
-
-        # Давление
-        for row in range(len(mechanicDF['P1'])):
-            press = (float(str(mechanicDF['Depth'][row]).replace(",", "."))
-                     * float(str(mechanicDF['p'][row]).replace(",", "."))
-                     * 9.80665) / 1000
-
-            if KD and press <= 0.05:
-                mechanicDF['P1'][row] = 0.05
-            else:
-                mechanicDF['P1'][row] = press
-
-        mechanicDF.to_csv(savePath, sep='\t', index=False)
 
 class FastReplace(ExcelModules):
     def __init__(self, worksheet):

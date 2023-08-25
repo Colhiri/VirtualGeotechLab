@@ -124,7 +124,7 @@ def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
 
     dataframe1 = dataframes[0]
 
-    dataframe1 = dataframe1.astype('float64')
+    dataframe1 = dataframe1.astype('float64', errors='ignore')
 
     for column in dataframe1.columns:
         for row in range(len(dataframe1)):
