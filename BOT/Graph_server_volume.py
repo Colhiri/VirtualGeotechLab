@@ -35,7 +35,6 @@ class Graph_traxial:
         """
         Объем
         """
-
         self.points_volume_X = dct.get('volume_traxial').get(self.schema).get("point_values_X")
         self.volume_list_X_min = dct.get('volume_traxial').get(self.schema).get("list_X_min")
         self.volume_list_X_max = dct.get('volume_traxial').get(self.schema).get("list_X_max")
@@ -592,6 +591,8 @@ class Graph_traxial:
 
         self.volume_mid_line_values.data = dict(x=self.points_volume_X, y=self.point_values_Y)
 
+        self.volume_table_values_perc.data = dict(x_min=self.list_X_min, x_max=self.list_X_max,)
+
         self.calculate()
 
         self.Y_boundaries()
@@ -637,7 +638,6 @@ class Graph_traxial:
         self.mid_line_interpolate_values.data = self.update_random_and_count_point(self.interpolation_line(self.mid_line_values.data['x'],
                                                                         self.mid_line_values.data['y'],
                                                                         'traxial'), 'traxial')
-
         """
         Объемные
         """

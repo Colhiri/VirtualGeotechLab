@@ -25,13 +25,13 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict,
     koef_puasson = organise_dct.get("CD_v")
     angle_dilatanci = organise_dct.get("Dilatanci")
 
-    if mode_traxial == 'КД':
+    if mode_traxial == 'CD':
         if name == 'graph1' or name == 'graph0':
             E_0 = organise_dct.get("E_0")
             E_50 = organise_dct.get("E_50")
 
         if name == 'graph2' or name == 'graph3':
-            random_press = (organise_dct.get("PressStart_traxial_now") / organise_dct.get("pressStart1_traxial")) * random.randint(90, 110) / 100
+            random_press = (organise_dct.get("PressStart_traxial_now") / organise_dct.get(f"Start1_traxial_{mode_traxial}")) * random.randint(90, 110) / 100
             E_0 = organise_dct.get("E_0") * random_press
             E_50 = organise_dct.get("E_50") * random_press
 
@@ -48,7 +48,7 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict,
     press16 = pressStart1 * 1.6
     stepE1 = endE1 / countPoint
 
-    if mode_traxial == 'КД':
+    if mode_traxial == 'CD':
 
         # Расчет E1 и относительных вертикальных деформаций
         press16 = pressStart1 * 1.6
@@ -109,7 +109,6 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict,
             "endE1": endE1,
 
             "pressStart1": pressStart1,
-            "press16": press16,
             "pressEnd1": pressEnd1,
 
             'Puasson': koef_puasson,
@@ -127,7 +126,7 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict,
     parameters_points_dct = analyze.get_parameters_points()
     xnew, yfit = interpolation(x=new_point_x, y=new_point_y, parameters=parameters_points_dct)
 
-    if mode_traxial == 'КД':
+    if mode_traxial == 'CD':
         # Вставка значений по найденному индексу приближенного значения для нахождения модулей для E0, E50, pressMax
         index_x_E_0 = xnew.index(nearest(xnew, press16))
         index_x_E_50 = xnew.index(nearest(xnew, pressE50))
@@ -165,7 +164,7 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict,
     Коэффициент Пуассона
     """
 
-    if mode_traxial == 'КД':
+    if mode_traxial == 'CD':
         delta_EV_E0 = (koef_puasson * otn_p16) * 2 + otn_p16
 
         control_point = {
@@ -191,13 +190,9 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict,
         }
     else:
         control_point = {
-            "y_press16": y_press16,
-            "y_pressE50": y_pressE50,
             "endE1": endE1,
 
             "pressStart1": pressStart1,
-            "press16": press16,
-            "pressE50": pressE50,
             "pressEnd1": pressEnd1,
 
             'Puasson': koef_puasson,
@@ -216,7 +211,8 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict,
     analyze_volume = AnalyzeGraphVolume(organise_values=organise_dct,
                                         control_points=control_point,
                                         data=dct_combination,
-                                        type_grunt_dct=type_grunt_schemas)
+                                        type_grunt_dct=type_grunt_schemas,
+                                        mode_traxial=mode_traxial)
     analyze_volume.calculate_perc()
     new_point_x, _, EV_END_1, EV_END_2 = analyze_volume.points_reload()
     parameters_points_dct = analyze_volume.get_parameters_points()
@@ -235,13 +231,22 @@ def start_TPDS_CF(organise_dct, dct_combination: dict, type_grunt_schemas: dict,
     NewDF = pd.DataFrame(curve1)
     NewDF.reset_index(drop=True, inplace=True)
 
-    values_for_Excel = {"epsE0": otnVertDef[index_y_E_0],
-                        "epsE50": otnVertDef[index_y_E_50],
-                        "epsMAX": otnVertDef[index_x_pressMax],
+    if mode_traxial == 'CD':
+        values_for_Excel = {"epsE0": otnVertDef[index_y_E_0],
+                            "epsE50": otnVertDef[index_y_E_50],
+                            "epsMAX": otnVertDef[index_x_pressMax],
 
-                        "devE0": deviator[index_y_E_0],
-                        "devE50": deviator[index_y_E_50],
-                        "devMAX": pressEnd1 - pressStart1,
-                        }
+                            "devE0": deviator[index_y_E_0],
+                            "devE50": deviator[index_y_E_50],
+                            "devMAX": pressEnd1 - pressStart1,
+                            }
+    else:
+        values_for_Excel = {
+
+
+
+
+                            "devMAX": pressEnd1 - pressStart1,
+                            }
 
     return NewDF, values_for_Excel

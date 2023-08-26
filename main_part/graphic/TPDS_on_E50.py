@@ -39,15 +39,14 @@ def start_TPDS_E50(organise_dct: dict, dct_combination: dict, type_grunt_schemas
     get_parameters = AnalyzeGraph(organise_values=organise_dct,
                                   control_points={},
                                   data=dct_combination,
-                                  type_grunt_dct=type_grunt_schemas)
+                                  type_grunt_dct=type_grunt_schemas,
+                                  mode_traxial='CD')
     parameters_points_dct = get_parameters.get_parameters_points()
     countPoint = parameters_points_dct.get("count_point")
     endE1 = parameters_points_dct.get("endE1")
 
     otn_pStart = 0
     stepE1 = endE1 / countPoint
-
-
 
     # Расчет E1 и относительных вертикальных деформаций
     press16 = pressStart1 * 1.6
@@ -117,7 +116,8 @@ def start_TPDS_E50(organise_dct: dict, dct_combination: dict, type_grunt_schemas
     analyze = AnalyzeGraph(organise_values=organise_dct,
                            control_points=control_point,
                            data=dct_combination,
-                           type_grunt_dct=type_grunt_schemas)
+                           type_grunt_dct=type_grunt_schemas,
+                           mode_traxial='CD')
     analyze.calculate_perc()
     new_point_x, new_point_y = analyze.points_reload()
     parameters_points_dct = analyze.get_parameters_points()
@@ -207,7 +207,8 @@ def start_TPDS_E50(organise_dct: dict, dct_combination: dict, type_grunt_schemas
     NewDF = pd.DataFrame(curve1)
     NewDF.reset_index(drop=True, inplace=True)
 
-    values_for_Excel = {"epsE0": otnVertDef[index_y_E_0],
+    values_for_Excel = {
+                        "epsE0": otnVertDef[index_y_E_0],
                         "epsE50": otnVertDef[index_y_E_50],
                         "epsMAX": otnVertDef[index_x_pressMax],
 

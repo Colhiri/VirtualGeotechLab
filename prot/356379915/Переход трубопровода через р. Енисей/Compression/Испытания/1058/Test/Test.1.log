@@ -1,0 +1,7 @@
+Time	Action	Action_Changed	VerticalPress_kPa	ePress_kPa	VerticalDeformation_mm	VerticalPress_MPa	PorePress_MPa	VerticalStrain	Deformation_mm	Stage	
+0.0	Stabilization	True	0.0	0	0.0	0.0	0.0	0	0.0	0	Компрессия
+12.34	Stabilization	True	1.25	0	0.14186786532660958	0.0125	0.14186786532660958	0	0.0012500000000000002	0	Компрессия
+23.92	Stabilization	True	2.5	0	0.20436786532660958	0.025	0.20436786532660958	0	0.0025000000000000005	0	Компрессия
+33.72	Stabilization	True	5.0	0	0.3574846196572928	0.05	0.3574846196572928	0	0.005000000000000001	0	Компрессия
+59.08	Stabilization	True	10.0	0	0.5674714613064382	0.1	0.5674714613064382	0	0.010000000000000002	0	Компрессия
+57.95	Stabilization	True	20.0	0	0.9008047946397717	0.2	0.9008047946397717	0	0.020000000000000004	0	Компрессия

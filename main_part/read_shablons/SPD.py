@@ -1,16 +1,9 @@
-import math
-import random
-import os
 import shutil
-from time import strftime
-import time
-import datetime
+import io
 
-import matplotlib.pyplot as plt
-import numpy as np
 import openpyxl
 import pandas as pd
-from scipy import interpolate
+from openpyxl.drawing.image import Image
 
 def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
     # Организационные моменты
@@ -53,7 +46,6 @@ def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
     else:
         prot_name = LAB_NO + '.xlsx'
 
-
     """
     Бот '..\\srcs\\shablons\\TPDS_CD_test.xlsx'
     Локальная '..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
@@ -83,21 +75,6 @@ def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
     ws['I37'] = values_Excel.get('otn_MAX')
     ws['K37'] = values_Excel.get('press_MAX')
 
-
-    # ws['A70'] = values_Excel.get('epsE0')
-
-    # ws['O53'] = dct.get('F')
-    # ws['O54'] = dct.get('C')
-
-    # Давления
-    # ws['N47'] = dct.get('pressStart1')
-    # ws['N48'] = dct.get('pressStart2')
-    # ws['N49'] = dct.get('pressStart3')
-
-    # ws['O47'] = dct.get('pressEnd1')
-    # ws['O48'] = dct.get('pressEnd2')
-    # ws['O49'] = dct.get('pressEnd3')
-
     date_protocol = [str(x) for x in date_protocol.replace(' 00:00:00', '').split('-')]
     date_protocol.reverse()
     str_prot = "Протокол испытаний № " + number_protocol + ' от ' + str('-'.join(map(str, date_protocol)))
@@ -115,6 +92,11 @@ def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
     else:
         ws['A16'] = 'Дата испытания: ' + date_isp
 
+    # ws.add_image(image_graph, anchor='E29')
+
+
+    ws['A55'] = f'Инженерно-геологический элемент: {N_IG}'
+
     wb.save(f'{pathSave}\\{prot_name}')
 
     writer = pd.ExcelWriter(
@@ -125,10 +107,6 @@ def shablonExcel_SPD(row, dataframes: list, organise_dct: dict, values_Excel):
     dataframe1 = dataframes[0]
 
     dataframe1 = dataframe1.astype('float64', errors='ignore')
-
-    for column in dataframe1.columns:
-        for row in range(len(dataframe1)):
-            pass
 
     dataframe1.to_excel(writer, sheet_name='1', startcol=5, startrow=29, index=False,
                         index_label=False,

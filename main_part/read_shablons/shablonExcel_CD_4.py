@@ -17,7 +17,7 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Exce
     nameSoil = organise_dct.get("nameSoil")
 
     # Путь для сохранения протоколов
-    pathSave = organise_dct.get("pathSave_traxial_CD")
+    pathSave = organise_dct.get(f"pathSave_traxial_{mode_traxial}")
 
     # Дата получение объекта подлежащего испытаниям
     date_isp_object = str(organise_dct.get("date_isp_object"))
@@ -51,9 +51,10 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Exce
 
     """
     Бот '..\\srcs\\shablons\\TPDS_CD_test.xlsx'
-    Локальная '..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
+    Локальная '..\\GEOF\\srcs\\shablons\\TPDS_CD.xlsx'
     """
-    shutil.copy('..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
+
+    shutil.copy('..\\GEOF\\srcs\\shablons\\TPDS_CD.xlsx'
                 , f'{pathSave}\\{prot_name}')
 
     wb = openpyxl.load_workbook(
@@ -79,37 +80,39 @@ def shablonExcel_TPS_CD_4(row, dataframes: list, organise_dct: dict, values_Exce
     ### Модули
     ### Модули
     ### Модули
-    ws['D85'] = values_Excel.get('devE50')
-    ws['E85'] = values_Excel.get('epsE50')
+    if mode_traxial == 'CD':
+    # ws['D85'] = values_Excel.get('devE50')
+    # ws['E85'] = values_Excel.get('epsE50')
+#
+    # ws['A85'] = values_Excel.get('devE0')
+    # ws['B85'] = values_Excel.get('epsE0')
 
-    ws['A85'] = values_Excel.get('devE0')
-    ws['B85'] = values_Excel.get('epsE0')
+    ws['O56'] = organise_dct.get(f'F_traxial_{mode_traxial}')
+    ws['O57'] = organise_dct.get(f'C_traxial_{mode_traxial}')
 
-    ws['O56'] = organise_dct.get('F_traxial')
-    ws['O57'] = organise_dct.get('C_traxial')
+    if mode_traxial == 'CD':
+        # Давления
+        # K0, д.е.
+        ws['D62'] = values_Excel.get('K0')
+        # Эффективное напряжение, Мпа:
+        ws['J62'] = organise_dct.get(f'Start1_traxial_{mode_traxial}') * values_Excel.get('K0')
+        # Точки нахождения модуля Е0, Мпа (полное напряжение):
+        # Первая точка модуля E0
+        ws['J63'] = organise_dct.get(f'Start1_traxial_{mode_traxial}') * values_Excel.get('K0')
+        # Вторая точка модуля E0
+        ws['K63'] = organise_dct.get(f'Start1_traxial_{mode_traxial}') * values_Excel.get('K0') + values_Excel.get('devE0')
+        # Максимальный девиатор
+        ws['J64'] = values_Excel.get('devMAX')
+        # Точка на Е50
+        ws['J65'] = values_Excel.get('devE50')
 
-    # Давления
-    # K0, д.е.
-    ws['D62'] = (1 - math.sin(math.radians(organise_dct.get('F_traxial'))))
-    # Эффективное напряжение, Мпа:
-    ws['J62'] = organise_dct.get('pressStart1_traxial') * (1 - math.sin(math.radians(organise_dct.get('F_traxial'))))
-    # Точки нахождения модуля Е0, Мпа (полное напряжение):
-    # Первая точка модуля E0
-    ws['J63'] = organise_dct.get('pressStart1_traxial') * (1 - math.sin(math.radians(organise_dct.get('F_traxial'))))
-    # Вторая точка модуля E0
-    ws['K63'] = organise_dct.get('pressStart1_traxial') * (1 - math.sin(math.radians(organise_dct.get('F_traxial')))) + values_Excel.get('devE0')
-    # Максимальный девиатор
-    ws['J64'] = values_Excel.get('devMAX')
-    # Точка на Е50
-    ws['J65'] = values_Excel.get('devE50')
+    ws['N47'] = organise_dct.get(f'Start1_traxial_{mode_traxial}')
+    ws['N48'] = organise_dct.get(f'Start2_traxial_{mode_traxial}')
+    ws['N49'] = organise_dct.get(f'Start3_traxial_{mode_traxial}')
 
-    ws['N47'] = organise_dct.get('pressStart1_traxial')
-    ws['N48'] = organise_dct.get('pressStart2_traxial')
-    ws['N49'] = organise_dct.get('pressStart3_traxial')
-
-    ws['O47'] = organise_dct.get('pressEnd1_traxial')
-    ws['O48'] = organise_dct.get('pressEnd2_traxial')
-    ws['O49'] = organise_dct.get('pressEnd3_traxial')
+    ws['O47'] = organise_dct.get(f'End1_traxial_{mode_traxial}')
+    ws['O48'] = organise_dct.get(f'End2_traxial_{mode_traxial}')
+    ws['O49'] = organise_dct.get(f'End3_traxial_{mode_traxial}')
 
     date_protocol = [str(x) for x in date_protocol.replace(' 00:00:00', '').split('-')]
     date_protocol.reverse()

@@ -1,40 +1,15 @@
-2023-08-26 01:03:21,218 INFO Initialize successful.
-2023-08-26 01:03:21,218 INFO Path create: ..\GEOF\prot\356379915\Переход трубопровода через р. Енисей.
-2023-08-26 01:03:21,219 INFO Sample 0 create successful.
-2023-08-26 01:03:21,219 INFO For ('1057',) initialize type grunt schemas complete.
-2023-08-26 01:03:21,219 INFO Traxial test: mode test - CD, mode write - 1
-Main parameters: F - None, C - None
-2023-08-26 01:03:21,219 INFO Traxial test is not start. Values F or C is missing.
-2023-08-26 01:03:21,219 INFO Additional path created and successfully added.
-2023-08-26 01:03:21,219 INFO Unaxial pressures are selected for the ('1057',):
-Press Start 1: 0.1, Press End 1: 0.046397023426620235
-Press Start 2: 0.15, Press End 2: 0.07959553513993035
-Press Start 3: 0.2, Press End 3: 0.08279404685324046
+2023-08-27 00:25:49,120 INFO Initialize successful.
+2023-08-27 00:25:49,120 INFO Path create: ..\GEOF\prot\356379915\Переход трубопровода через р. Енисей.
+2023-08-27 00:25:49,120 INFO Sample 0 create successful.
+2023-08-27 00:25:49,120 INFO For ('1057',) initialize type grunt schemas complete.
+2023-08-27 00:25:49,120 INFO Additional path created and successfully added.
+2023-08-27 00:25:49,120 INFO Traxial pressures are selected for the ('1057',):
+Press Start 1: 0.05, Press End 1: 0.14482477666033716
+Press Start 2: 0.15000000000000002, Press End 2: 0.3487854495764846
+Press Start 3: 0.25, Press End 3: 0.552746122492632
 
-2023-08-26 01:03:21,219 INFO Unaxial test start.
-2023-08-26 01:03:21,225 INFO Graph with start press - 0.1 is done.
-2023-08-26 01:03:21,228 INFO Graph with start press - 0.15 is done.
-2023-08-26 01:03:21,232 INFO Graph with start press - 0.2 is done.
-2023-08-26 01:03:21,232 INFO Prepare to excel write protocol.
-2023-08-26 01:03:21,431 INFO Protocol create. End unaxial test.
-2023-08-26 01:03:21,431 INFO Compression test start.
-2023-08-26 01:03:21,431 INFO Additional path created and successfully added.
-2023-08-26 01:03:21,431 WARNING Multiple parameters without value
-2023-08-26 01:03:21,431 INFO Initialize successful: Depth: 1.7, IP: None, IL: 1.082, e: 1.1, p: 1.9.
-2023-08-26 01:03:21,431 INFO Coefficients - Moed: 1 and Beta: 0.8.
-2023-08-26 01:03:21,431 INFO Press graph - [0, 0.0125, 0.025, 0.05, 0.1, 0.2].
-2023-08-26 01:03:21,431 INFO Effective press - 0.03167547949999999.
-2023-08-26 01:03:21,431 INFO Index are taken: 2, 3.
-2023-08-26 01:03:21,431 INFO The value of the effective press is less than the value of the range odometric module.
-First scenario
-2023-08-26 01:03:21,431 INFO Relative vertical deformation is successfully calculated.
-2023-08-26 01:03:21,431 INFO Calculate coefficient of porosity is done.
-2023-08-26 01:03:21,431 INFO Calculate coefficient of m0 is done.
-2023-08-26 01:03:21,432 INFO Checking the set parameters now: Ecas - 2.9999999999999987, Eoed - 5.000000000000001
-2023-08-26 01:03:21,519 INFO A graph is built.
-2023-08-26 01:03:22,948 INFO The data for graph is ready.
-2023-08-26 01:03:22,948 INFO The data for protocol is ready.
-2023-08-26 01:03:22,951 INFO Prepare to excel write protocol.
-2023-08-26 01:03:23,111 INFO Protocol create. End compression test.
-2023-08-26 01:03:23,111 INFO OCR test start.
-2023-08-26 01:03:23,111 INFO Additional path created and successfully added.
+2023-08-27 00:25:49,121 INFO Traxial test: mode test - CU, mode write - 1
+Main parameters: F - 20.0, C - 0.015
+2023-08-27 00:25:49,122 INFO The graph - graph1 is succesfully created.
+2023-08-27 00:25:49,123 INFO The graph - graph2 is succesfully created.
+2023-08-27 00:25:49,124 INFO The graph - graph3 is succesfully created.

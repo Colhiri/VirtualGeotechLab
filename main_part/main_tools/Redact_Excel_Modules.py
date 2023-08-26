@@ -1,11 +1,4 @@
-import sys
-import os
-import re
-import random
-
-import xlwings as xw
 import pandas as pd
-import numpy as np
 
 
 class ExcelModules:
@@ -57,21 +50,11 @@ class ExcelModules:
                     except:
                         pass
 
-        # for column in columns:
-        #     for row in range(len(self.worksheet)):
-        #         if str(self.worksheet[column][row]) in ['None', 'nan', 'nAn', '<NA>', 'NA']:
-        #             print(self.worksheet[column][row])
-        #             self.worksheet[column][row] = 'None'
-        # self.worksheet = self.worksheet.fillna(value=0)
-
         for column in columns:
             try:
                 self.worksheet[column] = self.worksheet[column].astype(typeRewrite)
             except:
                 continue
-
-        # self.worksheet.fillna(value=0)
-
 
     def returnDATAFRAME(self):
         return self.worksheet
@@ -79,52 +62,6 @@ class ExcelModules:
     def saveResultDeleteCSV(self, savePath):
         self.worksheet.to_csv(savePath, sep='\t', index=False)
 
-    def prepareToMechanic(self, columnsDF, KD, savePath):
-        """
-        Талые грунты
-        KD - Трехоcники или обычная механика?
-        """
-
 class FastReplace(ExcelModules):
     def __init__(self, worksheet):
         self.worksheet = worksheet
-
-class ExcelModuleWithoutPD:
-    def __init__(self, pathMain, sheetName):
-        self.pathMain = pathMain
-        self.sheetName = str(sheetName)
-
-        self.dopPaths = None
-        self.saveValues = {}
-        self.indexSave = 0
-
-    def checkFiles(self):
-        import os
-        for root, dirs, dopPaths in os.walk(self.pathMain):
-            self.dopPaths = dopPaths
-            # self.dopPaths.sort(key=len)
-        self.dopPaths.sort(key=lambda x: os.path.getmtime(self.pathMain + x))
-
-    def checkCells(self, CELLS: dict):
-        for path in self.dopPaths:
-
-            app = xw.App(visible=False)
-            wb = app.books.open(self.pathMain + path)
-
-            data_excel = xw.sheets[self.sheetName]
-
-            returnValues = {}
-            for value, name in CELLS.items():
-                returnValues.setdefault(value, data_excel.range(name).value)
-
-            wb.close()
-
-            self.saveValues.setdefault(self.indexSave, returnValues)
-            self.indexSave += 1
-
-        self.saveValues = pd.DataFrame.from_dict(self.saveValues)
-
-        self.saveValues.to_csv(".\Output_Files\Modules.log", sep='\t')
-
-        print()
-

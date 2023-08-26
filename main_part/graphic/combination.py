@@ -1,16 +1,4 @@
-import numpy as np
-from scipy import interpolate
-from scipy.stats import stats
-
-import json
 import random
-
-from GEOF.main_part.main_tools.main_functions import interpolation
-
-"""
-
-
-"""
 
 class AnalyzeGraph:
     def __init__(self, organise_values, control_points, data, type_grunt_dct, mode_traxial):
@@ -50,7 +38,7 @@ class AnalyzeGraph:
         press_rzg_END = self.control_points.get("press_rzg_END")
         y_pressR_RZG = self.control_points.get("y_pressR_RZG")
 
-        if self.mode_traxial == 'КД':
+        if self.mode_traxial == 'CD':
             if press_rzg_END:
                 self.point_x = [pressStart1, press16, pressE50, press_rzg_END, pressEnd1]
                 self.point_y = [0, y_press16, y_pressE50, y_pressR_RZG]
@@ -59,7 +47,7 @@ class AnalyzeGraph:
                 self.point_y = [0, y_press16, y_pressE50]
         else:
             self.point_x = [pressStart1, pressEnd1]
-            self.point_y = [0]
+            self.point_y = [0, endE1]
 
         # Существующие схемы
         self.get_type_grunt()
@@ -130,7 +118,7 @@ class AnalyzeGraph:
         Создает новые точки на основе контрольных и опорных точек и отхождений.
         :return:
         """
-        if self.mode_traxial == 'КД':
+        if self.mode_traxial == 'CD':
             max_x_real = max(self.point_x) - self.point_x[0]
         else:
             max_x_real = max(self.point_x) - self.point_x[0]
@@ -155,9 +143,13 @@ class AnalyzeGraph:
 
         new_point_x = []
         for count, perc in enumerate(percents_x, 0):
-            if count in [0,1,2]:
-                new_point_x.append(self.point_x[count])
-                continue
+            if count in [0, 1, 2]:
+                if self.mode_traxial == 'CD':
+                    new_point_x.append(self.point_x[count])
+                else:
+                    if count == 0:
+                        new_point_x.append(self.point_x[count])
+                        continue
             if count in [self.point_values_X.index(max(self.point_values_X))]:
                 new_point_x.append(self.point_x[-1])
                 continue
@@ -166,9 +158,16 @@ class AnalyzeGraph:
         new_point_y = []
         for count, perc in enumerate(percents_y, 0):
             if count in [0,1,2]:
-                new_point_y.append(self.point_y[count])
-                continue
-            new_point_y.append(perc * self.max_point_Y + max(self.point_y))
+                if self.mode_traxial == 'CD':
+                    new_point_y.append(self.point_y[count])
+                    continue
+                else:
+                    pass
+            if self.mode_traxial == 'CD':
+                new_point_y.append(perc * self.max_point_Y + max(self.point_y))
+            else:
+                new_point_y.append(perc * self.max_point_Y)
+
 
         self.new_point_x = new_point_x
         self.new_point_y = new_point_y

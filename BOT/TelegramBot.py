@@ -7,7 +7,7 @@ import telebot
 from telebot import types
 import numpy as np
 
-from GEOF.MECHANIC import start as start_mech
+# from GEOF.MECHANIC import start as start_mech
 import GEOF.main_part.main_tools as main_tools
 from DataDistributor_DB import DataDitributor as DD
 

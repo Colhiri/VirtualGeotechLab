@@ -1,3 +1,4 @@
+import io
 import logging
 import random
 from typing import Any
@@ -5,8 +6,9 @@ from typing import Any
 import matplotlib.pyplot as plt
 import pandas as pd
 import scipy.stats as stats
+from openpyxl.drawing.image import Image
 
-from isp_test.main_tools import bezier_curve
+from GEOF.main_part.main_tools import bezier_curve
 
 
 class compression:
@@ -23,6 +25,8 @@ class compression:
         self.Eoed = self.organise_dct.get('Eoed')  # Основной одометрический
         self.Ecas = self.organise_dct.get('Ecas')  # Касательный
         self.Erzg = self.organise_dct.get('Erzg')  # Касательный
+
+        self.plot_value = False
 
         logging.basicConfig(level=logging.INFO, filename="compression_isp.log", filemode="w",
                             format="%(asctime)s %(levelname)s %(message)s")
@@ -398,7 +402,7 @@ class compression:
             self.por_list = self.create_por_list()
             self.m0_list = self.create_mo_list()
 
-        self.plotting_graph()
+        self.image_graph = self.plotting_graph()
 
     def ret_dataframe(self) -> pd.DataFrame:
         """
@@ -426,23 +430,24 @@ class compression:
                             "q_zg": self.q_zg,
                             "otn_zg": self.otn_vert_def_ZG,
                             "otn_END_A": self.otn_END_A,
-                            'press_MAX': self.press_spd[-1],
+                            'press_MAX': self.press_MAX,
                             'otn_MAX': self.otn_vert_def[-1],
                             'Erzg': self.Erzg,
+                            'image': self.image_graph,
                             }
 
         logging.info(f"The data for protocol is ready.")
 
         return values_for_Excel
 
-    def plotting_graph(self) -> None:
+    def plotting_graph(self):
         """
         Формирует график
         :return:f
         """
         # plt.yticks([0.01 * count for count in range(len(self.ef))])
-        plt.xticks([0.1 * count for count in range(len(self.press_spd))])
-
+        plt.xticks([0.05 * count for count in range(len(self.press_spd))])
+        plt.gcf().subplots_adjust(left=0.15, bottom=0.15)
         ax = plt.gca()
         ax.set_xlim((0, self.press_spd[-1] * 1.1))
         ax.set_ylim((self.otn_vert_def[-1] * 1.1, 0))
@@ -464,8 +469,10 @@ class compression:
 
         logging.info(f"A graph is built.")
 
-        plt.show()
+        if self.plot_value:
+            plt.show()
 
+        return True
 
 if __name__ == "__main__":
     organise_dct = {

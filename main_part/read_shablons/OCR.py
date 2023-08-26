@@ -6,11 +6,9 @@ from time import strftime
 import time
 import datetime
 
-import matplotlib.pyplot as plt
 import numpy as np
 import openpyxl
 import pandas as pd
-from scipy import interpolate
 
 def shablonExcel_OCR(row, dataframes: list, organise_dct: dict, values_Excel):
     # Организационные моменты
@@ -48,83 +46,63 @@ def shablonExcel_OCR(row, dataframes: list, organise_dct: dict, values_Excel):
     e = organise_dct.get('e')
     IL = organise_dct.get('IL')
 
-    if LAB_NO is None or LAB_NO == np.nan or LAB_NO == np.NAN or LAB_NO == "None" or LAB_NO == "nAn":
+    if str(LAB_NO) in ['None', 'nan', 'nAn', 'NA', '<NA>']:
         prot_name = str(row) + '.xlsx'
     else:
         prot_name = LAB_NO + '.xlsx'
 
-    """
-    Бот '..\\srcs\\shablons\\TPDS_CD_test.xlsx'
-    Локальная '..\\GEOF\\srcs\\shablons\\TPDS_CD_test.xlsx'
-    """
     shutil.copy('..\\GEOF\\srcs\\shablons\\OCR.xlsx'
-                ,f'{pathSave}\\{prot_name}')
-
+                , f'{pathSave}\\{prot_name}')
 
     wb = openpyxl.load_workbook(
         f'{pathSave}\\{prot_name}')
     ws = wb.active
 
-    ws['E16'] = LAB_NO
-    ws['E14'] = boreHole
-    ws['E15'] = depth
-    # ws['C23'] = nameSoil
+    ws['C20'] = LAB_NO
+    ws['C21'] = boreHole
+    ws['C22'] = depth
+    ws['C23'] = nameSoil
 
-    ws['D22'] = We
-    ws['E22'] = p
-    ws['C22'] = ps
-    ws['H22'] = e
-    ws['L22'] = IL
-
-    # ### Значения для касательного модуля
-    # ws['G36'] = values_Excel.get('q_zg')
-    # ws['G37'] = values_Excel.get('otn_zg')
-    # ws['I36'] = values_Excel.get('otn_END_A')
-    # ws['I37'] = values_Excel.get('otn_MAX')
-    # ws['K37'] = values_Excel.get('press_MAX')
-
-
-    # ws['A70'] = values_Excel.get('epsE0')
-
-    # ws['O53'] = dct.get('F')
-    # ws['O54'] = dct.get('C')
-
-    # Давления
-    # ws['N47'] = dct.get('pressStart1')
-    # ws['N48'] = dct.get('pressStart2')
-    # ws['N49'] = dct.get('pressStart3')
-
-    # ws['O47'] = dct.get('pressEnd1')
-    # ws['O48'] = dct.get('pressEnd2')
-    # ws['O49'] = dct.get('pressEnd3')
+    ws['I20'] = We
+    ws['I21'] = p
+    ws['I22'] = ps
+    ws['I23'] = e
+    ws['I24'] = IL
 
     date_protocol = [str(x) for x in date_protocol.replace(' 00:00:00', '').split('-')]
     date_protocol.reverse()
     str_prot = "Протокол испытаний № " + number_protocol + ' от ' + str('-'.join(map(str, date_protocol)))
     ws['A9'] = str_prot
 
-    ws['E13'] = 'Наименование и адрес заказчика: ' + nameClient
-    ws['E12'] = 'Наименование объекта: ' + nameObject
+    ws['A11'] = 'Наименование и адрес заказчика: ' + nameClient
+    ws['A12'] = 'Наименование объекта: ' + nameObject
 
-    # date_isp_object = [str(x) for x in date_isp_object.replace(' 00:00:00', '').split('-')]
-    # date_isp_object.reverse()
-    # ws['A15'] = 'Дата получение объекта подлежащего испытаниям: ' + str('-'.join(map(str, date_isp_object)))
+    date_isp_object = [str(x) for x in date_isp_object.replace(' 00:00:00', '').split('-')]
+    date_isp_object.reverse()
+    ws['A15'] = 'Дата получение объекта подлежащего испытаниям: ' + str('-'.join(map(str, date_isp_object)))
 
-    # if isinstance(date_isp, str):
-    #     ws['A16'] = 'Дата испытания: ' + date_isp
-    # else:
-    #     ws['A16'] = 'Дата испытания: ' + date_isp
-    # Беккер
-    ws['K52'] = values_Excel.get('Sigma_Beccer')
-    ws['K53'] = values_Excel.get('effective_press')
-    ws['K54'] = values_Excel.get('OCR')
-    ws['K55'] = values_Excel.get('POP')
+    if isinstance(date_isp, str):
+        ws['A16'] = 'Дата испытания: ' + date_isp
+    else:
+        ws['A16'] = 'Дата испытания: ' + date_isp
 
     # Казагранде
-    ws['K35'] = values_Excel.get('Sigma_CASAGRANDE')
-    ws['K36'] = values_Excel.get('effective_press')
-    ws['K37'] = values_Excel.get('OCR_CASAGRANDE')
-    ws['K38'] = values_Excel.get('POP_CASAGRANDE')
+    ws['K38'] = values_Excel.get('Sigma_CASAGRANDE')
+    ws['K39'] = values_Excel.get('effective_press')
+    ws['K40'] = values_Excel.get('OCR_CASAGRANDE')
+    ws['K41'] = values_Excel.get('POP_CASAGRANDE')
+
+    # Беккер
+    ws['K55'] = values_Excel.get('Sigma_Beccer')
+    ws['K56'] = values_Excel.get('effective_press')
+    ws['K57'] = values_Excel.get('OCR')
+    ws['K58'] = values_Excel.get('POP')
+
+    ws['A67'] = f'Инженерно-геологический элемент: {N_IG}'
+
+    # Изображения
+    # ws.add_image(values_Excel.get('image_casagrande'), 'F26')
+    # ws.add_image(values_Excel.get('image_beccer'), 'F43')
 
     wb.save(f'{pathSave}\\{prot_name}')
 
@@ -140,23 +118,23 @@ def shablonExcel_OCR(row, dataframes: list, organise_dct: dict, values_Excel):
     dataframe2 = dataframe2.astype('float64')
 
     # метод Казагранде
-    (dataframe1).to_excel(writer, sheet_name='1', startcol=1, startrow=27, index=False,
+    (dataframe1).to_excel(writer, sheet_name='1', startcol=1, startrow=26, index=False,
                           index_label=False,
                           header=False, float_format="%.20f")
     # Значения для линий
     CASAGRANDE = values_Excel.get('VALUES_LINES').astype('float64')
-    CASAGRANDE.to_excel(writer, sheet_name='1', startcol=13, startrow=27, index=False,
+    CASAGRANDE.to_excel(writer, sheet_name='1', startcol=13, startrow=26, index=False,
                         index_label=False,
                         header=False, float_format="%.20f")
 
 
     # метод Беккера
-    (dataframe2).to_excel(writer, sheet_name='1', startcol=1, startrow=44, index=False,
+    (dataframe2).to_excel(writer, sheet_name='1', startcol=1, startrow=43, index=False,
                         index_label=False,
                         header=False, float_format="%.20f")
     # Значения для линий
     BECCER = values_Excel.get('BECCER').astype('float64')
-    BECCER.to_excel(writer, sheet_name='1', startcol=13, startrow=44, index=False,
+    BECCER.to_excel(writer, sheet_name='1', startcol=13, startrow=43, index=False,
                         index_label=False,
                         header=False, float_format="%.20f")
 

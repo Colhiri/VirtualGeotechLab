@@ -44,9 +44,12 @@ class IdentifySoil:
 
         return grunt_type
 
-    def definition_density(self) -> str:
+    def definition_density(self) -> str or None:
 
         density = None
+
+        if self.grunt_type not in ['Гравелистый', 'Крупный', 'Средней крупности', 'Мелкий', 'Пылеватый']:
+            return density
 
         match self.grunt_type:
             case 'Гравелистый' | 'Крупный' | 'Средней крупности':
@@ -78,23 +81,28 @@ class IdentifySoil:
 
         return density
 
-    def definition_water_saturation(self) -> str | None:
+    def definition_water_saturation(self) -> str or None:
 
         water_saturation = None
 
-        if self.Sr:
-            if self.Sr <= 0.8:
-                water_saturation = True
-            else:
-                water_saturation = False
+        if not self.Sr:
+            return water_saturation
+
+        if self.Sr <= 0.8:
+            water_saturation = True
+        else:
+            water_saturation = False
 
         return water_saturation
 
-    def definition_constistenci(self) -> (str, str):
+    def definition_constistenci(self) -> (str, str) or (None, None):
 
         consistency = None
 
         grunt_type = None
+
+        if not self.IP:
+            return consistency, grunt_type
 
         if self.IP <= 7:
             grunt_type = 'Супесь'
@@ -139,11 +147,9 @@ class IdentifySoil:
 
     def aggregation_parameters(self):
 
-        if self.IP:
-            self.consistency, self.grunt_type = self.definition_constistenci()
-        else:
-            self.grunt_type = self.definition_gransostav()
-            self.density = self.definition_density()
+        self.consistency, self.grunt_type = self.definition_constistenci()
+        self.grunt_type = self.definition_gransostav()
+        self.density = self.definition_density()
 
         self.water_saturation = self.definition_water_saturation()
 
@@ -162,7 +168,8 @@ class IdentifySoil:
                     press_2 = 0.300
                     press_3 = 0.500
             if self.grunt_type in ['Гравелистый', 'Крупный', 'Средний', 'Суглинок', 'Глина']:
-                if self.density in ['Средней плотности'] or self.consistency in ['Тугопластичная', 'Тугопластичный', 'Полутвердый']:
+                if self.density in ['Средней плотности'] or self.consistency in ['Тугопластичная', 'Тугопластичный',
+                                                                                 'Полутвердый']:
                     press_1 = 0.100
                     press_2 = 0.200
                     press_3 = 0.300

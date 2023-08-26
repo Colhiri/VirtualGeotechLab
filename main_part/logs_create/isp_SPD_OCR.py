@@ -1,3 +1,4 @@
+import logging
 import random
 import pandas as pd
 
@@ -16,7 +17,7 @@ def SPD_time(quantity_point) -> list[float]:
     """
     return [random_time() * count for count in range(quantity_point)]
 
-def ISP_SPD(dataframe_isp, organise_dct) -> pd.DataFrame:
+def ISP_SPD(dataframe_isp) -> pd.DataFrame:
 
     press_spd = dataframe_isp['press']
     otn_vert_def = dataframe_isp['otn']
@@ -46,4 +47,7 @@ def ISP_SPD(dataframe_isp, organise_dct) -> pd.DataFrame:
                        'VerticalPress_MPa': press_spd, 'PorePress_MPa': p_y, 'VerticalStrain': ePress_kPa,
                        'Deformation_mm': [press * 0.1 for press in press_spd],
                        'Stage': ePress_kPa, '': name})
+
+    logging.info(f"The initial data for compression is ready.\n")
+
     return df

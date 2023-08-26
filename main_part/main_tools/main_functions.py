@@ -1,9 +1,9 @@
 import random
 
 import numpy as np
-from scipy.stats import stats
 from scipy.special import comb
 from scipy import interpolate
+import scipy.stats as stats
 
 """
 Интерполяция значений исходя из настроек в интерактивной схеме
@@ -219,7 +219,25 @@ def bezier_curve(points, nTimes=1000):
     xvals = np.dot(xPoints, polynomial_array)
     yvals = np.dot(yPoints, polynomial_array)
 
+    xvals = xvals.tolist()
+    yvals = yvals.tolist()
+
+    xvals.reverse()
+    yvals.reverse()
+
     return xvals, yvals
 
-def definition_type_grunt(IP=None, IL=None, e=None):
-    pass
+def return_index(lst, lst2, target):
+    try:
+        pressMAX = lst.tolist().index(max(lst))
+
+    except:
+        pressMAX = lst.index(max(lst))
+
+    index = lst.index(min(lst[:pressMAX], key=lambda x: abs(x - target)))
+
+    # Рассчитаем функцию
+    res = stats.linregress([lst[index], lst[index + 1]], [lst2[index], lst2[index + 1]])
+    new_value = target * res.slope + res.intercept
+
+    return new_value

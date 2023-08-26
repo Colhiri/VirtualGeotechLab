@@ -13,7 +13,7 @@ from GEOF.main_part.main_tools.main_functions import interpolation, nearest, bez
 """
 
 class AnalyzeGraph:
-    def __init__(self, organise_values, control_points, data, type_grunt_dct,):
+    def __init__(self, organise_values, control_points, data, type_grunt_dct, mode_traxial):
         """
         Загрузка данных с файла по сохраненным схемам
         :param type_grunt: Н данный момент это является сохраненной схемой
@@ -33,6 +33,8 @@ class AnalyzeGraph:
         self.IL = self.organise_values.get('IL')
         self.IP = self.organise_values.get('IP')
 
+        self.mode_traxial = mode_traxial
+
         y_pressR_RZG = self.control_points.get("y_pressR_RZG")
 
         self.koef_puasson = self.control_points.get("Puasson")
@@ -50,6 +52,7 @@ class AnalyzeGraph:
             self.points_press = self.data.get('traxial').get(self.schema).get("point_values_X")
         else:
             self.points_press = self.data.get('traxial').get(self.schema).get("point_values_X")
+
 
         self.point_values_X = self.data.get('volume_traxial').get(self.schema).get("point_values_X")
         self.point_values_Y = self.data.get('volume_traxial').get(self.schema).get("point_values_Y")
@@ -136,9 +139,7 @@ class AnalyzeGraph:
 
             max_index_press -= 1
 
-
         else:
-
             if self.angle_dilatanci > 0:
                 EV_END_2 = EV_END_1 + ((-(2 * (self.otnVertDef[max_index_press] - self.otnVertDef[
                     max_index_press + 1]) * math.sin(math.radians(self.angle_dilatanci))) / (
@@ -152,8 +153,10 @@ class AnalyzeGraph:
         # print(max_index_press)
         # print(EV_END_1)
         # print(EV_END_2)
-
-        self.point_x = [0, -self.delta_EV_E0, EV_END_1, EV_END_2]
+        try:
+            self.point_x = [0, -self.delta_EV_E0, EV_END_1, EV_END_2]
+        except:
+            self.point_x = [0, EV_END_1, EV_END_2]
 
 
         max_x_real = min(self.point_values_X) # min(self.point_x)
@@ -163,7 +166,7 @@ class AnalyzeGraph:
 
         new_point_x = []
         for count, perc in enumerate(percents_x, 0):
-            if count in [1]:
+            if count in [1] and self.mode_traxial == 'CD':
                 new_point_x.append(self.point_x[count])
                 continue
             if count in [max_index_press]:

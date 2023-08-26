@@ -1,0 +1,72 @@
+<LogProject createSubfolder="false" version="1.0.0.0" schema="">
+  <Properties>
+    <Property name="LoadSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Root&gt;&lt;e name=&quot;Root&quot; type=&quot;Geotek.ASIS.Shear.Disperce.CRSShearSchema&quot;&gt;&lt;e name=&quot;SampleDiameter&quot; type=&quot;System.Single&quot; value=&quot;71,5&quot; /&gt;&lt;e name=&quot;ShearDeformationAbs&quot; type=&quot;System.Single&quot; value=&quot;7,15&quot; /&gt;&lt;e name=&quot;ShearDeformationLimitType&quot; type=&quot;System.String&quot; value=&quot;Absolute&quot; /&gt;&lt;e name=&quot;ShearDeformationPercent&quot; type=&quot;System.Single&quot; value=&quot;0&quot; /&gt;&lt;e name=&quot;ShearSpeed&quot; type=&quot;System.Single&quot; value=&quot;0,05&quot; /&gt;&lt;e name=&quot;shearSpeedType&quot; type=&quot;System.String&quot; value=&quot;const&quot; /&gt;&lt;e name=&quot;ShearTime&quot; type=&quot;System.TimeSpan&quot; value=&quot;01:00:00&quot; /&gt;&lt;e name=&quot;shearTimeType&quot; type=&quot;System.String&quot; value=&quot;const&quot; /&gt;&lt;e name=&quot;T100&quot; type=&quot;System.TimeSpan&quot; value=&quot;00:04:43.4650000&quot; /&gt;&lt;e name=&quot;VerticalConsolidationTime&quot; type=&quot;System.TimeSpan&quot; value=&quot;00:15:00&quot; /&gt;&lt;e name=&quot;VerticalPress&quot; type=&quot;System.Single&quot; value=&quot;100&quot; /&gt;&lt;/e&gt;&lt;/Root&gt;" />
+    <Property name="measurerArticul" value="ГТ 2.0.5" />
+    <Property name="measurerText" value="Устройство осевого нагружения ГТ 2.0.5-2" />
+    <Property name="startTime" value="27.06.2023 14:31:00" />
+    <Property name="testKey" value="ГТ 7.2.6" />
+    <Property name="testTitle" value="Метод одноплоскостного среза с постоянной скоростью деформации" />
+  </Properties>
+  <Logs>
+    <Log createSubfolder="true" maxFileSize="8388608" name="General" ext="log" culture="ru-RU">
+      <Properties />
+      <Columns>
+        <LogColumn name="SampleHeight_mm" caption="Высота образца, мм" csType="System.Single" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="SampleDiameter_mm" caption="Диаметр образца, мм" csType="System.Single" formatString="">
+          <Properties />
+        </LogColumn>
+      </Columns>
+    </Log>
+    <Log createSubfolder="true" maxFileSize="8388608" name="Execute" ext="log" culture="ru-RU">
+      <Properties />
+      <Columns>
+        <LogColumn name="Time" caption="Время от начала испытания, c" csType="System.Double" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="Message" caption="Сообщение" csType="System.String" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="Message_Changed" caption="" csType="System.Boolean" formatString="">
+          <Properties />
+        </LogColumn>
+      </Columns>
+    </Log>
+    <Log createSubfolder="true" maxFileSize="8388608" name="Test" ext="log" culture="ru-RU">
+      <Properties />
+      <Columns>
+        <LogColumn name="Time" caption="Время от начала испытания, c" csType="System.Double" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="Action" caption="Действие" csType="System.String" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="Action_Changed" caption="" csType="System.Boolean" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="VerticalPress_kPa" caption="Вертикальная нагрузка, кПа" csType="System.Single" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="ShearDeformation_mm" caption="Деформация среза, мм" csType="System.Single" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="ShearPress_kPa" caption="Касательная нагрузка, кПа" csType="System.Single" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="VerticalPress_MPa" caption="Вертикальная нагрузка, МПа" csType="System.Single" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="ShearPress_MPa" caption="Касательная нагрузка, МПа" csType="System.Single" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="ShearStrain" caption="Относительная деформация среза" csType="System.Single" formatString="">
+          <Properties />
+        </LogColumn>
+        <LogColumn name="Stage" caption="Стадия испытания" csType="System.String" formatString="">
+          <Properties />
+        </LogColumn>
+      </Columns>
+    </Log>
+  </Logs>
+</LogProject>

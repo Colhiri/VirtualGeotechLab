@@ -81,13 +81,13 @@ def shablonExcel_SPS_CD(row, dataframes: list, organise_dct: dict, values_Excel)
     ws['O54'] = organise_dct.get('C_unaxial')
 
     # Давления
-    ws['N47'] = organise_dct.get('pressStart1_unaxial')
-    ws['N48'] = organise_dct.get('pressStart2_unaxial')
-    ws['N49'] = organise_dct.get('pressStart3_unaxial')
+    ws['N47'] = organise_dct.get('Start1_unaxial')
+    ws['N48'] = organise_dct.get('Start2_unaxial')
+    ws['N49'] = organise_dct.get('Start3_unaxial')
 
-    ws['O47'] = organise_dct.get('pressEnd1_unaxial')
-    ws['O48'] = organise_dct.get('pressEnd2_unaxial')
-    ws['O49'] = organise_dct.get('pressEnd3_unaxial')
+    ws['O47'] = organise_dct.get('End1_unaxial')
+    ws['O48'] = organise_dct.get('End2_unaxial')
+    ws['O49'] = organise_dct.get('End3_unaxial')
 
     date_protocol = [str(x) for x in date_protocol.replace(' 00:00:00', '').split('-')]
     date_protocol.reverse()
